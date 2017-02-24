@@ -2,26 +2,8 @@
 #include "Component.h"
 #include <vector>
 
-void MapFilesToComponents(std::unordered_map<std::string, Component *> &components, std::unordered_map<std::string, File>& files) {
-    for (auto &fp : files) {
-        std::string nameCopy = fp.first;
-        size_t slashPos = nameCopy.find_last_of('/');
-        while (slashPos != nameCopy.npos) {
-            nameCopy.resize(slashPos);
-            auto it = components.find(nameCopy);
-            if (it != components.end()) {
-                fp.second.component = it->second;
-                it->second->files.insert(&fp.second);
-                break;
-            }
-            slashPos = nameCopy.find_last_of('/');
-        }
-    }
-}
-
 void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                std::map<std::string, std::vector<std::string>> &ambiguous,
-                               std::unordered_map<std::string, Component *> &components, 
                                std::unordered_map<std::string, File>& files) {
     for (auto &fp : files) {
         for (auto &p : fp.second.rawIncludes) {
@@ -41,24 +23,15 @@ void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &inc
                 if (fullPath == "INVALID") {
                     // We end up in more than one place. That's an ambiguous include then.
                     ambiguous[lowercaseInclude].push_back(fp.first);
-                } else if (fullPath.find("GENERATED:") == 0) {
-                    // We end up in a virtual file - it's not actually there yet, but it'll be generated.
-                    if (fp.second.component) {
-                        fp.second.component->buildAfters.insert(fullPath.substr(10));
-                        Component *c = components["./" + fullPath.substr(10)];
-                        if (c) {
-                            fp.second.component->privDeps.insert(c);
-                        }
-                    }
                 } else if (files.count(fullPath)) {
                     File *dep = &files.find(fullPath)->second;
                     fp.second.dependencies.insert(dep);
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
-                    if (inclpath.size() == dep->component->root.generic_string().size()) {
+                    if (inclpath.size() == dep->component.root.generic_string().size()) {
                         inclpath = ".";
-                    } else if (inclpath.size() > dep->component->root.generic_string().size() + 1) {
-                        inclpath = inclpath.substr(dep->component->root.generic_string().size() + 1);
+                    } else if (inclpath.size() > dep->component.root.generic_string().size() + 1) {
+                        inclpath = inclpath.substr(dep->component.root.generic_string().size() + 1);
                     } else {
                         inclpath = "";
                     }
@@ -66,9 +39,8 @@ void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &inc
                         dep->includePaths.insert(inclpath);
                     }
 
-                    if (fp.second.component != dep->component) {
-                        fp.second.component->privDeps.insert(dep->component);
-                        dep->component->privLinks.insert(fp.second.component);
+                    if (&fp.second.component != &dep->component) {
+                        fp.second.component.privDeps.insert(&dep->component);
                         dep->hasExternalInclude = true;
                     }
                     dep->hasInclude = true;
@@ -84,9 +56,9 @@ void PropagateExternalIncludes(std::unordered_map<std::string, File>& files) {
     do {
         foundChange = false;
         for (auto &fp : files) {
-            if (fp.second.hasExternalInclude && fp.second.component) {
+            if (fp.second.hasExternalInclude) {
                 for (auto &dep : fp.second.dependencies) {
-                    if (!dep->hasExternalInclude && dep->component == fp.second.component) {
+                    if (!dep->hasExternalInclude && &dep->component == &fp.second.component) {
                         dep->hasExternalInclude = true;
                         foundChange = true;
                     }
@@ -95,9 +67,6 @@ void PropagateExternalIncludes(std::unordered_map<std::string, File>& files) {
         }
     } while (foundChange);
 }
-
-
-#include "Component.h"
 
 void CreateIncludeLookupTable(std::unordered_map<std::string, File>& files,
                               std::unordered_map<std::string, std::string> &includeLookup,

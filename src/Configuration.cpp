@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-std::vector<std::string> split(const std::string& str) {  
+static std::vector<std::string> split(const std::string& str) {  
   std::vector<std::string> rv;
   const char* s = &str[0], *e = &str[str.size()-1];
   const char* p = s;

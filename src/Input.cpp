@@ -132,8 +132,8 @@ static void ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
     }
 }
 
-static void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path) {
-    File& f = files.insert(std::make_pair(path.generic_string(), File(path))).first->second;
+static void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp) {
+    File& f = files.emplace(path.generic_string(), File(path, comp)).first->second;
     int fd = open(path.c_str(), O_RDONLY);
     size_t fileSize = boost::filesystem::file_size(path);
     void* p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
@@ -160,7 +160,7 @@ static bool IsCode(const std::string &ext) {
     return exts.count(ext) > 0;
 }
 
-void LoadFileList(std::unordered_map<std::string, Component *> &components,
+void LoadFileList(std::unordered_map<std::string, Component> &components,
                   std::unordered_map<std::string, File>& files,
                   const boost::filesystem::path& sourceDir) {
     boost::filesystem::path outputpath = boost::filesystem::current_path();
@@ -178,19 +178,19 @@ void LoadFileList(std::unordered_map<std::string, Component *> &components,
             continue;
         }       
 
-        AddComponentDefinition(components, parent);
-
+        Component& comp = AddComponentDefinition(components, parent);
+        
         if (boost::filesystem::is_regular_file(it->status()) &&
             IsCode(it->path().extension().generic_string().c_str())) {
-            ReadCode(files, it->path());
+            ReadCode(files, it->path(), comp);
         }
     }
     boost::filesystem::current_path(outputpath);
 }
 
-void ForgetEmptyComponents(std::unordered_map<std::string, Component *> &components) {
+void ForgetEmptyComponents(std::unordered_map<std::string, Component> &components) {
   for (auto it = begin(components); it != end(components);) {
-    if (it->second->files.empty())
+    if (it->second.files.empty())
       it = components.erase(it);
     else
       ++it;

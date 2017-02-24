@@ -9,8 +9,8 @@
 struct File;
 struct Component;
 
-void ForgetEmptyComponents(std::unordered_map<std::string, Component *> &components);
-void LoadFileList(std::unordered_map<std::string, Component *> &components,
+void ForgetEmptyComponents(std::unordered_map<std::string, Component> &components);
+void LoadFileList(std::unordered_map<std::string, Component> &components,
                   std::unordered_map<std::string, File>& files,
                   const boost::filesystem::path& sourceDir);
                   
