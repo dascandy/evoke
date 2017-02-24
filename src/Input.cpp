@@ -155,11 +155,6 @@ static bool IsItemBlacklisted(const boost::filesystem::path &path) {
     return false;
 }
 
-static bool IsCompileableFile(const std::string& ext) {
-    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm" };
-    return exts.count(ext) > 0;
-}
-
 static bool IsCode(const std::string &ext) {
     static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp" };
     return exts.count(ext) > 0;
@@ -185,12 +180,9 @@ void LoadFileList(std::unordered_map<std::string, Component *> &components,
 
         AddComponentDefinition(components, parent);
 
-        if (boost::filesystem::is_regular_file(it->status())) {
-            if (it->path().generic_string().find("CMakeAddon.txt") != std::string::npos) {
-                AddComponentDefinition(components, parent).hasAddonCmake = true;
-            } else if (IsCode(it->path().extension().generic_string().c_str())) {
-                ReadCode(files, it->path());
-            }
+        if (boost::filesystem::is_regular_file(it->status()) &&
+            IsCode(it->path().extension().generic_string().c_str())) {
+            ReadCode(files, it->path());
         }
     }
     boost::filesystem::current_path(outputpath);
