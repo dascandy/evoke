@@ -133,7 +133,8 @@ static void ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
 }
 
 static void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp) {
-    File& f = files.emplace(path.generic_string(), File(path, comp)).first->second;
+    File& f = files.emplace(path.generic_string(), File(path.generic_string().substr(comp.root.size()+1), comp)).first->second;
+    comp.files.insert(&f);
     int fd = open(path.c_str(), O_RDONLY);
     size_t fileSize = boost::filesystem::file_size(path);
     void* p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
@@ -156,7 +157,7 @@ static bool IsItemBlacklisted(const boost::filesystem::path &path) {
 }
 
 static bool IsCode(const std::string &ext) {
-    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp" };
+    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp", ".hh" };
     return exts.count(ext) > 0;
 }
 
@@ -169,7 +170,7 @@ void LoadFileList(std::unordered_map<std::string, Component> &components,
     for (boost::filesystem::recursive_directory_iterator it("."), end;
          it != end; ++it) {
         const auto &parent = it->path().parent_path();
-
+        std::cout << it->path().generic_string() << "\n";
         // skip hidden files and dirs
         const auto& fileName = it->path().filename().generic_string();
         if ((fileName.size() >= 2 && fileName[0] == '.') ||

@@ -5,14 +5,15 @@
 #include "Input.h"
 #include <iostream>
 
-class Project {
-public:
+struct Project {
     Project(int, const char**)
     {
         projectRoot = boost::filesystem::current_path();
+        Reload();
     }
-private:
-    void LoadProject() {
+    void Reload() {
+        components.clear();
+        files.clear();
         LoadFileList(components, files, projectRoot);
 
         std::unordered_map<std::string, std::string> includeLookup;
@@ -30,15 +31,21 @@ private:
         ExtractPublicDependencies(components);
     }
     void UnloadProject() {
-        components.clear();
-        files.clear();
     }
     boost::filesystem::path projectRoot;
     std::unordered_map<std::string, Component> components;
     std::unordered_map<std::string, File> files;
 };
 
+std::ostream& operator<<(std::ostream& os, const Project& p) {
+    for (auto& c : p.components) {
+        os << c.second << "\n";
+    }
+    return os;
+}
+
 int main(int argc, const char **argv) {
     Project op(argc, argv);
+    std::cout << op;
     return 0;
 }

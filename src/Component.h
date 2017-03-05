@@ -3,7 +3,6 @@
 #include <boost/filesystem.hpp>
 #include <algorithm>
 #include <iostream>
-#include <map>
 #include <regex>
 #include <set>
 #include <stdio.h>
@@ -37,8 +36,12 @@ struct File {
 
 struct Component {
     explicit Component(const boost::filesystem::path &path);
+    std::string GetName() const {
+        if (root.size() < 3) 
+            return boost::filesystem::absolute(root).filename().string();
+        return root.generic_string().substr(2);
+    }
     boost::filesystem::path root;
-    std::string name;
     std::unordered_set<Component *> pubDeps;
     std::unordered_set<Component *> privDeps;
     std::unordered_set<File *> files;
@@ -54,5 +57,6 @@ void CreateIncludeLookupTable(std::unordered_map<std::string, File>& files,
                               std::unordered_map<std::string, std::string> &includeLookup,
                               std::unordered_map<std::string, std::set<std::string>> &collisions);
 
+std::ostream& operator<<(std::ostream& os, const Component& component);
 
 

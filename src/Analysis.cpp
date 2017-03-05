@@ -3,7 +3,7 @@
 #include <vector>
 
 void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
-                               std::map<std::string, std::vector<std::string>> &ambiguous,
+                               std::unordered_map<std::string, std::vector<std::string>> &ambiguous,
                                std::unordered_map<std::string, File>& files) {
     for (auto &fp : files) {
         for (auto &p : fp.second.rawIncludes) {
