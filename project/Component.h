@@ -11,36 +11,11 @@
 #include <unordered_set>
 #include <vector>
 
-// Forward reference:
-struct Component;
-
-struct File {
-    File(const boost::filesystem::path& path, Component& component)
-    : path(path)
-    , component(component)
-    , hasExternalInclude(false)
-    , hasInclude(false)
-    {
-    }
-    void AddIncludeStmt(bool withPointyBrackets, const std::string& filename) {
-        rawIncludes.insert(std::make_pair(filename, withPointyBrackets));
-    }
-    boost::filesystem::path path;
-    std::map<std::string, bool> rawIncludes;
-    std::unordered_set<File *> dependencies;
-    std::unordered_set<std::string> includePaths;
-    Component &component;
-    bool hasExternalInclude;
-    bool hasInclude;
-};
+struct File;
 
 struct Component {
     explicit Component(const boost::filesystem::path &path);
-    std::string GetName() const {
-        if (root.size() < 3) 
-            return boost::filesystem::absolute(root).filename().string();
-        return root.generic_string().substr(2);
-    }
+    std::string GetName() const;
     boost::filesystem::path root;
     std::unordered_set<Component *> pubDeps;
     std::unordered_set<Component *> privDeps;
@@ -50,12 +25,6 @@ struct Component {
 
 Component &AddComponentDefinition(std::unordered_map<std::string, Component> &components,
                                   const boost::filesystem::path &path );
-
-void ExtractPublicDependencies(std::unordered_map<std::string, Component> &components);
-
-void CreateIncludeLookupTable(std::unordered_map<std::string, File>& files,
-                              std::unordered_map<std::string, std::string> &includeLookup,
-                              std::unordered_map<std::string, std::set<std::string>> &collisions);
 
 std::ostream& operator<<(std::ostream& os, const Component& component);
 

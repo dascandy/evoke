@@ -1,4 +1,5 @@
 #include "Component.h"
+#include "File.h"
 #include "Configuration.h"
 #include <boost/filesystem/fstream.hpp>
 #include "Input.h"

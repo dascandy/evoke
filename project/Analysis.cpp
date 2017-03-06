@@ -1,6 +1,6 @@
 #include "Analysis.h"
 #include "Component.h"
-#include <vector>
+#include "File.h"
 
 void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                std::unordered_map<std::string, std::vector<std::string>> &ambiguous,
@@ -87,6 +87,25 @@ void CreateIncludeLookupTable(std::unordered_map<std::string, File>& files,
                 ref = "INVALID";
             }
         }
+    }
+}
+
+void ExtractPublicDependencies(std::unordered_map<std::string, Component> &components) {
+    for (auto &c : components) {
+        bool hasExtIncludes = false;
+        Component &comp = c.second;
+        for (auto &fp : comp.files) {
+            if (fp->hasExternalInclude) {
+                hasExtIncludes = true;
+                for (auto &dep : fp->dependencies) {
+                    comp.privDeps.erase(&dep->component);
+                    comp.pubDeps.insert(&dep->component);
+                }
+            }
+        }
+        comp.pubDeps.erase(&comp);
+        comp.privDeps.erase(&comp);
+        comp.type = hasExtIncludes ? "library" : "executable";
     }
 }
 

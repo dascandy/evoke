@@ -1,30 +1,19 @@
 #include "Component.h"
+#include "File.h"
 
 Component::Component(const boost::filesystem::path &path)
         : root(path), type("library") {}
 
+std::string Component::GetName() const {
+    if (root.size() < 3)
+        return boost::filesystem::absolute(root).filename().string();
+    return root.generic_string().substr(2);
+}
+
+
 Component &AddComponentDefinition(std::unordered_map<std::string, Component> &components,
                                   const boost::filesystem::path &path) {
     return components.emplace(path.generic_string(), path.generic_string()).first->second;
-}
-
-void ExtractPublicDependencies(std::unordered_map<std::string, Component> &components) {
-    for (auto &c : components) {
-        bool hasExtIncludes = false;
-        Component &comp = c.second;
-        for (auto &fp : comp.files) {
-            if (fp->hasExternalInclude) {
-                hasExtIncludes = true;
-                for (auto &dep : fp->dependencies) {
-                    comp.privDeps.erase(&dep->component);
-                    comp.pubDeps.insert(&dep->component);
-                }
-            }
-        }
-        comp.pubDeps.erase(&comp);
-        comp.privDeps.erase(&comp);
-        comp.type = hasExtIncludes ? "library" : "executable";
-    }
 }
 
 std::ostream& operator<<(std::ostream& os, const Component& component) {
