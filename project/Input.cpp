@@ -171,7 +171,6 @@ void LoadFileList(std::unordered_map<std::string, Component> &components,
     for (boost::filesystem::recursive_directory_iterator it("."), end;
          it != end; ++it) {
         const auto &parent = it->path().parent_path();
-        std::cout << it->path().generic_string() << "\n";
         // skip hidden files and dirs
         const auto& fileName = it->path().filename().generic_string();
         if ((fileName.size() >= 2 && fileName[0] == '.') ||
