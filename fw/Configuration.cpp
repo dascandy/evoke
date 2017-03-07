@@ -1,7 +1,7 @@
 #include "Configuration.h"
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
-#include <stdlib.h>
+//#include <stdlib.h>
 
 static std::vector<std::string> split(const std::string& str) {  
   std::vector<std::string> rv;

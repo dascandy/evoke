@@ -1,10 +1,8 @@
 #pragma once
 
 #include <boost/filesystem.hpp>
-#include <regex>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 struct File;
 struct Component;
