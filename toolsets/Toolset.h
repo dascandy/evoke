@@ -2,7 +2,9 @@
 
 struct PendingCommand {
   std::vector<File*> inputs;
+  std::vector<File*> dependencies;
   std::vector<File*> outputs;
+  std::string command;
 };
 
 struct Toolset {
