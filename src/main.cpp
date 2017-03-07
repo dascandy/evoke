@@ -12,6 +12,7 @@ struct Project {
         Reload();
     }
     void Reload() {
+        state = State::Reloading;
         components.clear();
         files.clear();
         LoadFileList(components, files, projectRoot);
@@ -22,19 +23,23 @@ struct Project {
         ForgetEmptyComponents(components);
         std::unordered_map<std::string, std::vector<std::string>> ambiguous;
         MapIncludesToDependencies(includeLookup, ambiguous, files);
-        for (auto &i : ambiguous) {
-            for (auto &c : collisions[i.first]) {
-                files.find(c)->second.hasInclude = true; // There is at least one include that might end up here.
-            }
+        if (!ambiguous.empty()) {
+          state = State::AmbiguousHeaders;
+          // TODO: write ambiguous log to log file
+        } else {
+          PropagateExternalIncludes(files);
+          ExtractPublicDependencies(components);
+          state = State::Good;
         }
-        PropagateExternalIncludes(files);
-        ExtractPublicDependencies(components);
-    }
-    void UnloadProject() {
     }
     boost::filesystem::path projectRoot;
     std::unordered_map<std::string, Component> components;
     std::unordered_map<std::string, File> files;
+    enum class State {
+      Reloading,
+      Good,
+      AmbiguousHeaders,
+    } state = State::Reloading;
 };
 
 std::ostream& operator<<(std::ostream& os, const Project& p) {
@@ -49,3 +54,5 @@ int main(int argc, const char **argv) {
     std::cout << op;
     return 0;
 }
+
+
