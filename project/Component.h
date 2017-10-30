@@ -12,19 +12,19 @@
 #include <vector>
 
 struct File;
+struct PendingCommand;
 
 struct Component {
-    explicit Component(const boost::filesystem::path &path);
-    std::string GetName() const;
-    boost::filesystem::path root;
-    std::unordered_set<Component *> pubDeps;
-    std::unordered_set<Component *> privDeps;
-    std::unordered_set<File *> files;
-    std::string type;
+public:
+  Component(const boost::filesystem::path &path);
+  std::string GetName() const;
+  boost::filesystem::path root;
+  std::unordered_set<Component *> pubDeps;
+  std::unordered_set<Component *> privDeps;
+  std::unordered_set<File *> files;
+  std::vector<PendingCommand*> commands;
+  std::string type;
 };
-
-Component &AddComponentDefinition(std::unordered_map<std::string, Component> &components,
-                                  const boost::filesystem::path &path );
 
 std::ostream& operator<<(std::ostream& os, const Component& component);
 

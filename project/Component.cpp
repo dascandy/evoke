@@ -1,5 +1,6 @@
 #include "Component.h"
 #include "File.h"
+#include "PendingCommand.h"
 
 Component::Component(const boost::filesystem::path &path)
         : root(path), type("library") {}
@@ -10,13 +11,8 @@ std::string Component::GetName() const {
     return root.generic_string().substr(2);
 }
 
-
-Component &AddComponentDefinition(std::unordered_map<std::string, Component> &components,
-                                  const boost::filesystem::path &path) {
-    return components.emplace(path.generic_string(), path.generic_string()).first->second;
-}
-
 std::ostream& operator<<(std::ostream& os, const Component& component) {
+    if (component.files.empty()) return os;
     os << "Component " << component.GetName() << " built as " << component.type;
     if (!component.pubDeps.empty()) {
       os << "\n  Exposes:";
@@ -57,6 +53,11 @@ std::ostream& operator<<(std::ostream& os, const Component& component) {
                 os << " " << d->path.generic_string();
         }
     }
+    os << "\n  Commands to run:";
+    for (auto& command : component.commands) {
+      os << "\n" << command->commandToRun;
+    }
+
     os << "\n\n";
     return os;
 }

@@ -1,15 +1,16 @@
 #pragma once
 
-struct PendingCommand {
-  std::vector<File*> inputs;
-  std::vector<File*> outputs;
-};
+class Component;
+class Project;
 
 struct Toolset {
-  virtual PendingCommand* createCommand(File& inputFile, const boost::filesystem::path& outputFolder) = 0;
-  virtual PendingCommand* createLinkCommand(const std::vector<File*> &inputFiles, const boost::filesystem::path& outputFile) = 0;
+  virtual void CreateCommandsFor(Project& project, Component& component) = 0;
 };
 
+
+struct UbuntuToolset : public Toolset {
+    void CreateCommandsFor(Project& project, Component& component) override;
+};
 /*
 
 1. generate sources from inputs

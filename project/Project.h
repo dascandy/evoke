@@ -6,13 +6,37 @@
 #include <ostream>
 #include "Component.h"
 #include "File.h"
+#include "PendingCommand.h"
 
-struct Project {
-    Project();
-    void Reload();
-    boost::filesystem::path projectRoot;
-    std::unordered_map<std::string, Component> components;
-    std::unordered_map<std::string, File> files;
+class Project {
+public:
+  Project();
+  void Reload();
+  File* CreateFile(Component& c, boost::filesystem::path p);
+  boost::filesystem::path projectRoot;
+  std::unordered_map<std::string, Component> components;
+private:
+  std::unordered_map<std::string, File> files;
+  std::vector<PendingCommand*> buildPipeline;
+  enum ProjectState {
+    Loading,
+    Invalid,
+    Compiling,
+    Done,
+  } state = Loading;
+  void LoadFileList();
+  void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
+                                 std::unordered_map<std::string, std::vector<std::string>> &ambiguous);
+  void PropagateExternalIncludes();
+  void ExtractPublicDependencies();
+  void CreateIncludeLookupTable(std::unordered_map<std::string, std::string> &includeLookup,
+                                std::unordered_map<std::string, std::set<std::string>> &collisions);
+
+  void ReadCodeFrom(File& f, const char* buffer, size_t buffersize);
+  void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp);
+  bool IsItemBlacklisted(const boost::filesystem::path &path);
+  bool IsCode(const std::string &ext);
+  friend std::ostream& operator<<(std::ostream& os, const Project& p);
 };
 
 std::ostream& operator<<(std::ostream& os, const Project& p);
