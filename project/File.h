@@ -25,9 +25,20 @@ public:
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
   std::unordered_set<std::string> includePaths;
+  PendingCommand* generator;
+  std::vector<PendingCommand*> listeners;
   Component &component;
   bool hasExternalInclude;
   bool hasInclude;
+  enum State {
+    Source,
+    Unknown,
+    ToRebuild,
+    Rebuilding,
+    Error,
+    Done,
+  } state = Source;
+  void SignalRebuild(State newState);
 };
 
 

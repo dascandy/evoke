@@ -207,6 +207,11 @@ bool Project::IsCode(const std::string &ext) {
     return exts.count(ext) > 0;
 }
 
+bool Project::IsCompilationUnit(const std::string& ext) {
+    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm" };
+    return exts.count(ext) > 0;
+}
+
 void Project::LoadFileList() {
   std::string root = ".";
   components.emplace(root, boost::filesystem::path(root));

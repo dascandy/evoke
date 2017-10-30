@@ -15,6 +15,8 @@ public:
   File* CreateFile(Component& c, boost::filesystem::path p);
   boost::filesystem::path projectRoot;
   std::unordered_map<std::string, Component> components;
+  bool IsCompilationUnit(const std::string& ext);
+  bool IsCode(const std::string &ext);
 private:
   std::unordered_map<std::string, File> files;
   std::vector<PendingCommand*> buildPipeline;
@@ -35,7 +37,6 @@ private:
   void ReadCodeFrom(File& f, const char* buffer, size_t buffersize);
   void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp);
   bool IsItemBlacklisted(const boost::filesystem::path &path);
-  bool IsCode(const std::string &ext);
   friend std::ostream& operator<<(std::ostream& os, const Project& p);
 };
 
