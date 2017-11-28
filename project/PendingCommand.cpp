@@ -1,4 +1,5 @@
 #include "PendingCommand.h"
+#include "File.h"
 
 PendingCommand::PendingCommand(const std::string& command) 
 : commandToRun(command)
@@ -20,17 +21,10 @@ void PendingCommand::AddOutput(File* output) {
 }
 
 void PendingCommand::SignalRecheck() {
-  enum State {
-    Unknown,
-    ToBeRun,
-    Running,
-    Done
-  } state = Unknown;
-
   bool readyToBuild = true;
   for (auto& i : inputs) {
-    if (i->status != Source &&
-        i->status != Done) {
+    if (i->state != File::Source &&
+        i->state != File::Done) {
       readyToBuild = false;
     }
   }
@@ -38,4 +32,7 @@ void PendingCommand::SignalRecheck() {
     TriggerRebuild();
 }
 
+void PendingCommand::TriggerRebuild() {
+
+}
 

@@ -25,7 +25,7 @@ public:
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
   std::unordered_set<std::string> includePaths;
-  PendingCommand* generator;
+  PendingCommand* generator = nullptr;
   std::vector<PendingCommand*> listeners;
   Component &component;
   bool hasExternalInclude;
