@@ -9,6 +9,7 @@ PendingCommand::PendingCommand(const std::string& command)
 void PendingCommand::AddInput(File* input) {
   inputs.push_back(input);
   input->listeners.push_back(this);
+  Check();
 }
 
 void PendingCommand::AddOutput(File* output) {
@@ -16,23 +17,41 @@ void PendingCommand::AddOutput(File* output) {
     throw std::runtime_error("Already found a command to create this output file");
 
   output->generator = this;
-  output->state = File::ToRebuild;
   outputs.push_back(output);
+  Check();
 }
 
-void PendingCommand::SignalRecheck() {
-  bool readyToBuild = true;
-  for (auto& i : inputs) {
-    if (i->state != File::Source &&
-        i->state != File::Done) {
-      readyToBuild = false;
+void PendingCommand::Check() {
+  if (outputs.empty()) return;
+  if (state == PendingCommand::ToBeRun) return;
+  std::time_t oldestOutput = outputs[0]->lastwrite();
+  for (auto& out : outputs) {
+    if (out->lastwrite() < oldestOutput) oldestOutput = out->lastwrite();
+  }
+  for (auto& in : inputs) {
+    if (in->lastwrite() > oldestOutput) {
+      state = PendingCommand::ToBeRun;
+      return;
+    }
+    if (in->generator) {
+      in->generator->Check();
+      if (in->generator->state == PendingCommand::ToBeRun) {
+        state = PendingCommand::ToBeRun;
+      }
     }
   }
-  if (readyToBuild)
-    TriggerRebuild();
+  state = PendingCommand::Done;
 }
 
-void PendingCommand::TriggerRebuild() {
-
+std::ostream& operator<<(std::ostream& os, const PendingCommand& pc) {
+  os << pc.commandToRun << " state=";
+  switch(pc.state) {
+    case PendingCommand::Unknown: os << "unknown"; break;
+    case PendingCommand::ToBeRun: os << "to be run"; break;
+    case PendingCommand::Running: os << "running"; break;
+    case PendingCommand::Done: os << "done"; break;
+  }
+  return os;
 }
+
 

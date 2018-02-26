@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <ostream>
 class File;
 
 struct PendingCommand {
@@ -10,18 +11,18 @@ public:
   void AddInput(File* input);
   void AddOutput(File* output);
 private:
-  void SignalRecheck();
   std::vector<File*> inputs;
   std::vector<File*> outputs;
-  public:
+  void Check();
+public:
   std::string commandToRun;
-  private:
   enum State {
     Unknown,
     ToBeRun,
     Running,
     Done
   } state = Unknown;
-  void TriggerRebuild();
 };
+
+std::ostream& operator<<(std::ostream& os, const PendingCommand&);
 

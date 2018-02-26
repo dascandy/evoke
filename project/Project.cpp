@@ -36,10 +36,12 @@ void Project::Reload() {
   }
   PropagateExternalIncludes();
   ExtractPublicDependencies();
-  // TODO: create build pipeline for all compileable files in each component to result in libraries or executables
 }
 
 File* Project::CreateFile(Component& c, boost::filesystem::path p) {
+  std::string subpath = p.string();
+  if (subpath[0] == '.' && subpath[1] == '/')
+    subpath = subpath.substr(2);
   File f(p, c);
   auto f2 = files.emplace(p.string(), std::move(f));
   return &f2.first->second;
@@ -48,6 +50,10 @@ File* Project::CreateFile(Component& c, boost::filesystem::path p) {
 std::ostream& operator<<(std::ostream& os, const Project& p) {
   for (auto& c : p.components) {
     os << c.second << "\n";
+  }
+  os << "Pipeline:\n";
+  for (auto& c : p.buildPipeline) {
+    os << c << "\n";
   }
   return os;
 }
@@ -179,7 +185,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
 }
 
 void Project::ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp) {
-    File& f = files.emplace(path.generic_string(), File(path.generic_string().substr(comp.root.size()+1), comp)).first->second;
+    File& f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
     int fd = open(path.c_str(), O_RDONLY);
     size_t fileSize = boost::filesystem::file_size(path);

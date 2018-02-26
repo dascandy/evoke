@@ -3,12 +3,16 @@
 #include "PendingCommand.h"
 
 Component::Component(const boost::filesystem::path &path)
-        : root(path), type("library") {}
+        : root(path), type("library") {
+  std::string rp = path.string();
+  if (rp[0] == '.' && rp[1] == '/') rp = rp.substr(2);
+  root = rp;
+}
 
 std::string Component::GetName() const {
-    if (root.size() < 3)
+    if (root.size() < 1)
         return boost::filesystem::absolute(root).filename().string();
-    return root.generic_string().substr(2);
+    return root.generic_string();
 }
 
 std::ostream& operator<<(std::ostream& os, const Component& component) {

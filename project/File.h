@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-
+#include "Component.h"
 struct Component;
 
 struct File {
@@ -21,6 +21,12 @@ private:
       rawIncludes.insert(std::make_pair(filename, withPointyBrackets));
   }
 public:
+  std::time_t lastwrite() {
+    boost::system::error_code ec;
+    auto rv = boost::filesystem::last_write_time(path, ec);
+    if (!ec) return rv;
+    return 0;
+  }
   boost::filesystem::path path;
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
