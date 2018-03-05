@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <algorithm>
 #include <iostream>
 #include <regex>
@@ -16,9 +16,9 @@ struct PendingCommand;
 
 struct Component {
 public:
-  Component(const boost::filesystem::path &path);
+  Component(const std::filesystem::path &path);
   std::string GetName() const;
-  boost::filesystem::path root;
+  std::filesystem::path root;
   std::unordered_set<Component *> pubDeps;
   std::unordered_set<Component *> privDeps;
   std::unordered_set<File *> files;

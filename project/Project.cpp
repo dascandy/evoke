@@ -1,7 +1,6 @@
 #include "Project.h"
 #include <algorithm>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include "Component.h"
 #include "Configuration.h"
 #include <fcntl.h>
@@ -10,7 +9,7 @@
 #include <unistd.h>
 
 Project::Project() {
-  projectRoot = boost::filesystem::current_path();
+  projectRoot = std::filesystem::current_path();
   Reload();
 }
 
@@ -38,7 +37,7 @@ void Project::Reload() {
   ExtractPublicDependencies();
 }
 
-File* Project::CreateFile(Component& c, boost::filesystem::path p) {
+File* Project::CreateFile(Component& c, std::filesystem::path p) {
   std::string subpath = p.string();
   if (subpath[0] == '.' && subpath[1] == '/')
     subpath = subpath.substr(2);
@@ -184,18 +183,18 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
     }
 }
 
-void Project::ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp) {
+void Project::ReadCode(std::unordered_map<std::string, File>& files, const std::filesystem::path &path, Component& comp) {
     File& f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
     int fd = open(path.c_str(), O_RDONLY);
-    size_t fileSize = boost::filesystem::file_size(path);
+    size_t fileSize = std::filesystem::file_size(path);
     void* p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
     ReadCodeFrom(f, static_cast<const char*>(p), fileSize);
     munmap(p, fileSize);
     close(fd);
 }
 
-bool Project::IsItemBlacklisted(const boost::filesystem::path &path) {
+bool Project::IsItemBlacklisted(const std::filesystem::path &path) {
     std::string pathS = path.generic_string();
     std::string fileName = path.filename().generic_string();
     for (auto& s : Configuration::Get().blacklist) {
@@ -220,8 +219,8 @@ bool Project::IsCompilationUnit(const std::string& ext) {
 
 void Project::LoadFileList() {
   std::string root = ".";
-  components.emplace(root, boost::filesystem::path(root));
-  for (boost::filesystem::recursive_directory_iterator it("."), end;
+  components.emplace(root, std::filesystem::path(root));
+  for (std::filesystem::recursive_directory_iterator it("."), end;
        it != end; ++it) {
       const auto &parent = it->path().parent_path();
       // skip hidden files and dirs
@@ -234,7 +233,7 @@ void Project::LoadFileList() {
 
       Component& comp = components.emplace(parent.c_str(), parent).first->second;
       
-      if (boost::filesystem::is_regular_file(it->status()) &&
+      if (std::filesystem::is_regular_file(it->status()) &&
           IsCode(it->path().extension().generic_string().c_str())) {
           ReadCode(files, it->path(), comp);
       }
@@ -247,7 +246,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
         for (auto &p : fp.second.rawIncludes) {
             // If this is a non-pointy bracket include, see if there's a local match first. 
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
-            std::string fullFilePath = (boost::filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            std::string fullFilePath = (std::filesystem::path(fp.first).parent_path() / p.first).generic_string();
             if (!p.second && files.count(fullFilePath)) {
                 // This file exists as a local include.
                 File* dep = &files.find(fullFilePath)->second;

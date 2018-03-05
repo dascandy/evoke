@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -9,7 +9,7 @@ struct Component;
 
 struct File {
 private:
-  File(const boost::filesystem::path& path, Component& component)
+  File(const std::filesystem::path& path, Component& component)
   : path(path)
   , component(component)
   , hasExternalInclude(false)
@@ -23,11 +23,11 @@ private:
 public:
   std::time_t lastwrite() {
     boost::system::error_code ec;
-    auto rv = boost::filesystem::last_write_time(path, ec);
+    auto rv = std::filesystem::last_write_time(path, ec);
     if (!ec) return rv;
     return 0;
   }
-  boost::filesystem::path path;
+  std::filesystem::path path;
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
   std::unordered_set<std::string> includePaths;

@@ -2,7 +2,7 @@
 #include "File.h"
 #include "PendingCommand.h"
 
-Component::Component(const boost::filesystem::path &path)
+Component::Component(const std::filesystem::path &path)
         : root(path), type("library") {
   std::string rp = path.string();
   if (rp[0] == '.' && rp[1] == '/') rp = rp.substr(2);
@@ -11,7 +11,7 @@ Component::Component(const boost::filesystem::path &path)
 
 std::string Component::GetName() const {
     if (root.size() < 1)
-        return boost::filesystem::absolute(root).filename().string();
+        return std::filesystem::absolute(root).filename().string();
     return root.generic_string();
 }
 
