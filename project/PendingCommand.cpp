@@ -17,6 +17,7 @@ void PendingCommand::AddOutput(File* output) {
     throw std::runtime_error("Already found a command to create this output file");
 
   output->generator = this;
+  output->state = File::Unknown;
   outputs.push_back(output);
   Check();
 }
@@ -31,16 +32,35 @@ void PendingCommand::Check() {
   for (auto& in : inputs) {
     if (in->lastwrite() > oldestOutput) {
       state = PendingCommand::ToBeRun;
+      for (auto& o : outputs) {
+        o->state = File::ToRebuild;
+        for (auto& d : o->dependencies) d->generator->Check();
+      }
       return;
     }
     if (in->generator) {
       in->generator->Check();
       if (in->generator->state == PendingCommand::ToBeRun) {
         state = PendingCommand::ToBeRun;
+        for (auto& o : outputs) {
+          o->state = File::ToRebuild;
+          for (auto& d : o->dependencies) d->generator->Check();
+        }
+        return;
       }
     }
   }
   state = PendingCommand::Done;
+}
+
+bool PendingCommand::CanRun() {
+  if (state != PendingCommand::ToBeRun) return false;
+  for (auto& in : inputs) {
+    if (in->generator && in->generator->state == PendingCommand::ToBeRun) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::ostream& operator<<(std::ostream& os, const PendingCommand& pc) {

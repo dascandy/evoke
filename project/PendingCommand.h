@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
-class File;
+#include "File.h"
 
 struct PendingCommand {
 public:
@@ -22,6 +22,7 @@ public:
     Running,
     Done
   } state = Unknown;
+  bool CanRun();
 };
 
 std::ostream& operator<<(std::ostream& os, const PendingCommand&);

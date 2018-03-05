@@ -1,18 +1,33 @@
 #pragma once
 
-struct Process {
+#include <string>
+#include <vector>
+#include <functional>
+#include <mutex>
+
+class PendingCommand;
+
+class Task {
 public:
-  Process(const std::string& cmd, const std::string& statefile, std::function<void()> onComplete);
-  ~Process();
-private:
+  enum State {
+    Running,
+    Done
+  };
   State state = Running;
-  int pid;
+  int errorcode = 0;
   std::vector<char> outbuffer;
 };
 
 class Executor {
 public:
-  Process& Start(const std::string& command);
+  void Run(PendingCommand* cmd);
+  void Start();
+  bool Busy();
+private:
+  void RunMoreCommands();
+  std::mutex m;
+  std::vector<PendingCommand*> commands;
+  std::vector<Task*> activeTasks;
 };
 
 
