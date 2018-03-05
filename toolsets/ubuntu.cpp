@@ -5,6 +5,53 @@
 #include "Project.h"
 #include "view/filter.h"
 
+template <bool usePrivDepsFromOthers = false>
+struct Tarjan {
+  // https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
+  struct Info {
+    size_t index;
+    size_t lowlink;
+    bool onStack = true;
+  };
+
+  Component* originalComponent;
+  size_t index = 0;
+  std::vector<Component*> stack;
+  std::unordered_map<Component*, Info> info;
+  std::vector<std::vector<Component*>> nodes;
+  void StrongConnect(Component* c) {
+    info[c].index = info[c].lowlink = index++;
+    stack.push_back(c);
+    for (auto& c2 : c->pubDeps) {
+      if (info[c2].index == 0) {
+        StrongConnect(c2);
+        info[c].lowlink = std::min(info[c].lowlink, info[c2].lowlink);
+      } else if (info[c2].onStack) {
+        info[c].lowlink = std::min(info[c].lowlink, info[c2].index);
+      }
+    }
+    bool shouldUsePrivDeps = (c == originalComponent) || usePrivDepsFromOthers;
+    if (shouldUsePrivDeps) {
+      for (auto& c2 : c->privDeps) {
+        if (info[c2].index == 0) {
+          StrongConnect(c2);
+          info[c].lowlink = std::min(info[c].lowlink, info[c2].lowlink);
+        } else if (info[c2].onStack) {
+          info[c].lowlink = std::min(info[c].lowlink, info[c2].index);
+        }
+      }
+    }
+    if (info[c].lowlink == info[c].index) {
+      auto it = std::find(stack.begin(), stack.end(), c);
+      nodes.push_back(std::vector<Component*>(it, stack.end()));
+      for (auto& ent : nodes.back()) {
+        info[ent].onStack = false;
+      }
+      stack.resize(it - stack.begin());
+    }
+  }
+};
+
 static std::string getLibNameFor(Component& component) {
   // TODO: change commponent to dotted string before making
   return "lib" + component.root.string() + ".a";
@@ -14,28 +61,36 @@ static std::string getExeNameFor(Component& component) {
   return component.root.string();
 }
 
-std::vector<Component*> GetTransitiveAllDeps(Component& c) {
-  
+std::vector<std::vector<Component*>> GetTransitiveAllDeps(Component& c) {
+  Tarjan<true> t;
+  t.originalComponent = &c;
+  t.StrongConnect(&c);
+  return t.nodes;
 }
 
-std::vector<Component*> GetTransitivePubDeps(Component& c) {
+std::vector<std::vector<Component*>> GetTransitivePubDeps(Component& c) {
+  Tarjan<false> t;
+  t.originalComponent = &c;
+  t.StrongConnect(&c);
+  return t.nodes;
+}
 
+std::vector<Component*> flatten(std::vector<std::vector<Component*>> in) {
+  std::vector<Component*> v;
+  for (auto& p : in) {
+    v.insert(v.end(), p.begin(), p.end());
+  }
+  return v;
 }
 
 void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
   boost::filesystem::path outputFolder = component.root;
   std::vector<File*> objects;
 
-  std::vector<Component*> deps = { &component };
-  deps.insert(component.privDeps.begin(), component.privDeps.end());
-  for (size_t n = 0; n < deps.size(); n++) { // not range based as we will modify deps
-    for (auto& id : d->pubDeps) {
-      if (deps.find(id) == deps.end()) deps.push_back(&id);
-    }
-  }
-  deps.erase(deps.find(&component));
+  std::vector<Component*> includeDeps = flatten(GetTransitivePubDeps(component));
+  includeDeps.erase(std::find(includeDeps.begin(), includeDeps.end(), &component));
   std::string includes;
-  for (auto& d : deps) {
+  for (auto& d : includeDeps) {
     includes += " -I" + d->root.string();
   }
 
@@ -58,40 +113,47 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
       for (auto& file : objects) {
         command += " " + file->path.string();
       }
+      pc = new PendingCommand(command);
     } else {
       outputFile = "bin/" + getExeNameFor(component);
       command = "g++ -o " + outputFile.string();
 
-      // Gather all the private dependencies (and their dependencies) too now
-      while (true) {
-        std::set<Component*> newDeps = deps;
-        for (auto d : deps) {
-          newDeps.insert(d->pubDeps.begin(), d->pubDeps.end());
-          newDeps.insert(d->privDeps.begin(), d->privDeps.end());
-        }
-        if (newDeps == deps) break;
-        std::swap(deps, newDeps);
-      }
-      if (deps.find(&component) != deps.end()) 
-        deps.erase(deps.find(&component));
-      command += " -Llib";
       for (auto& file : objects) {
         command += " " + file->path.string();
       }
-      for (auto& d : deps) {
-        command += " -l" + d->root.string();
+      command += " -Llib";
+      std::vector<std::vector<Component*>> linkDeps = GetTransitiveAllDeps(component);
+      std::reverse(linkDeps.begin(), linkDeps.end());
+      for (auto& d : linkDeps) {
+        if (d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component))) {
+          if (d[0] != &component) {
+            command += " -l" + d[0]->root.string();
+          } else if (d.size() == 2) {
+            command += " -l" + d[1]->root.string();
+          }
+        } else {
+          command += " --start-group";
+          for (auto& c : d) {
+            if (c != &component) {
+              command += " -l" + c->root.string();
+            }
+          }
+          command += " --end-group";
+        }
+      }
+      pc = new PendingCommand(command);
+      for (auto& d : linkDeps) {
+        for (auto& c : d) {
+          if (c != &component) {
+            pc->AddInput(project.CreateFile(*c, "lib/" + getLibNameFor(*c)));
+          }
+        }
       }
     }
-    pc = new PendingCommand(command);
     File* libraryFile = project.CreateFile(component, outputFile);
     pc->AddOutput(libraryFile);
     for (auto& file : objects) {
       pc->AddInput(file);
-    }
-    if (component.type == "executable") {
-      for (auto& d : deps) {
-        pc->AddInput(project.CreateFile(*d, "lib/" + getLibNameFor(*d)));
-      }
     }
     component.commands.push_back(pc);
   }
