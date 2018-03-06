@@ -84,7 +84,7 @@ std::vector<Component*> flatten(std::vector<std::vector<Component*>> in) {
 }
 
 void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
-  std::filesystem::path outputFolder = component.root;
+  boost::filesystem::path outputFolder = component.root;
   std::vector<File*> objects;
 
   std::vector<Component*> includeDeps = flatten(GetTransitivePubDeps(component));
@@ -95,7 +95,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
   }
 
   for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
-    std::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.stem().string() + ".o");
+    boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.stem().string() + ".o");
     File* of = project.CreateFile(component, outputFile);
     PendingCommand* pc = new PendingCommand("g++ -c -o " + outputFile.string() + " " + f->path.string() + includes);
     objects.push_back(of);
@@ -105,7 +105,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
   }
   if (!objects.empty()) {
     std::string command;
-    std::filesystem::path outputFile;
+    boost::filesystem::path outputFile;
     PendingCommand* pc;
     if (component.type != "executable") {
       outputFile = "lib/" + getLibNameFor(component);

@@ -1,5 +1,5 @@
 #include "Configuration.h"
-#include <filesystem>
+#include <boost/filesystem.hpp>
 #include <iostream>
 //#include <stdlib.h>
 
@@ -27,7 +27,7 @@ static std::vector<std::string> split(const std::string& str) {
 
 Configuration::Configuration()
 {
-  std::filesystem::ifstream in("x.conf");
+  boost::filesystem::ifstream in("x.conf");
   std::string line;
   while (in.good()) {
     std::getline(in, line);
