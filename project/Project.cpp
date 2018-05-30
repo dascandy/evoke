@@ -7,6 +7,7 @@
 #include "File.h"
 #include <sys/mman.h>
 #include <unistd.h>
+#include "known.h"
 
 Project::Project() {
   projectRoot = boost::filesystem::current_path();
@@ -14,6 +15,7 @@ Project::Project() {
 }
 
 void Project::Reload() {
+  unknownHeaders.clear();
   components.clear();
   files.clear();
   LoadFileList();
@@ -56,7 +58,6 @@ std::ostream& operator<<(std::ostream& os, const Project& p) {
   }
   return os;
 }
-
 
 void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
     if (buffersize == 0) return;
@@ -281,8 +282,9 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                         dep->hasExternalInclude = true;
                     }
                     dep->hasInclude = true;
+                } else if (!IsKnownHeader(p.first)) {
+                    unknownHeaders.insert(p.first);
                 }
-                // else we don't know about it. Probably a system include of some sort.
             }
         }
     }

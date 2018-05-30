@@ -24,6 +24,8 @@ public:
   std::unordered_set<File *> files;
   std::vector<PendingCommand*> commands;
   std::string type;
+  bool buildSuccess;
+  std::string accumulatedErrors;
 };
 
 std::ostream& operator<<(std::ostream& os, const Component& component);

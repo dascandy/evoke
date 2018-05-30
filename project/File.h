@@ -44,7 +44,9 @@ public:
     Error,
     Done,
   } state = Source;
-  void SignalRebuild(State newState);
+  void SignalRebuild(State newState) {
+    state = newState;
+  }
 };
 
 

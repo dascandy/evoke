@@ -51,10 +51,13 @@ std::ostream& operator<<(std::ostream& os, const Component& component) {
         }
     }
     if (anySource) {
-        os << "\n  Sources:";
+        os << "\n  Sources:\n";
         for (auto& d : component.files) {
-            if (!d->hasInclude) 
-                os << " " << d->path.generic_string();
+            if (!d->hasInclude) {
+                os << " " << d->path.generic_string() << "\n";
+                for (auto& dep : d->dependencies)
+                    os << "   " << dep->path.generic_string() << "\n";
+            }
         }
     }
     os << "\n  Commands to run:";

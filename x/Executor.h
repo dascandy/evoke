@@ -20,6 +20,8 @@ public:
 
 class Executor {
 public:
+  Executor();
+  ~Executor();
   void Run(PendingCommand* cmd);
   void Start();
   bool Busy();

@@ -21,6 +21,10 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> v) {
 
 int main(int, const char **) {
     Project op;
+    for (auto& u : op.unknownHeaders) {
+        std::cerr << "Unknown header: " << u << "\n";
+    }
+
     UbuntuToolset ut;
     for (auto& c : values(op.components)) {
       ut.CreateCommandsFor(op, c);
@@ -36,6 +40,7 @@ int main(int, const char **) {
     std::cout << op;
     ex.Start();
     while (ex.Busy()) { std::this_thread::sleep_for(1s); }
+    printf("\n\n");
     return 0;
 }
 

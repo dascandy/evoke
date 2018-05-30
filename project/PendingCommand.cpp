@@ -25,9 +25,11 @@ void PendingCommand::AddOutput(File* output) {
 void PendingCommand::Check() {
   if (outputs.empty()) return;
   if (state == PendingCommand::ToBeRun) return;
+  bool missingOutput = false;
   std::time_t oldestOutput = outputs[0]->lastwrite();
   for (auto& out : outputs) {
     if (out->lastwrite() < oldestOutput) oldestOutput = out->lastwrite();
+    if (out->lastwrite() == 0) missingOutput = true;
   }
   for (auto& in : inputs) {
     if (in->lastwrite() > oldestOutput) {
@@ -50,13 +52,24 @@ void PendingCommand::Check() {
       }
     }
   }
+  for (auto& o : outputs) {
+    o->state = missingOutput ? File::Error : File::Done;
+  }
   state = PendingCommand::Done;
+}
+
+void PendingCommand::SetResult(bool success) {
+  state = PendingCommand::Done;
+  for (auto& o : outputs) {
+    o->state = (success ? File::Done : File::Error);
+  }
 }
 
 bool PendingCommand::CanRun() {
   if (state != PendingCommand::ToBeRun) return false;
   for (auto& in : inputs) {
-    if (in->generator && in->generator->state == PendingCommand::ToBeRun) {
+    if (in->state != File::Source && in->state != File::Done) {
+      printf("Cannot build %s because %s is in %d\n", outputs[0]->path.filename().c_str(), in->path.filename().c_str(), in->state);
       return false;
     }
   }

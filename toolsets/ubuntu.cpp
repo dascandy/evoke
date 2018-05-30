@@ -58,7 +58,11 @@ static std::string getLibNameFor(Component& component) {
 }
 
 static std::string getExeNameFor(Component& component) {
-  return component.root.string();
+  printf("%s\n", component.root.string().c_str());
+  if (component.root.string() != ".") {
+    return component.root.string();
+  }
+  return boost::filesystem::canonical(component.root).filename().string();
 }
 
 std::vector<std::vector<Component*>> GetTransitiveAllDeps(Component& c) {
@@ -100,7 +104,15 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
     PendingCommand* pc = new PendingCommand("g++ -c -o " + outputFile.string() + " " + f->path.string() + includes);
     objects.push_back(of);
     pc->AddOutput(of);
-    pc->AddInput(f);
+    std::vector<File*> deps;
+    deps.push_back(f);
+    size_t index = 0;
+    while (index != deps.size()) {
+      pc->AddInput(deps[index]);
+      for (File* input : deps[index]->dependencies)
+        if (std::find(deps.begin(), deps.end(), input) == deps.end()) deps.push_back(input);
+      index++;
+    }
     component.commands.push_back(pc);
   }
   if (!objects.empty()) {

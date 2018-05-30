@@ -15,6 +15,7 @@ public:
   File* CreateFile(Component& c, boost::filesystem::path p);
   boost::filesystem::path projectRoot;
   std::unordered_map<std::string, Component> components;
+  std::unordered_set<std::string> unknownHeaders;
   bool IsCompilationUnit(const std::string& ext);
   bool IsCode(const std::string &ext);
 private:
@@ -33,7 +34,6 @@ private:
   void ExtractPublicDependencies();
   void CreateIncludeLookupTable(std::unordered_map<std::string, std::string> &includeLookup,
                                 std::unordered_map<std::string, std::set<std::string>> &collisions);
-
   void ReadCodeFrom(File& f, const char* buffer, size_t buffersize);
   void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp);
   bool IsItemBlacklisted(const boost::filesystem::path &path);
