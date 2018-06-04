@@ -64,6 +64,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
     size_t offset = 0;
     enum State { None, AfterHash, AfterInclude, InsidePointyIncludeBrackets, InsideStraightIncludeBrackets } state = None;
     // Try to terminate reading the file when we've read the last possible preprocessor command
+#ifdef LINUX
     const char* lastHash = static_cast<const char*>(memrchr(buffer, '#', buffersize));
     if (lastHash) {
         // Common case optimization: Header with inclusion guard
@@ -77,6 +78,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
             }
         }
     }
+#endif
     const char* nextHash = static_cast<const char*>(memchr(buffer+offset, '#', buffersize-offset));
     const char* nextSlash = static_cast<const char*>(memchr(buffer+offset, '/', buffersize-offset));
     size_t start = 0;

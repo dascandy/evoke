@@ -1,6 +1,6 @@
 
 obj/%.o: %.cpp
-	g++ -std=c++17 -c -o $@ $< -Wall -Wextra -Wpedantic  -Icompile -Ifw -Iload -Iproject -Itoolsets -I. -g
+	g++ -std=c++17 -c -o $@ $< -Wall -Wextra -Wpedantic -I/opt/local/include -Icompile -Ifw -Iload -Iproject -Itoolsets -I. -g
 
 evoke: $(patsubst %.cpp,obj/%.o,$(shell find ./ -name *.cpp))
-	g++ -o $@ $^ -lboost_filesystem -lboost_system -pthread  -g
+	g++ -o $@ $^ -L/opt/local/lib -lboost_filesystem-mt -lboost_system-mt -pthread  -g

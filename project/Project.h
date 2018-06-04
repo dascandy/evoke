@@ -21,12 +21,6 @@ public:
 private:
   std::unordered_map<std::string, File> files;
   std::vector<PendingCommand*> buildPipeline;
-  enum ProjectState {
-    Loading,
-    Invalid,
-    Compiling,
-    Done,
-  } state = Loading;
   void LoadFileList();
   void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                  std::unordered_map<std::string, std::vector<std::string>> &ambiguous);

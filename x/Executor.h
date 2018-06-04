@@ -5,7 +5,7 @@
 #include <functional>
 #include <mutex>
 
-class PendingCommand;
+struct PendingCommand;
 
 class Task {
 public:

@@ -1,6 +1,6 @@
 #pragma once
 
-class Component;
+struct Component;
 class Project;
 
 struct Toolset {
