@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <view/split.h>
+#include <split.h>
 #include <cstring>
 #include "PendingCommand.h"
 
@@ -31,18 +31,15 @@ public:
       }
       argv.push_back(strdup(cmd.data() + start));
       argv.push_back(nullptr);
-      int i = 0;
-      for (auto& p : argv) {
-        fprintf(stderr, "argv[%d] = \"%s\"\n", i++, p);
-      }
       execvp(argv[0], argv.data());
       abort();
     }
     close(outfd[1]);
     thread = std::thread([this, fd = outfd[0]]{ run(fd); });
+    thread.detach();
   }
   ~Process() {
-    thread.join();
+//    thread.join();
   }
 private:
   void run(int fd) {
@@ -57,7 +54,8 @@ private:
     }
     waitpid(pid, &errorcode, 0);
     state = Done;
-    onComplete(this);
+    auto x = std::move(onComplete);
+    x(this);
   }
 public:
   int pid = 0;
@@ -99,8 +97,8 @@ void Executor::RunMoreCommands() {
     // TODO: take into account its relative load
     if (c->CanRun()) {
       c->state = PendingCommand::Running;
-      printf("\nCan run %s\n", c->commandToRun.c_str());
-      *it = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, "", [this, it, c](Task* t){ 
+//      printf("\nCan run %s\n", c->commandToRun.c_str());
+      *it = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, "", [this, it, c](Task* t){
         *it = nullptr;
         // TODO: print errors from this command first
         if (t->errorcode || !t->outbuffer.empty()) {
@@ -108,10 +106,11 @@ void Executor::RunMoreCommands() {
           printf("\nError while running command for %s:\n%s\n", c->outputs[0]->path.filename().string().c_str(), t->outbuffer.data());
         }
         c->SetResult(t->errorcode == 0);
+        delete t;
         RunMoreCommands();
       });
-    } else
-      printf("\nCannot run %s\n", c->commandToRun.c_str());
+    } else ;
+//      printf("\nCannot run %s\n", c->commandToRun.c_str());
   }
   
   size_t w = 80 / activeTasks.size();

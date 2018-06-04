@@ -1,7 +1,7 @@
 #include "Project.h"
 #include <iostream>
 #include "Toolset.h"
-#include "view/values.h"
+#include "values.h"
 #include "Executor.h"
 #include <thread>
 #include <chrono>
@@ -37,7 +37,6 @@ int main(int, const char **) {
       }
     }
 
-    std::cout << op;
     ex.Start();
     while (ex.Busy()) { std::this_thread::sleep_for(1s); }
     printf("\n\n");

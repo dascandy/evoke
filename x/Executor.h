@@ -9,6 +9,7 @@ struct PendingCommand;
 
 class Task {
 public:
+  virtual ~Task() = default;
   enum State {
     Running,
     Done

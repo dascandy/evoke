@@ -9,6 +9,17 @@ Component::Component(const boost::filesystem::path &path)
   root = rp;
 }
 
+Component::~Component() {
+  for (auto& c : commands) delete c;
+}
+
+bool Component::isHeaderOnly() const {
+    for (auto& d : files) {
+        if (!d->hasExternalInclude && !d->hasInclude) return true;
+    }
+    return false;
+}
+
 std::string Component::GetName() const {
     if (root.size() < 1)
         return boost::filesystem::absolute(root).filename().string();

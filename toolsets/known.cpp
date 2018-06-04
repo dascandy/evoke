@@ -125,7 +125,7 @@ static std::unordered_set<std::string> known = {
 };
 
 bool IsKnownHeader(const std::string& str) {
-  return known.find(str) == known.end();
+  return known.find(str) != known.end();
 }
 
 

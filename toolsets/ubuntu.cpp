@@ -3,7 +3,7 @@
 #include "PendingCommand.h"
 #include "File.h"
 #include "Project.h"
-#include "view/filter.h"
+#include "filter.h"
 
 template <bool usePrivDepsFromOthers = false>
 struct Tarjan {
@@ -101,7 +101,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
   for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
     boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.stem().string() + ".o");
     File* of = project.CreateFile(component, outputFile);
-    PendingCommand* pc = new PendingCommand("g++ -c -o " + outputFile.string() + " " + f->path.string() + includes);
+    PendingCommand* pc = new PendingCommand("g++ -c -pthread -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
     objects.push_back(of);
     pc->AddOutput(of);
     std::vector<File*> deps;
@@ -137,6 +137,15 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
       std::vector<std::vector<Component*>> linkDeps = GetTransitiveAllDeps(component);
       std::reverse(linkDeps.begin(), linkDeps.end());
       for (auto& d : linkDeps) {
+        size_t index = 0;
+        while (index < d.size()) {
+          if (d[index]->isHeaderOnly()) {
+            d[index] = d.back();
+            d.pop_back();
+          } else {
+            ++index;
+          }
+        }
         if (d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component))) {
           if (d[0] != &component) {
             command += " -l" + d[0]->root.string();
@@ -144,13 +153,13 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
             command += " -l" + d[1]->root.string();
           }
         } else {
-          command += " --start-group";
+          command += " -Wl,--start-group";
           for (auto& c : d) {
             if (c != &component) {
               command += " -l" + c->root.string();
             }
           }
-          command += " --end-group";
+          command += " -Wl,--end-group";
         }
       }
       pc = new PendingCommand(command);

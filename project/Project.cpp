@@ -14,6 +14,9 @@ Project::Project() {
   Reload();
 }
 
+Project::~Project() {
+}
+
 void Project::Reload() {
   unknownHeaders.clear();
   components.clear();
@@ -225,9 +228,9 @@ void Project::LoadFileList() {
   components.emplace(root, boost::filesystem::path(root));
   for (boost::filesystem::recursive_directory_iterator it("."), end;
        it != end; ++it) {
-      const auto &parent = it->path().parent_path();
+      boost::filesystem::path parent = it->path().parent_path();
       // skip hidden files and dirs
-      const auto& fileName = it->path().filename().generic_string();
+      std::string fileName = it->path().filename().generic_string();
       if ((fileName.size() >= 2 && fileName[0] == '.') ||
           IsItemBlacklisted(it->path())) {
           it.disable_recursion_pending();

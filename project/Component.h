@@ -17,7 +17,9 @@ struct PendingCommand;
 struct Component {
 public:
   Component(const boost::filesystem::path &path);
+  ~Component();
   std::string GetName() const;
+  bool isHeaderOnly() const;
   boost::filesystem::path root;
   std::unordered_set<Component *> pubDeps;
   std::unordered_set<Component *> privDeps;

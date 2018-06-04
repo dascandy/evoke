@@ -11,6 +11,7 @@
 class Project {
 public:
   Project();
+  ~Project();
   void Reload();
   File* CreateFile(Component& c, boost::filesystem::path p);
   boost::filesystem::path projectRoot;
