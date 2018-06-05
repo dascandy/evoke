@@ -2,6 +2,17 @@
 #include "File.h"
 #include "PendingCommand.h"
 
+std::unordered_set<std::string> tus = {
+  ".cpp",
+  ".cxx",
+  ".C",
+  ".c",
+};
+
+bool isTranslationUnit(const std::string& str) {
+  return tus.find(str) != tus.end();
+}
+
 Component::Component(const boost::filesystem::path &path)
         : root(path), type("library") {
   std::string rp = path.string();
@@ -15,9 +26,9 @@ Component::~Component() {
 
 bool Component::isHeaderOnly() const {
     for (auto& d : files) {
-        if (!d->hasExternalInclude && !d->hasInclude) return true;
+      if (isTranslationUnit(d->path.extension().string())) return false;
     }
-    return false;
+    return true;
 }
 
 std::string Component::GetName() const {
@@ -69,6 +80,18 @@ std::ostream& operator<<(std::ostream& os, const Component& component) {
                 for (auto& dep : d->dependencies)
                     os << "   " << dep->path.generic_string() << "\n";
             }
+        }
+    }
+    if (!component.pubIncl.empty()) {
+        os << "\n  pubincl:\n";
+        for (auto& d : component.pubIncl) {
+            os << "    " << d << "\n";
+        }
+    }
+    if (!component.privIncl.empty()) {
+        os << "\n  privincl:\n";
+        for (auto& d : component.privIncl) {
+            os << "    " << d << "\n";
         }
     }
     os << "\n  Commands to run:";

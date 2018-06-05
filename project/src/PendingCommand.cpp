@@ -69,7 +69,7 @@ bool PendingCommand::CanRun() {
   if (state != PendingCommand::ToBeRun) return false;
   for (auto& in : inputs) {
     if (in->state != File::Source && in->state != File::Done) {
-      printf("Cannot build %s because %s is in %d\n", outputs[0]->path.filename().c_str(), in->path.filename().c_str(), in->state);
+//      printf("Cannot build %s because %s is in %d\n", outputs[0]->path.filename().c_str(), in->path.filename().c_str(), in->state);
       return false;
     }
   }

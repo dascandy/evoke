@@ -40,6 +40,7 @@ void Project::Reload() {
   }
   PropagateExternalIncludes();
   ExtractPublicDependencies();
+  ExtractIncludePaths();
 }
 
 File* Project::CreateFile(Component& c, boost::filesystem::path p) {
@@ -225,7 +226,7 @@ bool Project::IsCompilationUnit(const std::string& ext) {
 
 void Project::LoadFileList() {
   std::string root = ".";
-  components.emplace(root, boost::filesystem::path(root));
+  Component* current = nullptr;
   for (boost::filesystem::recursive_directory_iterator it("."), end;
        it != end; ++it) {
       boost::filesystem::path parent = it->path().parent_path();
@@ -236,12 +237,18 @@ void Project::LoadFileList() {
           it.disable_recursion_pending();
           continue;
       }       
-
-      Component& comp = components.emplace(parent.c_str(), parent).first->second;
       
-      if (boost::filesystem::is_regular_file(it->status()) &&
+      if (boost::filesystem::is_directory(it->status())) {
+          if (boost::filesystem::is_directory(it->path() / "include") ||
+              boost::filesystem::is_directory(it->path() / "src"))
+              current = &components.emplace(it->path().c_str(), it->path()).first->second;
+      } else if (boost::filesystem::is_regular_file(it->status()) &&
           IsCode(it->path().extension().generic_string().c_str())) {
-          ReadCode(files, it->path(), comp);
+          if (current) {
+              ReadCode(files, it->path(), *current);
+          } else {
+              fprintf(stderr, "Found file %s outside of any component\n", it->path().c_str());
+          }
       }
   }
 }
@@ -344,12 +351,28 @@ void Project::ExtractPublicDependencies() {
                     comp.privDeps.erase(&dep->component);
                     comp.pubDeps.insert(&dep->component);
                 }
+                break;
             }
         }
         comp.pubDeps.erase(&comp);
         comp.privDeps.erase(&comp);
-        comp.type = hasExtIncludes ? "library" : "executable";
+        comp.type = (hasExtIncludes || (*comp.root.begin() == "packages")) ? "library" : "executable";
     }
+}
+
+void Project::ExtractIncludePaths() {
+  for (auto &c : components) {
+    Component& comp = c.second;
+    for (auto &fp : comp.files) {
+      if (fp->hasInclude) {
+        (fp->hasExternalInclude ? comp.pubIncl : comp.privIncl).insert(fp->includePaths.begin(),
+                                                                       fp->includePaths.end());
+      }
+    }
+    for (auto &s : comp.pubIncl) {
+      comp.privIncl.erase(s);
+    }
+  }
 }
 
 

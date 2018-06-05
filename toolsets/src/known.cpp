@@ -97,7 +97,13 @@ static std::unordered_set<std::string> known = {
   "ctgmath",
   "cstdarg",
   "cstdbool",
+  "ciso646",
+  "climits",
+  "cstddef",
+  "cstdint",
+  "cwctype",
 
+  // C standard library header files
   "stdio.h",
   "conio.h",
   "assert.h",
@@ -122,6 +128,100 @@ static std::unordered_set<std::string> known = {
   "tgmath.h",
   "stdarg.h",
   "stdbool.h",
+
+  // Linux system headers
+  "sys/types.h",
+  "sys/wait.h",
+  "sys/mman.h",
+
+  // Unix system headers
+  "fcntl.h",
+  "unistd.h",
+
+  "stddef.h"
+  "stdint.h",
+  "limits.h",
+  "iso646.h",
+  "wctype.h",
+  "inttypes.h",
+  "malloc.h",
+
+/*
+afxcoll.h
+afx.h
+atlbase.h
+atldef.h
+atlsimpstr.h
+atomic.h
+basetyps.h
+bcrypt.h
+bits/atomicity.h
+bits/char_traits.h
+bits/fenv.h
+bits/move.h
+bits/stl_algobase.h
+bits/stl_function.h
+bits/stl_move.h
+bits/stl_pair.h
+boost/cast.hpp
+boost/detail/utf8_codecvt_facet.ipp
+boost/math/special_functions/fpclassify.hpp
+boost/math/special_functions/sign.hpp
+boost/numeric/conversion/cast.hpp
+boost/system/detail/error_code.ipp
+builtins.h
+cxxabi.h
+dbghelp.h
+dirent.h
+dlmalloc_2_8_6.c.inc
+ext/atomicity.h
+features.h
+float.h
+ia64intrin.h
+imagehlp.h
+../include/fenv.h
+intrin.h
+io.h
+ioLib.h
+kfuncs.h
+libs/regex/test/config_info/regex_config_info.cpp
+limits.h
+machine/endian.h
+machine/sys/inline.h
+_mingw.h
+msl_utility
+ntverp.h
+ostream.h
+process.h
+pthread.h
+sched.h
+shellapi.h
+sys/atomic_op.h
+sys/cygwin.h
+sys/endian.h
+sysLib.h
+sys/mount.h
+sys/param.h
+sys/stat.h
+sys/statvfs.h
+sys/time.h
+sys/utime.h
+sys/vfs.h
+TargetConditionals.h
+tchar.h
+thread.h
+tickLib.h
+type_traits.h
+unicode/coll.h
+unicode/uchar.h
+unicode/utypes.h
+utime.h
+winapifamily.h
+wincrypt.h
+winerror.h
+winnt.h
+xutility
+*/
 };
 
 bool IsKnownHeader(const std::string& str) {

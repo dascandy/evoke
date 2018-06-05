@@ -58,7 +58,6 @@ static std::string getLibNameFor(Component& component) {
 }
 
 static std::string getExeNameFor(Component& component) {
-  printf("%s\n", component.root.string().c_str());
   if (component.root.string() != ".") {
     return component.root.string();
   }
@@ -87,21 +86,37 @@ std::vector<Component*> flatten(std::vector<std::vector<Component*>> in) {
   return v;
 }
 
-void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
-  boost::filesystem::path outputFolder = component.root;
-  std::vector<File*> objects;
+std::set<std::string> getIncludePathsFor(Component& component) {
+  std::vector<std::vector<Component*>> pdeps = GetTransitivePubDeps(component);
+  std::set<std::string> inclpaths;
+  for (auto& v : pdeps) {
+    for (auto& c : v) {
+      for (auto& p : c->pubIncl) {
+        inclpaths.insert((c->root / p).string());
+      }
+    }
+  }
+  for (auto& p : component.pubIncl) {
+    inclpaths.insert((component.root / p).string());
+  }
+  for (auto& p : component.privIncl) {
+    inclpaths.insert((component.root / p).string());
+  }
+  return inclpaths;
+}
 
-  std::vector<Component*> includeDeps = flatten(GetTransitivePubDeps(component));
-  includeDeps.erase(std::find(includeDeps.begin(), includeDeps.end(), &component));
+void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
   std::string includes;
-  for (auto& d : includeDeps) {
-    includes += " -I" + d->root.string();
+  for (auto& d : getIncludePathsFor(component)) {
+    includes += " -I" + d;
   }
 
+  boost::filesystem::path outputFolder = component.root;
+  std::vector<File*> objects;
   for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
     boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.stem().string() + ".o");
     File* of = project.CreateFile(component, outputFile);
-    PendingCommand* pc = new PendingCommand("g++ -c -pthread -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
+    PendingCommand* pc = new PendingCommand("g++ -c -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
     objects.push_back(of);
     pc->AddOutput(of);
     std::vector<File*> deps;
@@ -128,7 +143,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
       pc = new PendingCommand(command);
     } else {
       outputFile = "bin/" + getExeNameFor(component);
-      command = "g++ -o " + outputFile.string();
+      command = "g++ -pthread -o " + outputFile.string();
 
       for (auto& file : objects) {
         command += " " + file->path.string();
@@ -136,7 +151,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
       command += " -Llib";
       std::vector<std::vector<Component*>> linkDeps = GetTransitiveAllDeps(component);
       std::reverse(linkDeps.begin(), linkDeps.end());
-      for (auto& d : linkDeps) {
+      for (auto d : linkDeps) {
         size_t index = 0;
         while (index < d.size()) {
           if (d[index]->isHeaderOnly()) {
@@ -146,6 +161,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
             ++index;
           }
         }
+        if (d.empty()) continue;
         if (d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component))) {
           if (d[0] != &component) {
             command += " -l" + d[0]->root.string();

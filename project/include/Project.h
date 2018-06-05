@@ -27,6 +27,7 @@ private:
                                  std::unordered_map<std::string, std::vector<std::string>> &ambiguous);
   void PropagateExternalIncludes();
   void ExtractPublicDependencies();
+  void ExtractIncludePaths();
   void CreateIncludeLookupTable(std::unordered_map<std::string, std::string> &includeLookup,
                                 std::unordered_map<std::string, std::set<std::string>> &collisions);
   void ReadCodeFrom(File& f, const char* buffer, size_t buffersize);

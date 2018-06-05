@@ -97,13 +97,16 @@ void Executor::RunMoreCommands() {
     // TODO: take into account its relative load
     if (c->CanRun()) {
       c->state = PendingCommand::Running;
+      for (auto& o : c->outputs) {
+        boost::filesystem::create_directories(o->path.parent_path());
+      }
 //      printf("\nCan run %s\n", c->commandToRun.c_str());
       *it = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, "", [this, it, c](Task* t){
         *it = nullptr;
         // TODO: print errors from this command first
         if (t->errorcode || !t->outbuffer.empty()) {
           t->outbuffer.push_back(0);
-          printf("\nError while running command for %s:\n%s\n", c->outputs[0]->path.filename().string().c_str(), t->outbuffer.data());
+          printf("\n\nError while running command for %s:\n$ %s\n%s\n", c->outputs[0]->path.filename().string().c_str(), c->commandToRun.c_str(), t->outbuffer.data());
         }
         c->SetResult(t->errorcode == 0);
         delete t;

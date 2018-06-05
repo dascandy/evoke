@@ -21,10 +21,10 @@ public:
   std::string GetName() const;
   bool isHeaderOnly() const;
   boost::filesystem::path root;
-  std::unordered_set<Component *> pubDeps;
-  std::unordered_set<Component *> privDeps;
   std::unordered_set<File *> files;
   std::vector<PendingCommand*> commands;
+  std::unordered_set<Component *> pubDeps, privDeps;
+  std::unordered_set<std::string> pubIncl, privIncl;
   std::string type;
   bool buildSuccess;
   std::string accumulatedErrors;
