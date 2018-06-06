@@ -36,7 +36,6 @@ int main(int, const char **) {
           ex.Run(c);
       }
     }
-//    std::cerr << op;
     ex.Start();
     while (ex.Busy()) { std::this_thread::sleep_for(1s); }
     printf("\n\n");

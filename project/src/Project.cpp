@@ -215,7 +215,7 @@ bool Project::IsItemBlacklisted(const boost::filesystem::path &path) {
 }
 
 bool Project::IsCode(const std::string &ext) {
-    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp", ".hh" };
+    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp", ".hh", "tcc", "ipp", "inc" };
     return exts.count(ext) > 0;
 }
 
