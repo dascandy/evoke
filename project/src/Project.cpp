@@ -215,7 +215,7 @@ bool Project::IsItemBlacklisted(const boost::filesystem::path &path) {
 }
 
 bool Project::IsCode(const std::string &ext) {
-    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp", ".hh", "tcc", "ipp", "inc" };
+    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc" };
     return exts.count(ext) > 0;
 }
 
@@ -224,9 +224,22 @@ bool Project::IsCompilationUnit(const std::string& ext) {
     return exts.count(ext) > 0;
 }
 
+static Component* GetComponentFor(std::unordered_map<std::string, Component> &components, boost::filesystem::path path) {
+  Component* rv = nullptr;
+  size_t matchLength = 0;
+  for (auto& p : components) {
+    if (p.first.size() > matchLength &&
+        p.first.size() < path.string().size() &&
+        path.string().compare(0, p.first.size(), p.first) == 0) {
+      rv = &p.second;
+      matchLength = p.first.size();
+    }
+  }
+  return rv;
+}
+
 void Project::LoadFileList() {
   std::string root = ".";
-  Component* current = nullptr;
   for (boost::filesystem::recursive_directory_iterator it("."), end;
        it != end; ++it) {
       boost::filesystem::path parent = it->path().parent_path();
@@ -236,16 +249,19 @@ void Project::LoadFileList() {
           IsItemBlacklisted(it->path())) {
           it.disable_recursion_pending();
           continue;
-      }       
+      }
       
       if (boost::filesystem::is_directory(it->status())) {
           if (boost::filesystem::is_directory(it->path() / "include") ||
               boost::filesystem::is_directory(it->path() / "src"))
-              current = &components.emplace(it->path().c_str(), it->path()).first->second;
+          {
+              components.emplace(it->path().c_str(), it->path()).first->second;
+          }
       } else if (boost::filesystem::is_regular_file(it->status()) &&
           IsCode(it->path().extension().generic_string().c_str())) {
-          if (current) {
-              ReadCode(files, it->path(), *current);
+          Component* component = GetComponentFor(components, it->path());
+          if (component) {
+              ReadCode(files, it->path(), *component);
           } else {
               fprintf(stderr, "Found file %s outside of any component\n", it->path().c_str());
           }
