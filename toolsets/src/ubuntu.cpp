@@ -114,20 +114,24 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
   boost::filesystem::path outputFolder = component.root;
   std::vector<File*> objects;
   for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
-    boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.stem().string() + ".o");
+    boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
     File* of = project.CreateFile(component, outputFile);
     PendingCommand* pc = new PendingCommand("g++ -c -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
     objects.push_back(of);
     pc->AddOutput(of);
-    std::vector<File*> deps;
-    deps.push_back(f);
+    std::unordered_set<File*> d;
+    std::stack<File*> deps;
+    deps.push(f);
     size_t index = 0;
-    while (index != deps.size()) {
-      pc->AddInput(deps[index]);
-      for (File* input : deps[index]->dependencies)
-        if (std::find(deps.begin(), deps.end(), input) == deps.end()) deps.push_back(input);
+    while (!deps.empty()) {
+      File* dep = deps.top();
+      deps.pop();
+      pc->AddInput(dep);
+      for (File* input : dep->dependencies)
+        if (d.insert(input).second) deps.push(input);
       index++;
     }
+    pc->Check();
     component.commands.push_back(pc);
   }
   if (!objects.empty()) {
