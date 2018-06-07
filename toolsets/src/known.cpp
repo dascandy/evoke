@@ -13,95 +13,18 @@ static std::unordered_set<std::string> known = {
   "cuchar", "cfenv", "cwchar", "ctgmath", "cstdarg", "cstdbool", "ciso646", "climits", "cstddef", "cstdint", "cwctype", 
 
   // C standard library header files
-  "stdio.h", "conio.h", "assert.h", "ctype.h", "cocale.h", "math.h", "setjmp.h", "signal.h", "stdarg.h", "stdlib.h", "string.h", "time.h", "complex.h", "stdalign.h", "errno.h", "locale.h", "stdatomic.h",
-  "stdnoreturn.h", "uchar.h", "fenv.h", "wchar.h", "tgmath.h", "stdarg.h", "stdbool.h",
+  "assert.h", "cocale.h", "complex.h", "conio.h", "ctype.h", "errno.h", "fenv.h", "inttypes.h", "iso646.h", "limits.h", "locale.h", "malloc.h", "math.h", "setjmp.h", "signal.h", "stdalign.h", "stdarg.h", 
+  "stdarg.h", "stdatomic.h", "stdbool.h", "stddef.h", "stdint.h", "stdio.h", "stdlib.h", "stdnoreturn.h", "string.h", "tgmath.h", "time.h", "uchar.h", "wchar.h", "wctype.h",
 
-  // Linux system headers
-  "sys/types.h",
-  "sys/wait.h",
-  "sys/mman.h",
+  // common OS system headers
+  "afxcoll.h", "afx.h", "atlbase.h", "atldef.h", "atlsimpstr.h", "atomic.h", "basetyps.h", "bcrypt.h", "builtins.h", "cxxabi.h", "dbghelp.h", "dirent.h", "ext/atomicity.h", "fcntl.h", "features.h", 
+  "float.h", "ia64intrin.h", "imagehlp.h", "intrin.h", "io.h", "ioLib.h", "kfuncs.h", "limits.h", "machine/endian.h", "machine/sys/inline.h", "_mingw.h", "msl_utility", "ntverp.h", "ostream.h", 
+  "process.h", "pthread.h", "sched.h", "shellapi.h", "strings.h", "sys/atomic_op.h", "sys/cygwin.h", "sys/endian.h", "sysLib.h", "sys/mman.h", "sys/mount.h", "sys/param.h", "sys/stat.h", "sys/statvfs.h", 
+  "sys/time.h", "sys/types.h", "sys/utime.h", "sys/vfs.h", "sys/wait.h", "TargetConditionals.h", "tchar.h", "thread.h", "tickLib.h", "type_traits.h", "unistd.h", "utime.h", "winapifamily.h", 
+  "wincrypt.h", "winerror.h", "winnt.h", "xutility",
 
-  // Unix system headers
-  "fcntl.h",
-  "unistd.h",
-
-  "stddef.h"
-  "stdint.h",
-  "limits.h",
-  "iso646.h",
-  "wctype.h",
-  "inttypes.h",
-  "malloc.h",
-
-/*
-afxcoll.h
-afx.h
-atlbase.h
-atldef.h
-atlsimpstr.h
-atomic.h
-basetyps.h
-bcrypt.h
-bits/atomicity.h
-bits/char_traits.h
-bits/fenv.h
-bits/move.h
-bits/stl_algobase.h
-bits/stl_function.h
-bits/stl_move.h
-bits/stl_pair.h
-builtins.h
-cxxabi.h
-dbghelp.h
-dirent.h
-ext/atomicity.h
-features.h
-float.h
-ia64intrin.h
-imagehlp.h
-../include/fenv.h
-intrin.h
-io.h
-ioLib.h
-kfuncs.h
-libs/regex/test/config_info/regex_config_info.cpp
-limits.h
-machine/endian.h
-machine/sys/inline.h
-_mingw.h
-msl_utility
-ntverp.h
-ostream.h
-process.h
-pthread.h
-sched.h
-shellapi.h
-sys/atomic_op.h
-sys/cygwin.h
-sys/endian.h
-sysLib.h
-sys/mount.h
-sys/param.h
-sys/stat.h
-sys/statvfs.h
-sys/time.h
-sys/utime.h
-sys/vfs.h
-TargetConditionals.h
-tchar.h
-thread.h
-tickLib.h
-type_traits.h
-unicode/coll.h
-unicode/uchar.h
-unicode/utypes.h
-utime.h
-winapifamily.h
-wincrypt.h
-winerror.h
-winnt.h
-xutility
-*/
+  // Stuff you really shouldn't include
+  "bits/atomicity.h", "bits/char_traits.h", "bits/fenv.h", "bits/move.h", "bits/stl_algobase.h", "bits/stl_function.h", "bits/stl_move.h", "bits/stl_pair.h",
 };
 
 bool IsKnownHeader(const std::string& str) {
