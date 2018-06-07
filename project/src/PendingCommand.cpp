@@ -9,17 +9,18 @@ PendingCommand::PendingCommand(const std::string& command)
 void PendingCommand::AddInput(File* input) {
   inputs.push_back(input);
   input->listeners.push_back(this);
-  Check();
 }
 
 void PendingCommand::AddOutput(File* output) {
-  if (output->generator) 
-    throw std::runtime_error("Already found a command to create this output file");
+  if (output->generator) {
+    fprintf(stderr, "Multiple rules define %s\n", output->path.string().c_str());
+    fprintf(stderr, "from %s and %s\n", inputs.front()->path.string().c_str(), output->generator->inputs.front()->path.string().c_str());
+    return;
+  }
 
   output->generator = this;
   output->state = File::Unknown;
   outputs.push_back(output);
-  Check();
 }
 
 void PendingCommand::Check() {
