@@ -22,11 +22,13 @@ private:
   }
 public:
   std::time_t lastwrite() {
-    boost::system::error_code ec;
-    auto rv = boost::filesystem::last_write_time(path, ec);
-    if (!ec) return rv;
-    return 0;
+    if (lastwrite_ == 0) {
+      boost::system::error_code ec;
+      lastwrite_ = boost::filesystem::last_write_time(path, ec);
+    }
+    return lastwrite_;
   }
+  std::time_t lastwrite_;
   boost::filesystem::path path;
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
