@@ -196,6 +196,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
     for (auto& file : objects) {
       pc->AddInput(file);
     }
+    pc->Check();
     component.commands.push_back(pc);
   }
 }
