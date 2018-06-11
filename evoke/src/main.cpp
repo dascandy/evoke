@@ -32,10 +32,12 @@ int main(int, const char **) {
     Executor ex;
     for (auto& comp : op.components) {
       for (auto& c : comp.second.commands) {
+        printf("%s %d\n", c->commandToRun.c_str(), c->state);
         if (c->state == PendingCommand::ToBeRun) 
           ex.Run(c);
       }
     }
+    std::cout << op;
     ex.Start();
     while (ex.Busy()) { std::this_thread::sleep_for(1s); }
     printf("\n\n");

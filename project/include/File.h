@@ -28,7 +28,7 @@ public:
     }
     return lastwrite_;
   }
-  std::time_t lastwrite_;
+  std::time_t lastwrite_ = 0;
   boost::filesystem::path path;
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
@@ -39,8 +39,9 @@ public:
   bool hasExternalInclude;
   bool hasInclude;
   enum State {
-    Source,
     Unknown,
+    NotFound,
+    Source,
     ToRebuild,
     Rebuilding,
     Error,

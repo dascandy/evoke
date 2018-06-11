@@ -27,13 +27,16 @@ void PendingCommand::Check() {
   if (outputs.empty()) return;
   if (state == PendingCommand::ToBeRun) return;
   bool missingOutput = false;
+  printf("%s\n", commandToRun.c_str());
+  printf("%zu %zu\n", inputs.size(), outputs.size());
   std::time_t oldestOutput = outputs[0]->lastwrite();
   for (auto& out : outputs) {
-    if (out->lastwrite() < oldestOutput) oldestOutput = out->lastwrite();
     if (out->lastwrite() == 0) missingOutput = true;
+    else if (out->lastwrite() < oldestOutput) oldestOutput = out->lastwrite();
   }
   for (auto& in : inputs) {
     if (in->lastwrite() > oldestOutput) {
+      printf("older source\n");
       state = PendingCommand::ToBeRun;
       for (auto& o : outputs) {
         o->state = File::ToRebuild;
@@ -44,6 +47,7 @@ void PendingCommand::Check() {
     if (in->generator) {
       in->generator->Check();
       if (in->generator->state == PendingCommand::ToBeRun) {
+        printf("input has generator that needs to be run\n");
         state = PendingCommand::ToBeRun;
         for (auto& o : outputs) {
           o->state = File::ToRebuild;
@@ -53,8 +57,18 @@ void PendingCommand::Check() {
       }
     }
   }
+  if (missingOutput) {
+    printf("missing output\n");
+    state = PendingCommand::ToBeRun;
+    for (auto& o : outputs) {
+      o->state = File::ToRebuild;
+      for (auto& d : o->dependencies) d->generator->Check();
+    }
+    return;
+  }
+  printf("all seems done\n");
   for (auto& o : outputs) {
-    o->state = missingOutput ? File::Error : File::Done;
+    o->state = File::Done;
   }
   state = PendingCommand::Done;
 }
@@ -69,7 +83,7 @@ void PendingCommand::SetResult(bool success) {
 bool PendingCommand::CanRun() {
   if (state != PendingCommand::ToBeRun) return false;
   for (auto& in : inputs) {
-    if (in->state != File::Source && in->state != File::Done) {
+    if (in->state != File::Unknown && in->state != File::Source && in->state != File::Done) {
 //      printf("Cannot build %s because %s is in %d\n", outputs[0]->path.filename().c_str(), in->path.filename().c_str(), in->state);
       return false;
     }
