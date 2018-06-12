@@ -3,6 +3,19 @@
 #include <iostream>
 //#include <stdlib.h>
 
+void Configuration::LoadDefaults() {
+#ifdef _WIN32
+  toolchain = "msvc15";
+  compileFlags = "/permissive- -std=c++17";
+#elif APPLE
+  toolchain = "osx";
+  compileFlags = "-std=c++17";
+#else
+  toolchain = "ubuntu";
+  compileFlags = "-std=c++17 -pthread";
+#endif
+}
+
 static std::vector<std::string> split(const std::string& str) {  
   std::vector<std::string> rv;
   const char* s = &str[0], *e = &str[str.size()-1];
@@ -27,7 +40,8 @@ static std::vector<std::string> split(const std::string& str) {
 
 Configuration::Configuration()
 {
-  boost::filesystem::ifstream in("x.conf");
+  LoadDefaults();
+  boost::filesystem::ifstream in("evoke.conf");
   std::string line;
   while (in.good()) {
     std::getline(in, line);
@@ -47,7 +61,9 @@ Configuration::Configuration()
 
     std::string name = line.substr(0, pos);
     std::string value = line.substr(pos+2);
-    if (name == "blacklist") { blacklist = split(value); }
+    if (name == "toolchain") { toolchain = value; }
+    else if (name == "compile-flags") { compileFlags = value; }
+    else if (name == "blacklist") { blacklist = split(value); }
     else {
       std::cout << "Ignoring unknown tag in configuration file: " << name << "\n";
     }
