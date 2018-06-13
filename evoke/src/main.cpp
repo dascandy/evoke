@@ -21,6 +21,14 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> v) {
 
 int main(int, const char **) {
     Project op;
+    if (!op.unknownHeaders.empty()) {
+        // TODO: allow building without package fetching somehow
+        std::string fetch = "accio fetch";
+        std::vector<std::string> hdrsToFetch(op.unknownHeaders.begin(), op.unknownHeaders.end());
+        for (auto& hdr : hdrsToFetch) fetch += " " + hdr;
+        system(fetch.c_str());
+        op.Reload();
+    }
     for (auto& u : op.unknownHeaders) {
         std::cerr << "Unknown header: " << u << "\n";
     }

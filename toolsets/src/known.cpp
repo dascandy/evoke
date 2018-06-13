@@ -21,7 +21,8 @@ static std::unordered_set<std::string> known = {
   "float.h", "ia64intrin.h", "imagehlp.h", "intrin.h", "io.h", "ioLib.h", "kfuncs.h", "limits.h", "machine/endian.h", "machine/sys/inline.h", "_mingw.h", "msl_utility", "ntverp.h", "ostream.h", 
   "process.h", "pthread.h", "sched.h", "shellapi.h", "strings.h", "sys/atomic_op.h", "sys/cygwin.h", "sys/endian.h", "sysLib.h", "sys/mman.h", "sys/mount.h", "sys/param.h", "sys/stat.h", "sys/statvfs.h", 
   "sys/time.h", "sys/types.h", "sys/utime.h", "sys/vfs.h", "sys/wait.h", "TargetConditionals.h", "tchar.h", "thread.h", "tickLib.h", "type_traits.h", "unistd.h", "utime.h", "winapifamily.h", 
-  "wincrypt.h", "winerror.h", "winnt.h", "xutility",
+  "wincrypt.h", "winerror.h", "winnt.h", "xutility", "linux/if.h", "netinet/in.h", "linux/if_tun.h", "sys/ioctl.h",
+
 
   // Stuff you really shouldn't include
   "bits/atomicity.h", "bits/char_traits.h", "bits/fenv.h", "bits/move.h", "bits/stl_algobase.h", "bits/stl_function.h", "bits/stl_move.h", "bits/stl_pair.h",

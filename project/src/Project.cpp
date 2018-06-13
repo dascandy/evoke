@@ -21,12 +21,12 @@ void Project::Reload() {
   unknownHeaders.clear();
   components.clear();
   files.clear();
+  ambiguous.clear();
   LoadFileList();
 
   std::unordered_map<std::string, std::string> includeLookup;
   std::unordered_map<std::string, std::set<std::string>> collisions;
   CreateIncludeLookupTable(includeLookup, collisions);
-  std::unordered_map<std::string, std::vector<std::string>> ambiguous;
   MapIncludesToDependencies(includeLookup, ambiguous);
   if (!ambiguous.empty()) {
     fprintf(stderr, "Ambiguous includes found!\n");
@@ -255,7 +255,10 @@ void Project::LoadFileList() {
           if (boost::filesystem::is_directory(it->path() / "include") ||
               boost::filesystem::is_directory(it->path() / "src"))
           {
-              components.emplace(it->path().c_str(), it->path()).first->second;
+              components.emplace(it->path().c_str(), it->path());
+              if (boost::filesystem::is_directory(it->path() / "test")) {
+                  components.emplace((it->path() / "test").c_str(), it->path() / "test").first->second.type = "unittest";
+              }
           }
       } else if (boost::filesystem::is_regular_file(it->status()) &&
           IsCode(it->path().extension().generic_string().c_str())) {

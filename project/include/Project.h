@@ -17,11 +17,13 @@ public:
   boost::filesystem::path projectRoot;
   std::unordered_map<std::string, Component> components;
   std::unordered_set<std::string> unknownHeaders;
+  std::unordered_map<std::string, File> files;
+  std::vector<PendingCommand*> buildPipeline;
+  std::unordered_map<std::string, std::vector<std::string>> ambiguous;
+
   bool IsCompilationUnit(const std::string& ext);
   bool IsCode(const std::string &ext);
 private:
-  std::unordered_map<std::string, File> files;
-  std::vector<PendingCommand*> buildPipeline;
   void LoadFileList();
   void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                  std::unordered_map<std::string, std::vector<std::string>> &ambiguous);
