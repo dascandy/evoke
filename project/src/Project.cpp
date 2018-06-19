@@ -370,7 +370,6 @@ void Project::ExtractPublicDependencies() {
                     comp.privDeps.erase(&dep->component);
                     comp.pubDeps.insert(&dep->component);
                 }
-                break;
             }
         }
         comp.pubDeps.erase(&comp);
