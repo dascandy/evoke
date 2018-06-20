@@ -64,26 +64,18 @@ static std::string getExeNameFor(Component& component) {
   return boost::filesystem::canonical(component.root).filename().string();
 }
 
-std::vector<std::vector<Component*>> GetTransitiveAllDeps(Component& c) {
+static std::vector<std::vector<Component*>> GetTransitiveAllDeps(Component& c) {
   Tarjan<true> t;
   t.originalComponent = &c;
   t.StrongConnect(&c);
   return t.nodes;
 }
 
-std::vector<std::vector<Component*>> GetTransitivePubDeps(Component& c) {
+static std::vector<std::vector<Component*>> GetTransitivePubDeps(Component& c) {
   Tarjan<false> t;
   t.originalComponent = &c;
   t.StrongConnect(&c);
   return t.nodes;
-}
-
-std::vector<Component*> flatten(std::vector<std::vector<Component*>> in) {
-  std::vector<Component*> v;
-  for (auto& p : in) {
-    v.insert(v.end(), p.begin(), p.end());
-  }
-  return v;
 }
 
 std::set<std::string> getIncludePathsFor(Component& component) {
