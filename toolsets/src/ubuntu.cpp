@@ -138,7 +138,7 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
     std::string command;
     boost::filesystem::path outputFile;
     PendingCommand* pc;
-    if (component.type != "executable") {
+    if (component.type == "library") {
       outputFile = "lib/" + getLibNameFor(component);
       command = "ar rcs " + outputFile.string();
       for (auto& file : objects) {
@@ -198,6 +198,15 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
     }
     pc->Check();
     component.commands.push_back(pc);
+    if (component.type == "unittest") {
+      command = outputFile.string();
+      pc = new PendingCommand(command);
+      outputFile += ".log";
+      pc->AddInput(libraryFile);
+      pc->AddOutput(project.CreateFile(component, outputFile.string()));
+      pc->Check();
+      component.commands.push_back(pc);
+    }
   }
 }
 
