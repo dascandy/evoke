@@ -20,6 +20,17 @@ private:
   void AddIncludeStmt(bool withPointyBrackets, const std::string& filename) {
       rawIncludes.insert(std::make_pair(filename, withPointyBrackets));
   }
+  void SetModule(const std::string& moduleName, bool exported) {
+    this->moduleName = moduleName;
+    moduleExported = exported;
+  }
+  void AddImport(const std::string& importName, bool exported) {
+    if (importName[0] == ':') {
+      imports[moduleName + importName] = exported;
+    } else {
+      imports[importName] = exported;
+    }
+  }
 public:
   std::time_t lastwrite() {
     if (lastwrite_ == 0) {
@@ -30,14 +41,17 @@ public:
   }
   std::time_t lastwrite_ = 0;
   boost::filesystem::path path;
+  std::string moduleName;
+  bool moduleExported = false;
+  std::unordered_map<std::string, bool> imports;
   std::unordered_map<std::string, bool> rawIncludes;
   std::unordered_set<File *> dependencies;
   std::unordered_set<std::string> includePaths;
   PendingCommand* generator = nullptr;
   std::vector<PendingCommand*> listeners;
   Component &component;
-  bool hasExternalInclude;
-  bool hasInclude;
+  bool hasExternalInclude = false;
+  bool hasInclude = false;
   enum State {
     Unknown,
     NotFound,

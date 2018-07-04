@@ -63,133 +63,6 @@ std::ostream& operator<<(std::ostream& os, const Project& p) {
   return os;
 }
 
-void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
-    if (buffersize == 0) return;
-    size_t offset = 0;
-    enum State { None, AfterHash, AfterInclude, InsidePointyIncludeBrackets, InsideStraightIncludeBrackets } state = None;
-    // Try to terminate reading the file when we've read the last possible preprocessor command
-#ifdef LINUX
-    const char* lastHash = static_cast<const char*>(memrchr(buffer, '#', buffersize));
-    if (lastHash) {
-        // Common case optimization: Header with inclusion guard
-        if (strncmp(lastHash, "#endif", 6) == 0) {
-            lastHash = static_cast<const char*>(memrchr(buffer, '#', lastHash - buffer - 1));
-        }
-        if (lastHash) {
-            const char* nextNewline = static_cast<const char*>(memchr(lastHash, '\n', buffersize - (lastHash - buffer)));
-            if (nextNewline) {
-                buffersize = nextNewline - buffer;
-            }
-        }
-    }
-#endif
-    const char* nextHash = static_cast<const char*>(memchr(buffer+offset, '#', buffersize-offset));
-    const char* nextSlash = static_cast<const char*>(memchr(buffer+offset, '/', buffersize-offset));
-    size_t start = 0;
-    while (offset < buffersize) {
-        switch (state) {
-        case None:
-        {
-            if (nextHash && nextHash < buffer + offset) nextHash = static_cast<const char*>(memchr(buffer+offset, '#', buffersize-offset));
-            if (nextHash == NULL) return;
-            if (nextSlash && nextSlash < buffer + offset) nextSlash = static_cast<const char*>(memchr(buffer+offset, '/', buffersize-offset));
-            if (nextSlash && nextSlash < nextHash) {
-                offset = nextSlash - buffer;
-                if (buffer[offset + 1] == '/') {
-                    offset = static_cast<const char*>(memchr(buffer+offset, '\n', buffersize-offset)) - buffer;
-                }
-                else if (buffer[offset + 1] == '*') {
-                    do {
-                        const char* endSlash = static_cast<const char*>(memchr(buffer + offset + 1, '/', buffersize - offset));
-                        if (!endSlash) return;
-                        offset = endSlash - buffer;
-                    } while (buffer[offset-1] != '*');
-                }
-            } else {
-                offset = nextHash - buffer;
-                state = AfterHash;
-            }
-        }
-            break;
-        case AfterHash:
-            switch (buffer[offset]) {
-            case ' ':
-            case '\t':
-                break;
-            case 'i':
-                if (buffer[offset + 1] == 'm' &&
-                    buffer[offset + 2] == 'p' &&
-                    buffer[offset + 3] == 'o' &&
-                    buffer[offset + 4] == 'r' &&
-                    buffer[offset + 5] == 't') {
-                    state = AfterInclude;
-                    offset += 5;
-                }
-                else if (buffer[offset + 1] == 'n' &&
-                    buffer[offset + 2] == 'c' &&
-                    buffer[offset + 3] == 'l' &&
-                    buffer[offset + 4] == 'u' &&
-                    buffer[offset + 5] == 'd' &&
-                    buffer[offset + 6] == 'e') {
-                    state = AfterInclude;
-                    offset += 6;
-                }
-                else
-                {
-                    state = None;
-                }
-                break;
-            default:
-                state = None;
-                break;
-            }
-            break;
-        case AfterInclude:
-            switch (buffer[offset]) {
-            case ' ':
-            case '\t':
-                break;
-            case '<':
-                start = offset + 1;
-                state = InsidePointyIncludeBrackets;
-                break;
-            case '"':
-                start = offset + 1;
-                state = InsideStraightIncludeBrackets;
-                break;
-            default:
-                // Buggy code, skip over this include.
-                state = None;
-                break;
-            }
-            break;
-        case InsidePointyIncludeBrackets:
-            switch (buffer[offset]) {
-            case '\n':
-                state = None; // Buggy code, skip over this include.
-                break;
-            case '>':
-                f.AddIncludeStmt(true, std::string(&buffer[start], &buffer[offset]));
-                state = None;
-                break;
-            }
-            break;
-        case InsideStraightIncludeBrackets:
-            switch (buffer[offset]) {
-            case '\n':
-                state = None; // Buggy code, skip over this include.
-                break;
-            case '\"':
-                f.AddIncludeStmt(false, std::string(&buffer[start], &buffer[offset]));
-                state = None;
-                break;
-            }
-            break;
-        }
-        offset++;
-    }
-}
-
 void Project::ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp) {
     File& f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
@@ -374,7 +247,7 @@ void Project::ExtractPublicDependencies() {
         }
         comp.pubDeps.erase(&comp);
         comp.privDeps.erase(&comp);
-        comp.type = (hasExtIncludes || (*comp.root.begin() == "packages")) ? "library" : "executable";
+        comp.type = comp.root.filename().string() == "test" ? "unittest" : (hasExtIncludes || (*comp.root.begin() == "packages")) ? "library" : "executable";
     }
 }
 
