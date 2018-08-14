@@ -32,4 +32,8 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const Component& component);
 
+std::vector<std::vector<Component*>> GetTransitiveAllDeps(Component& c);
+std::vector<std::vector<Component*>> GetTransitivePubDeps(Component& c);
+std::set<std::string> getIncludePathsFor(Component& component);
+
 
