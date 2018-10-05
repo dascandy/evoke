@@ -13,8 +13,8 @@ bool isTranslationUnit(const std::string& str) {
   return tus.find(str) != tus.end();
 }
 
-Component::Component(const boost::filesystem::path &path)
-        : root(path), type("library") {
+Component::Component(const boost::filesystem::path &path, bool isBinary)
+        : root(path), type("library") , isBinary(isBinary) {
   std::string rp = path.string();
   if (rp[0] == '.' && rp[1] == '/') rp = rp.substr(2);
   root = rp;
@@ -25,6 +25,7 @@ Component::~Component() {
 }
 
 bool Component::isHeaderOnly() const {
+    if (isBinary) return false;
     for (auto& d : files) {
       if (isTranslationUnit(d->path.extension().string())) return false;
     }

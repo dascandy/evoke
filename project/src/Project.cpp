@@ -145,6 +145,20 @@ void Project::LoadFileList() {
   }
 }
 
+static std::map<std::string, Component*> PredefComponentList() {
+  std::map<std::string, Component*> list;
+  list["sdl2/sdl.h"] = new Component("SDL2", true);
+  list["sdl2/sdl_opengl.h"] = new Component("GL", true);
+  list["gl/glew.h"] = new Component("GLEW", true);
+  return list;
+}
+
+static Component* GetPredefComponent(const boost::filesystem::path& path) {
+  static auto list = PredefComponentList();
+  if (list.find(path.string()) != list.end()) return list.find(path.string())->second;
+  return nullptr;
+}
+
 void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                         std::unordered_map<std::string, std::vector<std::string>> &ambiguous) {
     for (auto &fp : files) {
@@ -165,6 +179,9 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 if (fullPath == "INVALID") {
                     // We end up in more than one place. That's an ambiguous include then.
                     ambiguous[lowercaseInclude].push_back(fp.first);
+                } else if (GetPredefComponent(lowercaseInclude)) {
+                    Component* comp = GetPredefComponent(lowercaseInclude);
+                    fp.second.component.privDeps.insert(comp);
                 } else if (files.count(fullPath)) {
                     File *dep = &files.find(fullPath)->second;
                     fp.second.dependencies.insert(dep);

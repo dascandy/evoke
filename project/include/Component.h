@@ -16,7 +16,7 @@ struct PendingCommand;
 
 struct Component {
 public:
-  Component(const boost::filesystem::path &path);
+  Component(const boost::filesystem::path &path, bool isBinary = false);
   ~Component();
   std::string GetName() const;
   bool isHeaderOnly() const;
@@ -27,6 +27,7 @@ public:
   std::unordered_set<std::string> pubIncl, privIncl;
   std::string type;
   bool buildSuccess;
+  bool isBinary;
   std::string accumulatedErrors;
 };
 

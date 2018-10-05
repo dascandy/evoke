@@ -24,11 +24,12 @@ void PendingCommand::AddOutput(File* output) {
 }
 
 void PendingCommand::Check() {
-  if (outputs.empty()) return;
+  if (outputs.empty()) {
+    // Assume always out of date
+    state = PendingCommand::ToBeRun;
+  }
   if (state == PendingCommand::ToBeRun) return;
   bool missingOutput = false;
-  printf("%s\n", commandToRun.c_str());
-  printf("%zu %zu\n", inputs.size(), outputs.size());
   std::time_t oldestOutput = outputs[0]->lastwrite();
   for (auto& out : outputs) {
     if (out->lastwrite() == 0) missingOutput = true;
@@ -36,7 +37,7 @@ void PendingCommand::Check() {
   }
   for (auto& in : inputs) {
     if (in->lastwrite() > oldestOutput) {
-      printf("older source\n");
+      //printf("older source\n");
       state = PendingCommand::ToBeRun;
       for (auto& o : outputs) {
         o->state = File::ToRebuild;
@@ -47,7 +48,7 @@ void PendingCommand::Check() {
     if (in->generator) {
       in->generator->Check();
       if (in->generator->state == PendingCommand::ToBeRun) {
-        printf("input has generator that needs to be run\n");
+        //printf("input has generator that needs to be run\n");
         state = PendingCommand::ToBeRun;
         for (auto& o : outputs) {
           o->state = File::ToRebuild;
@@ -58,7 +59,7 @@ void PendingCommand::Check() {
     }
   }
   if (missingOutput) {
-    printf("missing output\n");
+    //printf("missing output\n");
     state = PendingCommand::ToBeRun;
     for (auto& o : outputs) {
       o->state = File::ToRebuild;
@@ -66,7 +67,6 @@ void PendingCommand::Check() {
     }
     return;
   }
-  printf("all seems done\n");
   for (auto& o : outputs) {
     o->state = File::Done;
   }
