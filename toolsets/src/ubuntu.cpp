@@ -23,6 +23,8 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
     includes += " -I" + d;
   }
 
+  // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
+
   boost::filesystem::path outputFolder = component.root;
   std::vector<File*> objects;
   for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {

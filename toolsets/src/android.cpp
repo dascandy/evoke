@@ -6,6 +6,13 @@
 #include "filter.h"
 
 struct androidconfig {
+  struct target {
+    std::set<std::string> systemincludepaths;
+    std::set<std::string> systemlibrarypaths;
+    std::string ccflags;
+    std::string ld;
+    std::string sofoldername;
+  };
   std::string compiler(const target &t) {
     std::string accum = ndkpath + clangpp + " " + t.ccflags + " -sysroot " + ndkpath + sysroot;
     for (auto& p : t.systemincludepaths) {
@@ -24,27 +31,20 @@ struct androidconfig {
     return manifest1 + appName + manifest2 + appName + manifest3 + appName + manifest4;
   }
   std::string aapt(const std::string& apkName, const std::string &manifestFile) {
-    return "aapt package -f -M " + manifestFile + " -S res -F apk/unsigned_" + apkName + ".apk so"
+    return "aapt package -f -M " + manifestFile + " -S res -F apk/unsigned_" + apkName + ".apk so";
   }
   std::string apksigner(const std::string& apkName) {
-    return apksigner = "apksigner sign --ks ~/.ssh/keystore.jks --ks-key-alias androidkey --ks-pass pass:android --key-pass pass:android --out apk/" + apkName + ".apk apk/unsigned_" + apkName + ".apk";
+    return "apksigner sign --ks ~/.ssh/keystore.jks --ks-key-alias androidkey --ks-pass pass:android --key-pass pass:android --out apk/" + apkName + ".apk apk/unsigned_" + apkName + ".apk";
   }
   const std::string ndkpath = "/home/pebi/android-ndk-r17b";
   const std::string clangpp = "/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++";
   const std::string sysroot = "/sysroot";
   const std::string ldflags = "-shared -lc -ldl -llog -landroid -lc++_static -lc++abi";
-  struct target {
-    std::set<std::string> systemincludepaths;
-    std::set<std::string> systemlibrarypaths;
-    std::string ccflags;
-    std::string ld;
-    std::string sofoldername;
-  };
-  std::map<std::string, target> targets = { "aarch64", {
+  std::map<std::string, target> targets = { { "aarch64", {
     { "/sources/cxx-stl/llvm-libc++/include", "/sysroot/usr/include/aarch64-linux-android" },
     { "/platforms/android-28/arch-arm64/usr/lib", "/sources/cxx-stl/llvm-libc++/libs/arm64-v8a" },
     "-std=c++17 -target aarch64-linux-android -DANDROID",
-    "/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld";
+    "/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld",
     "arm64-v8a",
   } }, 
   { "armv7", {
@@ -67,7 +67,7 @@ struct androidconfig {
     "-std=c++17 -target x86_64-linux-android -DANDROID",
     "/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin/x86_64-linux-android-ld",
     "x86_64",
-  } };
+  } } };
   const std::string manifest1 = 
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   "<!-- BEGIN_INCLUDE(manifest) -->\n"
@@ -167,7 +167,7 @@ void AndroidToolset::CreateCommandsFor(Project& project, Component& component) {
         pc = new PendingCommand(command);
       } else {
         outputFile = "so/" + p.second.sofoldername + "/" + getSoNameFor(component);
-        command = config.linker(p.second) + "-pthread -o " + outputFile.string()
+        command = config.linker(p.second) + "-pthread -o " + outputFile.string();
 
         for (auto& file : objects) {
           command += " " + file->path.string();
@@ -226,8 +226,8 @@ void AndroidToolset::CreateCommandsFor(Project& project, Component& component) {
     std::string manifest = "AndroidManifest.xml";
 
     // Create apk from manifest & shared libraries
-    outputName = p.first;
-    pc = new PendingCommand(config.aapt(outputName, manifest));
+    std::string outputName = component.root.filename().string();
+    PendingCommand* pc = new PendingCommand(config.aapt(outputName, manifest));
     File* uapkfile = project.CreateFile(component, "apk/unsigned_" + outputName + ".apk");
     pc->AddOutput(uapkfile);
     for (auto& file : libraries) {
@@ -238,7 +238,7 @@ void AndroidToolset::CreateCommandsFor(Project& project, Component& component) {
 
     // create signed apk from unsigned apk
     pc = new PendingCommand(config.apksigner(outputName));
-    File* apkfile = project.CreateFile(component, "apk/unsigned_" + outputName + ".apk");
+    File* apkfile = project.CreateFile(component, "apk/" + outputName + ".apk");
     pc->AddOutput(apkfile);
     pc->AddInput(uapkfile);
     pc->Check();
