@@ -10,11 +10,11 @@
 #include "known.h"
 
 void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
-    size_t offset = 0, start = 0;
+    size_t start = 0;
     bool pointyBrackets = true;
-    bool module = false;
-    enum State { None, AfterHash, AfterSemicolon, AfterImportModule } state = None;
-    while (offset < buffersize) {
+    bool exported = false;
+    enum State { None, AfterHash, AfterSemicolon, AfterImport, AfterModule } state = None;
+    for (size_t offset = 0; offset < buffersize; offset++) {
         switch (state) {
         case None:
         {
@@ -34,12 +34,11 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
                         if (!endSlash) return;
                         offset = endSlash - buffer;
                     } while (buffer[offset-1] != '*');
-                } else {
-                    offset++;
                 }
                 break;
             default:
-                continue;
+                break;
+            }
         }
             break;
         case AfterSemicolon:
@@ -118,7 +117,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
                     buffer[offset + 4] == 'u' &&
                     buffer[offset + 5] == 'd' &&
                     buffer[offset + 6] == 'e') {
-                    state = AfterInclude;
+                    state = AfterImport;
                     offset += 6;
                 }
                 else
@@ -133,7 +132,6 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
             break;
         case AfterImport:
         case AfterModule:
-        case AfterInclude:
             switch (buffer[offset]) {
             case ' ':
             case '\t':
@@ -141,10 +139,10 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
             
             case '<':
             case '"':
-                if (state == AfterModule) { state = None; break; } // Invalid
                 pointyBrackets = (buffer[offset] == '<');
                 offset++;
-                while (offset < size) {
+                start = offset;
+                while (state != None && offset < buffersize) {
                     switch (buffer[offset]) {
                     case '\n':
                         state = None; // Buggy code, skip over this include.
@@ -160,7 +158,6 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
                 }
                 break;
             default:
-                if (state == AfterInclude) { state = None; break; } // Buggy code (or a macro), skip over this include.
                 if (isalnum(buffer[offset]) || buffer[offset] == '_' || buffer[offset] == ':') {
                     std::string modulename;
                     while (buffer[offset] != ';' && buffer[offset] != '[' && buffer[offset] != '\n') {
@@ -173,6 +170,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
                         } else {
                             f.AddImport(modulename, exported);
                         }
+                        exported = false;
                     }
                 }
                 state = None;
@@ -180,7 +178,6 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
             }
             break;
         }
-        offset++;
     }
 }
 
