@@ -4,3 +4,4 @@ o/%.o: %.cpp
 
 bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find ./ -name *.cpp))
 	g++ -O3 -o $@ $^ -L/opt/local/lib -lboost_filesystem -lboost_system -pthread
+
