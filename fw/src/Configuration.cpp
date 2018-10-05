@@ -16,7 +16,7 @@ void Configuration::LoadDefaults() {
 #endif
 }
 
-static std::vector<std::string> split(const std::string& str) {  
+static std::vector<std::string> splitWithQuotes(const std::string& str) {  
   std::vector<std::string> rv;
   const char* s = &str[0], *e = &str[str.size()-1];
   const char* p = s;
@@ -63,7 +63,7 @@ Configuration::Configuration()
     std::string value = line.substr(pos+2);
     if (name == "toolchain") { toolchain = value; }
     else if (name == "compile-flags") { compileFlags = value; }
-    else if (name == "blacklist") { blacklist = split(value); }
+    else if (name == "blocklist") { blacklist = splitWithQuotes(value); }
     else {
       std::cout << "Ignoring unknown tag in configuration file: " << name << "\n";
     }

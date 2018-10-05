@@ -100,7 +100,6 @@ void Executor::RunMoreCommands() {
       for (auto& o : c->outputs) {
         boost::filesystem::create_directories(o->path.parent_path());
       }
-//      printf("\nCan run %s\n", c->commandToRun.c_str());
       *it = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, "", [this, it, c](Task* t){
         *it = nullptr;
         // TODO: print errors from this command first
@@ -112,8 +111,7 @@ void Executor::RunMoreCommands() {
         delete t;
         RunMoreCommands();
       });
-    } else ;
-//      printf("\nCannot run %s\n", c->commandToRun.c_str());
+    } else {;}
   }
   
   size_t w = 80 / activeTasks.size();
