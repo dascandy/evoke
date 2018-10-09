@@ -1,4 +1,5 @@
 #include "Toolset.h"
+#include <string>
 
 std::unique_ptr<Toolset> GetToolsetByName(const std::string& name) {
   if (name == "android") {

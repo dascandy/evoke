@@ -14,7 +14,6 @@ void PendingCommand::AddInput(File* input) {
 void PendingCommand::AddOutput(File* output) {
   if (output->generator) {
     fprintf(stderr, "Multiple rules define %s\n", output->path.string().c_str());
-    fprintf(stderr, "from %s and %s\n", inputs.front()->path.string().c_str(), output->generator->inputs.front()->path.string().c_str());
     return;
   }
 

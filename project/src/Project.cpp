@@ -8,6 +8,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include "known.h"
+#include <map>
 
 Project::Project() {
   projectRoot = boost::filesystem::current_path();
@@ -41,6 +42,14 @@ void Project::Reload() {
   PropagateExternalIncludes();
   ExtractPublicDependencies();
   ExtractIncludePaths();
+  
+  for (auto it = components.begin(); it != components.end();) {
+    if (it->second.files.empty()) {
+      it = components.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 File* Project::CreateFile(Component& c, boost::filesystem::path p) {
@@ -147,6 +156,10 @@ void Project::LoadFileList() {
 
 static std::map<std::string, Component*> PredefComponentList() {
   std::map<std::string, Component*> list;
+  Component* boost_system = new Component("boost_system", true);
+  Component* boost_filesystem = new Component("boost_filesystem", true);
+  boost_filesystem->pubDeps.insert(boost_system);
+  list["boost/filesystem.hpp"] = boost_filesystem;
   list["sdl2/sdl.h"] = new Component("SDL2", true);
   list["sdl2/sdl_opengl.h"] = new Component("GL", true);
   list["gl/glew.h"] = new Component("GLEW", true);

@@ -6,6 +6,7 @@ struct Component;
 class Project;
 
 struct Toolset {
+  virtual ~Toolset() {}
   virtual void CreateCommandsFor(Project& project, Component& component) = 0;
 };
 
