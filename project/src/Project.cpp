@@ -160,6 +160,24 @@ static std::map<std::string, Component*> PredefComponentList() {
   Component* boost_filesystem = new Component("boost_filesystem", true);
   boost_filesystem->pubDeps.insert(boost_system);
   list["boost/filesystem.hpp"] = boost_filesystem;
+
+  Component* crypto = new Component("crypto", true);
+  list["md5.h"] = crypto;
+
+  Component* ssl = new Component("ssl", true);
+  ssl->pubDeps.insert(crypto);
+  list["openssl/conf.h"] = ssl;
+  list["openssl/ssl.h"] = ssl;
+  list["openssl/engine.h"] = ssl;
+  list["openssl/dh.h"] = ssl;
+  list["openssl/err.h"] = ssl;
+  list["openssl/rsa.h"] = ssl;
+  list["openssl/x509v3.h"] = ssl;
+  list["openssl/x509_vfy.h"] = ssl;
+
+  list["zlib.h"] = new Component("z", true);
+
+  list["mysql/mysql.h"] = new Component("mysqlclient", true);
   list["sdl2/sdl.h"] = new Component("SDL2", true);
   list["sdl2/sdl_opengl.h"] = new Component("GL", true);
   list["gl/glew.h"] = new Component("GLEW", true);
