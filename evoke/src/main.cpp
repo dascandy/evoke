@@ -1,7 +1,6 @@
 #include "Project.h"
 #include <iostream>
 #include "Toolset.h"
-#include "values.h"
 #include "Executor.h"
 #include <thread>
 #include <chrono>
@@ -51,8 +50,8 @@ int main(int argc, const char **argv) {
       std::cerr << "Unknown header: " << u << "\n";
   }
   std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
-  for (auto& c : values(op.components)) {
-    toolset->CreateCommandsFor(op, c);
+  for (auto& c : op.components) {
+    toolset->CreateCommandsFor(op, c.second);
   }
   Executor ex;
   for (auto& comp : op.components) {

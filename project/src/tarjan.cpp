@@ -3,7 +3,6 @@
 #include "PendingCommand.h"
 #include "File.h"
 #include "Project.h"
-#include "filter.h"
 
 template <bool usePrivDepsFromOthers = false>
 struct Tarjan {

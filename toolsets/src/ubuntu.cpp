@@ -3,7 +3,6 @@
 #include "PendingCommand.h"
 #include "File.h"
 #include "Project.h"
-#include "filter.h"
 #include <algorithm>
 
 std::string as_dotted(std::string str) {
@@ -33,7 +32,10 @@ void UbuntuToolset::CreateCommandsFor(Project& project, Component& component) {
 
   boost::filesystem::path outputFolder = component.root;
   std::vector<File*> objects;
-  for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
+  for (auto& f : component.files) {
+    if (!project.IsCompilationUnit(f->path.extension().string()))
+      continue;
+
     boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
     File* of = project.CreateFile(component, outputFile);
     PendingCommand* pc = new PendingCommand("g++ -c -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);

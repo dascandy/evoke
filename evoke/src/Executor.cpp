@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <split.h>
 #include <cstring>
 #include "PendingCommand.h"
 
