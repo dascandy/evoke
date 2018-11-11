@@ -3,7 +3,8 @@
 #include "PendingCommand.h"
 #include "File.h"
 #include "Project.h"
-#include "filter.h"
+#include <map>
+#include <set>
 
 struct androidconfig {
   struct target {

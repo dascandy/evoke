@@ -3,16 +3,21 @@
 #include "PendingCommand.h"
 #include "File.h"
 #include "Project.h"
-#include "filter.h"
+#include <algorithm>
+
+std::string as_dotted(std::string str) {
+  std::replace(str.begin(), str.end(), '/', '.');
+  return str;
+}
 
 static std::string getLibNameFor(Component& component) {
   // TODO: change commponent to dotted string before making
-  return "lib" + component.root.string() + ".a";
+  return "lib" + as_dotted(component.root.string()) + ".a";
 }
 
 static std::string getExeNameFor(Component& component) {
   if (component.root.string() != ".") {
-    return component.root.string();
+    return as_dotted(component.root.string());
   }
   return boost::filesystem::canonical(component.root).filename().string();
 }
