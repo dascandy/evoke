@@ -19,9 +19,17 @@ Still to be implemented is minor customization around this:
 - It needs to allow customization of compile flags for the project-wide compilation, so that you can disable some warnings.
 - It needs to allow customization of the toolchain, so that you can use it for cross-compiling to other targets, or tune it for some CPU type.
 
-# Helping with Evoke development
+# Developing Evoke
 
 Everybody is free to help with Evoke development. The simpler things that need to be done are to create issues for things you would like it to do, or for asking help when it does not do what you want it to. You can join the discord at https://includecpp.org . If you want to do more, there are a few open issues already that require a bit more knowledge and time investment, like porting it to run on Windows or OSX.
+
+### Clang Format 
+
+Formatting of all source files is done using ClangFormat. Rules for it are specified in .clang-format file in the root of the repository.
+
+**Path:** /.clang-format
+
+**Requires:** [LLVM](http://llvm.org/)
 
 # License
 
