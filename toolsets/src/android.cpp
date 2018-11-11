@@ -122,127 +122,129 @@ static std::string getSoNameFor(Component& component) {
   return boost::filesystem::canonical(component.root).filename().string() + ".so";
 }
 
-void AndroidToolset::CreateCommandsFor(Project& project, Component& component) {
-  std::string includes;
-  for (auto& d : getIncludePathsFor(component)) {
-    includes += " -I" + d;
-  }
-
-  androidconfig config;
-  std::vector<File*> libraries;
-  for (auto& p : config.targets) {
-    boost::filesystem::path outputFolder = component.root;
-    std::vector<File*> objects;
-    for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
-      boost::filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
-      File* of = project.CreateFile(component, outputFile);
-      PendingCommand* pc = new PendingCommand(config.compiler(p.second) + " -c -o " + outputFile.string() + " " + f->path.string() + " " + includes);
-      objects.push_back(of);
-      pc->AddOutput(of);
-      std::unordered_set<File*> d;
-      std::stack<File*> deps;
-      deps.push(f);
-      size_t index = 0;
-      while (!deps.empty()) {
-        File* dep = deps.top();
-        deps.pop();
-        pc->AddInput(dep);
-        for (File* input : dep->dependencies)
-          if (d.insert(input).second) deps.push(input);
-        index++;
-      }
-      pc->Check();
-      component.commands.push_back(pc);
+void AndroidToolset::CreateCommandsFor(Project& project) {
+  for (auto& [name, component] : project.components) {
+    std::string includes;
+    for (auto& d : getIncludePathsFor(component)) {
+      includes += " -I" + d;
     }
-    if (!objects.empty()) {
-      std::string command;
-      boost::filesystem::path outputFile;
-      PendingCommand* pc;
-      if (component.type == "library") {
-        outputFile = "lib/" + p.first + "/" + getLibNameFor(component);
-        command = "ar rcs " + outputFile.string();
-        for (auto& file : objects) {
-          command += " " + file->path.string();
-        }
-        pc = new PendingCommand(command);
-      } else {
-        outputFile = "so/" + p.second.sofoldername + "/" + getSoNameFor(component);
-        command = config.linker(p.second) + "-pthread -o " + outputFile.string();
 
-        for (auto& file : objects) {
-          command += " " + file->path.string();
+    androidconfig config;
+    std::vector<File*> libraries;
+    for (auto& p : config.targets) {
+      boost::filesystem::path outputFolder = component.root;
+      std::vector<File*> objects;
+      for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
+        boost::filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
+        File* of = project.CreateFile(component, outputFile);
+        PendingCommand* pc = new PendingCommand(config.compiler(p.second) + " -c -o " + outputFile.string() + " " + f->path.string() + " " + includes);
+        objects.push_back(of);
+        pc->AddOutput(of);
+        std::unordered_set<File*> d;
+        std::stack<File*> deps;
+        deps.push(f);
+        size_t index = 0;
+        while (!deps.empty()) {
+          File* dep = deps.top();
+          deps.pop();
+          pc->AddInput(dep);
+          for (File* input : dep->dependencies)
+            if (d.insert(input).second) deps.push(input);
+          index++;
         }
-        command += " -Llib";
-        std::vector<std::vector<Component*>> linkDeps = GetTransitiveAllDeps(component);
-        std::reverse(linkDeps.begin(), linkDeps.end());
-        for (auto d : linkDeps) {
-          size_t index = 0;
-          while (index < d.size()) {
-            if (d[index]->isHeaderOnly()) {
-              d[index] = d.back();
-              d.pop_back();
-            } else {
-              ++index;
-            }
+        pc->Check();
+        component.commands.push_back(pc);
+      }
+      if (!objects.empty()) {
+        std::string command;
+        boost::filesystem::path outputFile;
+        PendingCommand* pc;
+        if (component.type == "library") {
+          outputFile = "lib/" + p.first + "/" + getLibNameFor(component);
+          command = "ar rcs " + outputFile.string();
+          for (auto& file : objects) {
+            command += " " + file->path.string();
           }
-          if (d.empty()) continue;
-          if (d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component))) {
-            if (d[0] != &component) {
-              command += " -l" + d[0]->root.string();
-            } else if (d.size() == 2) {
-              command += " -l" + d[1]->root.string();
-            }
-          } else {
-            command += " -Wl,--start-group";
-            for (auto& c : d) {
-              if (c != &component) {
-                command += " -l" + c->root.string();
+          pc = new PendingCommand(command);
+        } else {
+          outputFile = "so/" + p.second.sofoldername + "/" + getSoNameFor(component);
+          command = config.linker(p.second) + "-pthread -o " + outputFile.string();
+
+          for (auto& file : objects) {
+            command += " " + file->path.string();
+          }
+          command += " -Llib";
+          std::vector<std::vector<Component*>> linkDeps = GetTransitiveAllDeps(component);
+          std::reverse(linkDeps.begin(), linkDeps.end());
+          for (auto d : linkDeps) {
+            size_t index = 0;
+            while (index < d.size()) {
+              if (d[index]->isHeaderOnly()) {
+                d[index] = d.back();
+                d.pop_back();
+              } else {
+                ++index;
               }
             }
-            command += " -Wl,--end-group";
+            if (d.empty()) continue;
+            if (d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component))) {
+              if (d[0] != &component) {
+                command += " -l" + d[0]->root.string();
+              } else if (d.size() == 2) {
+                command += " -l" + d[1]->root.string();
+              }
+            } else {
+              command += " -Wl,--start-group";
+              for (auto& c : d) {
+                if (c != &component) {
+                  command += " -l" + c->root.string();
+                }
+              }
+              command += " -Wl,--end-group";
+            }
           }
-        }
-        pc = new PendingCommand(command);
-        for (auto& d : linkDeps) {
-          for (auto& c : d) {
-            if (c != &component) {
-              pc->AddInput(project.CreateFile(*c, "lib/" + p.first + "/" + getLibNameFor(*c)));
+          pc = new PendingCommand(command);
+          for (auto& d : linkDeps) {
+            for (auto& c : d) {
+              if (c != &component) {
+                pc->AddInput(project.CreateFile(*c, "lib/" + p.first + "/" + getLibNameFor(*c)));
+              }
             }
           }
         }
+        File* libraryFile = project.CreateFile(component, outputFile);
+        pc->AddOutput(libraryFile);
+        libraries.push_back(libraryFile);
+        for (auto& file : objects) {
+          pc->AddInput(file);
+        }
+        pc->Check();
+        component.commands.push_back(pc);
       }
-      File* libraryFile = project.CreateFile(component, outputFile);
-      pc->AddOutput(libraryFile);
-      libraries.push_back(libraryFile);
-      for (auto& file : objects) {
+    }
+    if (component.type != "library") {
+      // Find manifest, if not then make one
+      std::string manifest = "AndroidManifest.xml";
+
+      // Create apk from manifest & shared libraries
+      std::string outputName = component.root.filename().string();
+      PendingCommand* pc = new PendingCommand(config.aapt(outputName, manifest));
+      File* uapkfile = project.CreateFile(component, "apk/unsigned_" + outputName + ".apk");
+      pc->AddOutput(uapkfile);
+      for (auto& file : libraries) {
         pc->AddInput(file);
       }
       pc->Check();
       component.commands.push_back(pc);
-    }
-  }
-  if (component.type != "library") {
-    // Find manifest, if not then make one
-    std::string manifest = "AndroidManifest.xml";
 
-    // Create apk from manifest & shared libraries
-    std::string outputName = component.root.filename().string();
-    PendingCommand* pc = new PendingCommand(config.aapt(outputName, manifest));
-    File* uapkfile = project.CreateFile(component, "apk/unsigned_" + outputName + ".apk");
-    pc->AddOutput(uapkfile);
-    for (auto& file : libraries) {
-      pc->AddInput(file);
+      // create signed apk from unsigned apk
+      pc = new PendingCommand(config.apksigner(outputName));
+      File* apkfile = project.CreateFile(component, "apk/" + outputName + ".apk");
+      pc->AddOutput(apkfile);
+      pc->AddInput(uapkfile);
+      pc->Check();
+      component.commands.push_back(pc);
     }
-    pc->Check();
-    component.commands.push_back(pc);
-
-    // create signed apk from unsigned apk
-    pc = new PendingCommand(config.apksigner(outputName));
-    File* apkfile = project.CreateFile(component, "apk/" + outputName + ".apk");
-    pc->AddOutput(apkfile);
-    pc->AddInput(uapkfile);
-    pc->Check();
-    component.commands.push_back(pc);
   }
 }
 

@@ -35,7 +35,8 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string&
 
 int main(int argc, const char **argv) {
   std::string toolsetname = "ubuntu";
-  parseArgs(std::vector<std::string>(argv+1, argv + argc), { { "-t", toolsetname } });
+  std::string compdbname = "";
+  parseArgs(std::vector<std::string>(argv+1, argv + argc), { { "-t", toolsetname }, { "-cp", compdbname } });
   Project op;
   if (!op.unknownHeaders.empty()) {
     /*
@@ -51,9 +52,12 @@ int main(int argc, const char **argv) {
       std::cerr << "Unknown header: " << u << "\n";
   }
   std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
-  for (auto& c : values(op.components)) {
-    toolset->CreateCommandsFor(op, c);
+  toolset->CreateCommandsFor(op);
+  if (!compdbname.empty()) {
+    std::ofstream os(compdbname);
+    op.dumpJsonCompileDb(os);
   }
+  std::cout << op;
   Executor ex;
   for (auto& comp : op.components) {
     for (auto& c : comp.second.commands) {

@@ -25,6 +25,10 @@ void Project::Reload() {
   ambiguous.clear();
   LoadFileList();
 
+  std::unordered_map<std::string, File*> moduleMap;
+  CreateModuleMap(moduleMap);
+  MapImportsToModules(moduleMap);
+
   std::unordered_map<std::string, std::string> includeLookup;
   std::unordered_map<std::string, std::set<std::string>> collisions;
   CreateIncludeLookupTable(includeLookup, collisions);
@@ -97,12 +101,12 @@ bool Project::IsItemBlacklisted(const boost::filesystem::path &path) {
 }
 
 bool Project::IsCode(const std::string &ext) {
-    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm", ".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc" };
+    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm", ".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc" };
     return exts.count(ext) > 0;
 }
 
 bool Project::IsCompilationUnit(const std::string& ext) {
-    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".m", ".mm" };
+    static const std::unordered_set<std::string> exts = { ".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm" };
     return exts.count(ext) > 0;
 }
 
@@ -154,6 +158,35 @@ void Project::LoadFileList() {
   }
 }
 
+bool Project::CreateModuleMap(std::unordered_map<std::string, File*>& moduleMap) {
+  bool error = false;
+  for (auto& f : files) {
+    if (!f.second.moduleName.empty()) {
+      auto& entry = moduleMap[f.second.moduleName];
+      if (entry) {
+        fprintf(stderr, "Found second definition for module %s - found first in %s\n", f.second.path.c_str(), entry->path.c_str());
+        error = true;
+      } else {
+        entry = &f.second;
+      }
+    }
+  }
+  return error;
+}
+
+void Project::MapImportsToModules(std::unordered_map<std::string, File*>& moduleMap) {
+  for (auto& f : files) {
+    for (auto& import : f.second.imports) {
+      File* target = moduleMap[import.first];
+      if (target) {
+        f.second.modImports.insert(target);
+      } else {
+        fprintf(stderr, "Could not find module %s imported by %s\n", import.first.c_str(), f.second.path.c_str());
+      }
+    }
+  }
+}
+
 static std::map<std::string, Component*> PredefComponentList() {
   std::map<std::string, Component*> list;
   Component* boost_system = new Component("boost_system", true);
@@ -175,6 +208,53 @@ static Component* GetPredefComponent(const boost::filesystem::path& path) {
 void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                         std::unordered_map<std::string, std::vector<std::string>> &ambiguous) {
     for (auto &fp : files) {
+        for (auto &p : fp.second.rawImports) {
+            // If this is a non-pointy bracket include, see if there's a local match first. 
+            // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
+            std::string fullFilePath = (boost::filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            if (!p.second && files.count(fullFilePath)) {
+                // This file exists as a local include.
+                File* dep = &files.find(fullFilePath)->second;
+                dep->hasInclude = true;
+                fp.second.modImports.insert(dep);
+            } else {
+                // We need to use an include path to find this. So let's see where we end up.
+                std::string lowercaseInclude;
+                std::transform(p.first.begin(), p.first.end(), std::back_inserter(lowercaseInclude), ::tolower);
+                const std::string &fullPath = includeLookup[lowercaseInclude];
+                if (fullPath == "INVALID") {
+                    // We end up in more than one place. That's an ambiguous include then.
+                    ambiguous[lowercaseInclude].push_back(fp.first);
+                } else if (GetPredefComponent(lowercaseInclude)) {
+                    Component* comp = GetPredefComponent(lowercaseInclude);
+                    fp.second.component.privDeps.insert(comp);
+                    // TODO: we need to precompile this too now? No hook for it yet...
+                } else if (files.count(fullPath)) {
+                    File *dep = &files.find(fullPath)->second;
+                    fp.second.modImports.insert(dep);
+
+                    std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
+                    if (inclpath.size() == dep->component.root.generic_string().size()) {
+                        inclpath = ".";
+                    } else if (inclpath.size() > dep->component.root.generic_string().size() + 1) {
+                        inclpath = inclpath.substr(dep->component.root.generic_string().size() + 1);
+                    } else {
+                        inclpath = "";
+                    }
+                    if (!inclpath.empty()) {
+                        dep->includePaths.insert(inclpath);
+                    }
+
+                    if (&fp.second.component != &dep->component) {
+                        fp.second.component.privDeps.insert(&dep->component);
+                        dep->hasExternalInclude = true;
+                    }
+                    dep->hasInclude = true;
+                } else if (!IsKnownHeader(p.first)) {
+                    unknownHeaders.insert(p.first);
+                }
+            }
+        }
         for (auto &p : fp.second.rawIncludes) {
             // If this is a non-pointy bracket include, see if there's a local match first. 
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).

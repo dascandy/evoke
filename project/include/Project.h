@@ -23,15 +23,18 @@ public:
 
   bool IsCompilationUnit(const std::string& ext);
   bool IsCode(const std::string &ext);
+  void dumpJsonCompileDb(std::ostream& os);
 private:
   void LoadFileList();
+  bool CreateModuleMap(std::unordered_map<std::string, File*>& moduleMap);
+  void MapImportsToModules(std::unordered_map<std::string, File*>& moduleMap);
+  void CreateIncludeLookupTable(std::unordered_map<std::string, std::string> &includeLookup,
+                                std::unordered_map<std::string, std::set<std::string>> &collisions);
   void MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                  std::unordered_map<std::string, std::vector<std::string>> &ambiguous);
   void PropagateExternalIncludes();
   void ExtractPublicDependencies();
   void ExtractIncludePaths();
-  void CreateIncludeLookupTable(std::unordered_map<std::string, std::string> &includeLookup,
-                                std::unordered_map<std::string, std::set<std::string>> &collisions);
   void ReadCodeFrom(File& f, const char* buffer, size_t buffersize);
   void ReadCode(std::unordered_map<std::string, File>& files, const boost::filesystem::path &path, Component& comp);
   bool IsItemBlacklisted(const boost::filesystem::path &path);

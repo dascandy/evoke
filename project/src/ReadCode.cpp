@@ -13,7 +13,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
     size_t start = 0;
     bool pointyBrackets = true;
     bool exported = false;
-    enum State { None, AfterHash, AfterSemicolon, AfterImport, AfterModule } state = None;
+    enum State { None, AfterHash, AfterSemicolon, AfterImport, AfterInclude, AfterModule } state = None;
     for (size_t offset = 0; offset < buffersize; offset++) {
         switch (state) {
         case None:
@@ -117,7 +117,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
                     buffer[offset + 4] == 'u' &&
                     buffer[offset + 5] == 'd' &&
                     buffer[offset + 6] == 'e') {
-                    state = AfterImport;
+                    state = AfterInclude;
                     offset += 6;
                 }
                 else
@@ -131,6 +131,7 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
             }
             break;
         case AfterImport:
+        case AfterInclude:
         case AfterModule:
             switch (buffer[offset]) {
             case ' ':
@@ -150,7 +151,10 @@ void Project::ReadCodeFrom(File& f, const char* buffer, size_t buffersize) {
                     case '>':
                     case '\"':
                         // Yes, we'll match a mismatched pair. That's fine.
-                        f.AddIncludeStmt(pointyBrackets, std::string(&buffer[start], &buffer[offset]));
+                        if (state == AfterInclude)
+                          f.AddIncludeStmt(pointyBrackets, std::string(&buffer[start], &buffer[offset]));
+                        else
+                          f.AddImportStmt(pointyBrackets, std::string(&buffer[start], &buffer[offset]));
                         state = None;
                         break;
                     }

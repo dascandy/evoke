@@ -57,7 +57,8 @@ std::ostream& operator<<(std::ostream& os, const Component& component) {
     for (auto& d : component.files) {
         if (d->hasExternalInclude) anyExternal = true;
         else if (d->hasInclude) anyHeader = true;
-        else anySource = true;
+
+        if (isTranslationUnit(d->path.extension().string())) anySource = true;
     }
     if (anyExternal) {
         os << "\n  Exposed headers:";
@@ -76,7 +77,7 @@ std::ostream& operator<<(std::ostream& os, const Component& component) {
     if (anySource) {
         os << "\n  Sources:\n";
         for (auto& d : component.files) {
-            if (!d->hasInclude) {
+            if (isTranslationUnit(d->path.extension().string())) {
                 os << " " << d->path.generic_string() << "\n";
                 for (auto& dep : d->dependencies)
                     os << "   " << dep->path.generic_string() << "\n";
