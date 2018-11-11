@@ -36,7 +36,8 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string&
 int main(int argc, const char **argv) {
   std::string toolsetname = "ubuntu";
   std::string compdbname = "";
-  parseArgs(std::vector<std::string>(argv+1, argv + argc), { { "-t", toolsetname }, { "-cp", compdbname } });
+  std::string verbose = "";
+  parseArgs(std::vector<std::string>(argv+1, argv + argc), { { "-t", toolsetname }, { "-cp", compdbname }, { "-v", verbose } });
   Project op;
   if (!op.unknownHeaders.empty()) {
     /*
@@ -57,7 +58,9 @@ int main(int argc, const char **argv) {
     std::ofstream os(compdbname);
     op.dumpJsonCompileDb(os);
   }
-  std::cout << op;
+  if (!verbose.empty()) {
+    std::cout << op;
+  }
   Executor ex;
   for (auto& comp : op.components) {
     for (auto& c : comp.second.commands) {
