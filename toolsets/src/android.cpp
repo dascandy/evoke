@@ -135,7 +135,8 @@ void AndroidToolset::CreateCommandsFor(Project& project) {
     for (auto& p : config.targets) {
       boost::filesystem::path outputFolder = component.root;
       std::vector<File*> objects;
-      for (auto& f : filter(component.files, [&project](File*f){ return project.IsCompilationUnit(f->path.extension().string()); })) {
+      for (auto& f : component.files) {
+        if (!project.IsCompilationUnit(f->path.extension().string())) continue;
         boost::filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
         File* of = project.CreateFile(component, outputFile);
         PendingCommand* pc = new PendingCommand(config.compiler(p.second) + " -c -o " + outputFile.string() + " " + f->path.string() + " " + includes);
