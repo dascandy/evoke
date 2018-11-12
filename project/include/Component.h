@@ -1,7 +1,7 @@
 #pragma once
 
-#include <fw/filesystem.hpp>
 #include <algorithm>
+#include <fw/filesystem.hpp>
 #include <iostream>
 #include <regex>
 #include <set>
@@ -14,27 +14,26 @@
 struct File;
 struct PendingCommand;
 
-struct Component {
+struct Component
+{
 public:
-  Component(const boost::filesystem::path &path, bool isBinary = false);
-  ~Component();
-  std::string GetName() const;
-  bool isHeaderOnly() const;
-  boost::filesystem::path root;
-  std::unordered_set<File *> files;
-  std::vector<PendingCommand*> commands;
-  std::unordered_set<Component *> pubDeps, privDeps;
-  std::unordered_set<std::string> pubIncl, privIncl;
-  std::string type;
-  bool buildSuccess;
-  bool isBinary;
-  std::string accumulatedErrors;
+    Component(const boost::filesystem::path &path, bool isBinary = false);
+    ~Component();
+    std::string GetName() const;
+    bool isHeaderOnly() const;
+    boost::filesystem::path root;
+    std::unordered_set<File *> files;
+    std::vector<PendingCommand *> commands;
+    std::unordered_set<Component *> pubDeps, privDeps;
+    std::unordered_set<std::string> pubIncl, privIncl;
+    std::string type;
+    bool buildSuccess;
+    bool isBinary;
+    std::string accumulatedErrors;
 };
 
-std::ostream& operator<<(std::ostream& os, const Component& component);
+std::ostream &operator<<(std::ostream &os, const Component &component);
 
-std::vector<std::vector<Component*>> GetTransitiveAllDeps(Component& c);
-std::vector<std::vector<Component*>> GetTransitivePubDeps(Component& c);
-std::set<std::string> getIncludePathsFor(Component& component);
-
-
+std::vector<std::vector<Component *>> GetTransitiveAllDeps(Component &c);
+std::vector<std::vector<Component *>> GetTransitivePubDeps(Component &c);
+std::set<std::string> getIncludePathsFor(Component &component);

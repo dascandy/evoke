@@ -5,13 +5,10 @@
 // Enable modules support for MSVC
 //"/experimental:module /module:stdIfcDir \"$(VC_IFCPath)\" /module:search obj/modules/"
 
-
 // Tell MSVC to act like a sane compiler (use the latest C++ version in standards conforming mode, use C++ exceptions as specified, and link to the C/C++ runtime)
 //"/std:c++latest /permissive- /EHsc /MD"
 
-void WindowsToolset::CreateCommandsFor(Project& project) {
-  std::abort();
+void WindowsToolset::CreateCommandsFor(Project &project)
+{
+    std::abort();
 }
-
-
-

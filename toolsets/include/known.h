@@ -2,6 +2,4 @@
 
 #include <string>
 
-bool IsKnownHeader(const std::string& str);
-
-
+bool IsKnownHeader(const std::string &str);

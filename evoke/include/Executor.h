@@ -1,36 +1,38 @@
 #pragma once
 
-#include <string>
-#include <vector>
 #include <functional>
 #include <mutex>
+#include <string>
+#include <vector>
 
 struct PendingCommand;
 
-class Task {
+class Task
+{
 public:
-  virtual ~Task() = default;
-  enum State {
-    Running,
-    Done
-  };
-  State state = Running;
-  int errorcode = 0;
-  std::vector<char> outbuffer;
+    virtual ~Task() = default;
+    enum State
+    {
+        Running,
+        Done
+    };
+    State state = Running;
+    int errorcode = 0;
+    std::vector<char> outbuffer;
 };
 
-class Executor {
+class Executor
+{
 public:
-  Executor();
-  ~Executor();
-  void Run(PendingCommand* cmd);
-  void Start();
-  bool Busy();
+    Executor();
+    ~Executor();
+    void Run(PendingCommand *cmd);
+    void Start();
+    bool Busy();
+
 private:
-  void RunMoreCommands();
-  std::mutex m;
-  std::vector<PendingCommand*> commands;
-  std::vector<Task*> activeTasks;
+    void RunMoreCommands();
+    std::mutex m;
+    std::vector<PendingCommand *> commands;
+    std::vector<Task *> activeTasks;
 };
-
-

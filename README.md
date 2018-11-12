@@ -29,7 +29,7 @@ Formatting of all source files is done using ClangFormat. Rules for it are speci
 
 **Path:** /.clang-format
 
-**Requires:** [LLVM](http://llvm.org/)
+**Requires:** [LLVM](http://llvm.org/) version 6.0
 
 # License
 

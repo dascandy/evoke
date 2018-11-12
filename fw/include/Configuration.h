@@ -3,15 +3,15 @@
 #include <string>
 #include <vector>
 
-struct Configuration {
+struct Configuration
+{
 private:
-  Configuration();
-  void LoadDefaults();
+    Configuration();
+    void LoadDefaults();
+
 public:
-  static Configuration& Get();
-  std::vector<std::string> blacklist;
-  std::string toolchain;
-  std::string compileFlags;
+    static Configuration &Get();
+    std::vector<std::string> blacklist;
+    std::string toolchain;
+    std::string compileFlags;
 };
-
-
