@@ -25,20 +25,29 @@ std::ostream &operator<<(std::ostream &os, std::vector<T> v)
     return os;
 }
 
-void parseArgs(std::vector<std::string> args, std::map<std::string, std::string &> argmap)
+void parseArgs(std::vector<std::string> args, std::map<std::string, std::string &> argmap, std::map<std::string, bool &> toggles)
 {
-    if(args.size() % 1)
-        std::cout << "Lone argument at end? " << args.back() << "\n";
-    for(size_t index = 0; index + 1 < args.size(); index += 2)
+    for(size_t index = 0; index < args.size();)
     {
-        auto it = argmap.find(args[index]);
-        if(it != argmap.end())
+        auto toggle_it = toggles.find(args[index]);
+        if(toggle_it != toggles.end())
         {
-            it->second = args[index + 1];
+            toggle_it->second = true;
+            ++index;
         }
         else
         {
-            std::cout << "Invalid argument: " << args[index] << "\n";
+            auto it = argmap.find(args[index]);
+            if(it != argmap.end() && index + 1 != args.size())
+            {
+                it->second = args[index + 1];
+                index += 2;
+            }
+            else
+            {
+                std::cout << "Invalid argument: " << args[index] << "\n";
+                ++index;
+            }
         }
     }
 }
@@ -46,9 +55,9 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 int main(int argc, const char **argv)
 {
     std::string toolsetname = "ubuntu";
-    std::string compdbname = "";
-    std::string verbose = "";
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"-cp", compdbname}, {"-v", verbose}});
+    bool compilation_database = false;
+    bool verbose = false;
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}}, {{"-cp", compilation_database}, {"-v", verbose}});
     Project op;
     if(!op.unknownHeaders.empty())
     {
@@ -67,12 +76,12 @@ int main(int argc, const char **argv)
     }
     std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
     toolset->CreateCommandsFor(op);
-    if(!compdbname.empty())
+    if(compilation_database)
     {
-        std::ofstream os(compdbname);
+        std::ofstream os("compile_commands.json");
         op.dumpJsonCompileDb(os);
     }
-    if(!verbose.empty())
+    if(verbose)
     {
         std::cout << op;
     }
