@@ -3,3 +3,5 @@ obj
 /bin
 /o
 /lib
+.ninja*
+*.obj
