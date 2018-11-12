@@ -12,9 +12,9 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-Project::Project()
+Project::Project(const std::string &rootpath)
 {
-    projectRoot = boost::filesystem::current_path();
+    projectRoot = rootpath;
     Reload();
 }
 

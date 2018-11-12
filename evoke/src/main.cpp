@@ -55,10 +55,11 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 int main(int argc, const char **argv)
 {
     std::string toolsetname = "ubuntu";
+    std::string rootpath = boost::filesystem::current_path().generic_string();
     bool compilation_database = false;
     bool verbose = false;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}}, {{"-cp", compilation_database}, {"-v", verbose}});
-    Project op;
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}}, {{"-cp", compilation_database}, {"-v", verbose}});
+    Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
         /*
