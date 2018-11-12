@@ -15,6 +15,7 @@
 Project::Project(const std::string &rootpath)
 {
     projectRoot = rootpath;
+    boost::filesystem::current_path(projectRoot);
     Reload();
 }
 
