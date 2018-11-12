@@ -14,7 +14,6 @@ std::string as_dotted(std::string str)
 
 static std::string getLibNameFor(Component &component)
 {
-    // TODO: change commponent to dotted string before making
     return "lib" + as_dotted(component.root.string()) + ".a";
 }
 
