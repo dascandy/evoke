@@ -8,6 +8,16 @@ Right now it is not available as a package for common operating systems yet. To 
 
 It requires Boost 1.60 (or thereabouts) or higher; it uses only boost.filesystem. To compile, download the full source tree and type `make` in the place you downloaded it to. Then, run `bin/evoke_make` to build evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
 
+### Windows
+
+The Windows OS is currently unsupported. The **build-windows.ninja** script can build most of the Evoke currently using [Ninja](https://ninja-build.org/manual.html):
+
+- Start Visual Studio 2017 command prompt
+- Navigate to Evoke root directory
+- Call: `ninja -f build-windows.ninja`
+
+The build will fail at the moment due to use of POSIX headers. Anyone willing to add the Windows specific version is welcome!
+
 # Using Evoke
 
 To use evoke, create a folder that is named after your project target, and create a `src` or `include` folder inside that. Evoke recognizes a `src` or `include` folder as the root of a component, and will name it after the directory tree navigated to get to it. For example, if you have a folder called `hello/src` it will create a component called `hello`, and if your folder is called `thirdparty/catch/include` it will create a component called `thirdparty.catch`.
