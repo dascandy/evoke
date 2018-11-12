@@ -1,7 +1,7 @@
-x_
-obj
+/obj
 /bin
 /o
 /lib
 .ninja*
 *.obj
+compile_commands.json
