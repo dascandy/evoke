@@ -78,8 +78,7 @@ public:
 
 Executor::Executor()
 {
-    for(size_t n = 0; n < 4; n++)
-        activeTasks.push_back(nullptr);
+    activeTasks.resize(std::max(4u, std::thread::hardware_concurrency()));
 }
 
 Executor::~Executor()
@@ -146,25 +145,42 @@ void Executor::RunMoreCommands()
         }
     }
 
-    size_t w = 80 / activeTasks.size();
+    size_t screenWidth = 80;
+    size_t w = screenWidth / activeTasks.size();
     size_t active = 0;
     for(auto &t : activeTasks)
         if(t)
             active++;
 
     printf("%zu concurrent tasks, %zu active, %zu commands left to run\n", activeTasks.size(), active, commands.size());
-    for(auto &t : activeTasks)
-    {
-        std::string file;
-        if(t)
-        {
-            file = ((Process *)t)->filename;
-            if(file.size() > w - 3)
-                file.resize(w - 3);
+    if (w == 0) {
+        // If you have more cores than horizontal characters, we can't display one task per character. Instead make the horizontal line a "usage" bar representing proportional task use.
+        size_t activeCount = 0;
+        for (auto& t : activeTasks) {
+            if (t) activeCount++;
         }
-        while(file.size() < w - 3)
-            file.push_back(' ');
-        printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m ", file.c_str());
+        std::cout << std::string((screenWidth-1) * activeCount / activeTasks.size(), '*') << std::string(screenWidth - (screenWidth-1) * activeCount / activeTasks.size() - 1, ' ');
+    } else {
+        for(auto &t : activeTasks)
+        {
+            if (w >= 10) 
+            {
+                std::string file;
+                if(t)
+                {
+                    file = ((Process *)t)->filename;
+                    if(file.size() > w - 2)
+                        file.resize(w - 2);
+                }
+                while(file.size() < w - 2)
+                    file.push_back(' ');
+                printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m", file.c_str());
+            } else if (w >= 3) {
+                printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m", t ? "*" : "_");
+            } else if (w >= 1) {
+                printf("\033[1;37m%s\033[0m", t ? "*" : "_");
+            }
+        }
     }
     printf("\r\033[1A");
     fflush(stdout);
