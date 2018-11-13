@@ -138,7 +138,7 @@ static std::string getSoNameFor(Component &component)
 
 void AndroidToolset::CreateCommandsFor(Project &project)
 {
-    for(auto p : project.components)
+    for(auto& p : project.components)
     {
         auto& component = p.second;
         std::string includes;
