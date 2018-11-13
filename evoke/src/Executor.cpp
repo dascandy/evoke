@@ -52,9 +52,9 @@ void Process::run()
     x(this);
 }
 
-Executor::Executor()
+Executor::Executor(size_t jobcount)
 {
-    activeProcesses.resize(std::max(4u, std::thread::hardware_concurrency()));
+    activeProcesses.resize(jobcount);
 }
 
 Executor::~Executor()

@@ -12,7 +12,7 @@ class Process;
 class Executor
 {
 public:
-    Executor();
+    Executor(size_t jobcount);
     ~Executor();
     void Run(PendingCommand *cmd);
     void Start();
