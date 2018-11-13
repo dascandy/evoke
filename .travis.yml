@@ -1,0 +1,21 @@
+script:
+  - make
+
+sudo: required
+dist: trusty
+
+matrix:
+  include:
+    - compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - g++-7-multilib
+            - cmake
+      env: CXX=g++-7
+
+
