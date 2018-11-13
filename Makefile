@@ -1,7 +1,7 @@
 
-BOOST_INCLUDE_DIR = /opt/local/include
-BOOST_LIB_DIR = /opt/local/lib
-CXX=g++
+BOOST_INCLUDE_DIR ?= /opt/local/include
+BOOST_LIB_DIR ?= /opt/local/lib
+CXX ?= g++
 
 o/%.o: %.cpp
 	@mkdir -p $(dir $@)
