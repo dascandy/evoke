@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <fcntl.h>
 #include <fw/filesystem.hpp>
-#include <sys/mman.h>
-#include <unistd.h>
 
 void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
 {

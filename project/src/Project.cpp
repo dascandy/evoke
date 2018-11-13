@@ -6,11 +6,14 @@
 #include "known.h"
 
 #include <algorithm>
-#include <fcntl.h>
 #include <fw/filesystem.hpp>
 #include <map>
+#include <iostream>
+#ifndef _WIN32
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#endif
 
 Project::Project(const std::string &rootpath)
 {
@@ -94,17 +97,27 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const boost::filesystem::path &path, Component &comp)
 {
+#ifdef _WIN32
+    File& f = files.insert(std::make_pair(path.generic_string(), File(path))).first->second;
+    std::string buffer;
+    buffer.resize(filesystem::file_size(path));
+    {
+        filesystem::ifstream(path).read(&buffer[0], buffer.size());
+    }
+    ReadCodeFrom(f, buffer.data(), buffer.size(), withLoc);
+#else
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
     int fd = open(path.c_str(), O_RDONLY);
-    size_t fileSize = boost::filesystem::file_size(path);
+    size_t fileSize = filesystem::file_size(path);
     void *p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
     ReadCodeFrom(f, static_cast<const char *>(p), fileSize);
     munmap(p, fileSize);
     close(fd);
+#endif
 }
 
-bool Project::IsItemBlacklisted(const boost::filesystem::path &path)
+bool Project::IsItemBlacklisted(const filesystem::path &path)
 {
     std::string pathS = path.generic_string();
     std::string fileName = path.filename().generic_string();
