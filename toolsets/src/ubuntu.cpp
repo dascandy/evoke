@@ -28,8 +28,9 @@ static std::string getExeNameFor(Component &component)
 
 void UbuntuToolset::CreateCommandsFor(Project &project)
 {
-    for(auto &[name, component] : project.components)
+    for(auto p : project.components)
     {
+        auto& component = p.second;
         std::string includes;
         for(auto &d : getIncludePathsFor(component))
         {
