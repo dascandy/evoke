@@ -7,12 +7,12 @@
 
 #include <algorithm>
 #include <fw/filesystem.hpp>
-#include <map>
 #include <iostream>
+#include <map>
 #ifndef _WIN32
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <unistd.h>
+#    include <fcntl.h>
+#    include <sys/mman.h>
+#    include <unistd.h>
 #endif
 
 Project::Project(const std::string &rootpath)
@@ -98,7 +98,7 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const boost::filesystem::path &path, Component &comp)
 {
 #ifdef _WIN32
-    File& f = files.insert(std::make_pair(path.generic_string(), File(path))).first->second;
+    File &f = files.insert(std::make_pair(path.generic_string(), File(path))).first->second;
     std::string buffer;
     buffer.resize(filesystem::file_size(path));
     {

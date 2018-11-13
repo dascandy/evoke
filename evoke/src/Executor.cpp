@@ -2,17 +2,19 @@
 
 #include "PendingCommand.h"
 
+#include <boost/process.hpp>
 #include <cstring>
 #include <functional>
 #include <thread>
-#include <boost/process.hpp>
 
 class Process
 {
 public:
     Process(const std::string &filename, const std::string &cmd, std::function<void(Process *)> onComplete);
+
 private:
     void run();
+
 public:
     std::function<void(Process *)> onComplete;
     std::string filename;
@@ -39,7 +41,7 @@ Process::Process(const std::string &filename, const std::string &cmd, std::funct
 void Process::run()
 {
     std::string line;
-    while (pipe_stream && std::getline(pipe_stream, line) && !line.empty())
+    while(pipe_stream && std::getline(pipe_stream, line) && !line.empty())
         outbuffer += line;
 
     child.wait();
@@ -127,17 +129,22 @@ void Executor::RunMoreCommands()
             active++;
 
     printf("%zu concurrent tasks, %zu active, %zu commands left to run\n", activeProcesses.size(), active, commands.size());
-    if (w == 0) {
+    if(w == 0)
+    {
         // If you have more cores than horizontal characters, we can't display one task per character. Instead make the horizontal line a "usage" bar representing proportional task use.
         size_t activeCount = 0;
-        for (auto& t : activeProcesses) {
-            if (t) activeCount++;
-        }
-        std::cout << std::string((screenWidth-1) * activeCount / activeProcesses.size(), '*') << std::string(screenWidth - (screenWidth-1) * activeCount / activeProcesses.size() - 1, ' ');
-    } else {
         for(auto &t : activeProcesses)
         {
-            if (w >= 10) 
+            if(t)
+                activeCount++;
+        }
+        std::cout << std::string((screenWidth - 1) * activeCount / activeProcesses.size(), '*') << std::string(screenWidth - (screenWidth - 1) * activeCount / activeProcesses.size() - 1, ' ');
+    }
+    else
+    {
+        for(auto &t : activeProcesses)
+        {
+            if(w >= 10)
             {
                 std::string file;
                 if(t)
@@ -149,9 +156,13 @@ void Executor::RunMoreCommands()
                 while(file.size() < w - 2)
                     file.push_back(' ');
                 printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m", file.c_str());
-            } else if (w >= 3) {
+            }
+            else if(w >= 3)
+            {
                 printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m", t ? "*" : "_");
-            } else if (w >= 1) {
+            }
+            else if(w >= 1)
+            {
                 printf("\033[1;37m%s\033[0m", t ? "*" : "_");
             }
         }
