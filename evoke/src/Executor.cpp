@@ -3,12 +3,8 @@
 #include "PendingCommand.h"
 
 #include <cstring>
-#include <fcntl.h>
 #include <functional>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <thread>
-#include <unistd.h>
 #include <boost/process.hpp>
 
 class Process
