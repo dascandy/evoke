@@ -250,6 +250,7 @@ static std::map<std::string, Component *> PredefComponentList()
     Component *boost_filesystem = new Component("boost_filesystem", true);
     boost_filesystem->pubDeps.insert(boost_system);
     list["boost/filesystem.hpp"] = boost_filesystem;
+    list["boost/process.hpp"] = new Component("boost_process");
 
     Component *crypto = new Component("crypto", true);
     list["md5.h"] = crypto;
