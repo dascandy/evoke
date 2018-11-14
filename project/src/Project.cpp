@@ -107,7 +107,6 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const boost
     }
     ReadCodeFrom(f, buffer.data(), buffer.size());
 #else
-    File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
     int fd = open(path.c_str(), O_RDONLY);
     size_t fileSize = filesystem::file_size(path);
