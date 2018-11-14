@@ -97,14 +97,14 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const boost::filesystem::path &path, Component &comp)
 {
+    File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
 #ifdef _WIN32
-    File &f = files.insert(std::make_pair(path.generic_string(), File(path))).first->second;
     std::string buffer;
     buffer.resize(filesystem::file_size(path));
     {
         filesystem::ifstream(path).read(&buffer[0], buffer.size());
     }
-    ReadCodeFrom(f, buffer.data(), buffer.size(), withLoc);
+    ReadCodeFrom(f, buffer.data(), buffer.size());
 #else
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
