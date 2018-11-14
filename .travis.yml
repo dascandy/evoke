@@ -1,0 +1,28 @@
+script:
+  - wget -O boost_1_64_0.tar.gz http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.gz/download
+  - tar xzf boost_1_64_0.tar.gz 
+  - cd boost_1_64_0/
+  - ./bootstrap.sh --with-libraries=program_options,filesystem,system >/dev/null 2>&1
+  - ./b2 link=static threading=multi variant=release >/dev/null 2>&1
+  - sudo ./b2 install >/dev/null 2>&1 
+  - cd ..
+  - rm -rf boost_1_64_0
+  - make
+
+sudo: required
+dist: trusty
+
+matrix:
+  include:
+    - compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - g++-7-multilib
+      env: CXX=g++-7
+
+

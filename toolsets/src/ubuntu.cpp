@@ -6,6 +6,9 @@
 
 #include <algorithm>
 
+static const std::string compiler = "g++";
+static const std::string archiver = "ar";
+
 std::string as_dotted(std::string str)
 {
     std::replace(str.begin(), str.end(), '/', '.');
@@ -28,8 +31,9 @@ static std::string getExeNameFor(Component &component)
 
 void UbuntuToolset::CreateCommandsFor(Project &project)
 {
-    for(auto &[name, component] : project.components)
+    for(auto &p : project.components)
     {
+        auto &component = p.second;
         std::string includes;
         for(auto &d : getIncludePathsFor(component))
         {
@@ -37,7 +41,6 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
         }
 
         // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
-
         boost::filesystem::path outputFolder = component.root;
         std::vector<File *> objects;
         for(auto &f : component.files)
@@ -46,7 +49,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                 continue;
             boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand("g++ -c -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
+            PendingCommand *pc = new PendingCommand(compiler + " -c -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
@@ -74,7 +77,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
             if(component.type == "library")
             {
                 outputFile = "lib/" + getLibNameFor(component);
-                command = "ar rcs " + outputFile.string();
+                command = archiver + " rcs " + outputFile.string();
                 for(auto &file : objects)
                 {
                     command += " " + file->path.string();
@@ -84,7 +87,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
             else
             {
                 outputFile = "bin/" + getExeNameFor(component);
-                command = "g++ -pthread -o " + outputFile.string();
+                command = compiler + " -pthread -o " + outputFile.string();
 
                 for(auto &file : objects)
                 {

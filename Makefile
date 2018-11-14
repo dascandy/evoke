@@ -1,9 +1,21 @@
 
+BOOST_INCLUDE_DIR ?= /opt/local/include
+BOOST_LIB_DIR ?= /opt/local/lib
+CXX ?= g++
+
 o/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	g++ -std=c++17 -O3 -c -o $@ $< -Wall -Wextra -Wpedantic -I/opt/local/include -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include
+	$(CXX) -std=c++17 -O3 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include
+
+bin/evoke: bin/evoke_make
+	bin/evoke_make
+	@echo Build complete. Please copy bin/evoke to wherever you want to install it.
 
 bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find ./ -name *.cpp))
 	@mkdir -p $(dir $@)
-	g++ -O3 -o $@ $^ -L/opt/local/lib -lboost_filesystem -lboost_system -pthread
+	$(CXX) -O3 -std=c++17 -pthread -o $@ $^ -L$(BOOST_LIB_DIR) -lboost_filesystem -lboost_system -Wl,-rpath -Wl,$(BOOST_LIB_DIR)
 
+clean:
+	@mkdir -p $(dir $@)
+	@rm -f $(patsubst %.cpp,o/%.o,$(shell find ./ -name *.cpp))
+	@rm -f bin/evoke_make

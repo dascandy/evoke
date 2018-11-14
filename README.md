@@ -6,7 +6,7 @@ Evoke is the simple solution to the complicated problem of build software for C+
 
 Right now it is not available as a package for common operating systems yet. To install it, you will need to compile it from source.
 
-It requires Boost 1.60 (or thereabouts) or higher; it uses only boost.filesystem. To compile, download the full source tree and type `make` in the place you downloaded it to. Then, run `bin/evoke_make` to build evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
+It requires Boost 1.64 or higher; it uses boost.filesystem and boost.process. To compile, download the full source tree and type `make` in the place you downloaded it to. Then, run `bin/evoke_make` to build evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
 
 ### Windows
 

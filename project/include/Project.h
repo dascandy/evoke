@@ -12,7 +12,7 @@
 class Project
 {
 public:
-    Project(const std::string& root);
+    Project(const std::string &root);
     ~Project();
     void Reload();
     File *CreateFile(Component &c, boost::filesystem::path p);
