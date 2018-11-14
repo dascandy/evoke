@@ -6,6 +6,7 @@ script:
   - ./b2 link=static threading=multi variant=release >/dev/null 2>&1
   - sudo ./b2 install >/dev/null 2>&1 
   - cd ..
+  - rm -rf boost_1_64_0
   - make
 
 sudo: required
