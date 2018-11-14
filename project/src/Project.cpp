@@ -9,6 +9,7 @@
 #include <fw/filesystem.hpp>
 #include <iostream>
 #include <map>
+
 #ifndef _WIN32
 #    include <fcntl.h>
 #    include <sys/mman.h>
@@ -180,10 +181,10 @@ void Project::LoadFileList()
         {
             if(boost::filesystem::is_directory(it->path() / "include") || boost::filesystem::is_directory(it->path() / "src"))
             {
-                components.emplace(it->path().c_str(), it->path());
+                components.emplace(it->path().string(), it->path());
                 if(boost::filesystem::is_directory(it->path() / "test"))
                 {
-                    components.emplace((it->path() / "test").c_str(), it->path() / "test").first->second.type = "unittest";
+                    components.emplace((it->path() / "test").string(), it->path() / "test").first->second.type = "unittest";
                 }
             }
         }
