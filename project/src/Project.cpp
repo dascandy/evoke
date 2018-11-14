@@ -44,15 +44,18 @@ void Project::Reload()
     MapIncludesToDependencies(includeLookup, ambiguous);
     if(!ambiguous.empty())
     {
-        fprintf(stderr, "Ambiguous includes found!\n");
+        std::cerr << "Ambiguous includes found!\n";
+
         for(auto &i : ambiguous)
         {
-            fprintf(stderr, "Include name %s could point to %zu files -", i.first.c_str(), i.second.size());
+            std::cerr << "Include name " << i.first.c_str() << " could point to " << i.second.size() << " files:";
+
             for(auto &s : i.second)
             {
-                fprintf(stderr, " %s", s.c_str());
+                std::cerr << s.c_str();
             }
-            fprintf(stderr, "\n");
+
+            std::cerr << '\n';
         }
     }
     PropagateExternalIncludes();
@@ -196,7 +199,7 @@ void Project::LoadFileList()
             }
             else
             {
-                fprintf(stderr, "Found file %s outside of any component\n", it->path().c_str());
+                std::cerr << "Found file " << it->path().c_str() << " outside of any component\n";
             }
         }
     }
@@ -212,7 +215,7 @@ bool Project::CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap
             auto &entry = moduleMap[f.second.moduleName];
             if(entry)
             {
-                fprintf(stderr, "Found second definition for module %s - found first in %s\n", f.second.path.c_str(), entry->path.c_str());
+                std::cerr << "Found second definition for module " << f.second.path.c_str() << " found first in " << entry->path.c_str() << '\n';
                 error = true;
             }
             else
@@ -237,7 +240,7 @@ void Project::MapImportsToModules(std::unordered_map<std::string, File *> &modul
             }
             else
             {
-                fprintf(stderr, "Could not find module %s imported by %s\n", import.first.c_str(), f.second.path.c_str());
+                std::cerr << "Could not find module " << import.first.c_str() << " imported by " << f.second.path.c_str() << '\n';
             }
         }
     }
