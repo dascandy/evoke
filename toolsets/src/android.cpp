@@ -19,7 +19,7 @@ struct androidconfig
     };
     std::string compiler(const target &t)
     {
-        std::string accum = ndkpath + clangpp + " " + t.ccflags + " -sysroot " + ndkpath + sysroot;
+        std::string accum = ndkpath + clangpp + " " + t.ccflags + " --sysroot " + ndkpath + sysroot;
         for(auto &p : t.systemincludepaths)
         {
             accum += " -I" + ndkpath + p;
@@ -47,7 +47,7 @@ struct androidconfig
     {
         return "apksigner sign --ks ~/.ssh/keystore.jks --ks-key-alias androidkey --ks-pass pass:android --key-pass pass:android --out apk/" + apkName + ".apk apk/unsigned_" + apkName + ".apk";
     }
-    const std::string ndkpath = "/home/pebi/android-ndk-r17b";
+    const std::string ndkpath = "/home/pebi/android-ndk-r18";
     const std::string clangpp = "/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++";
     const std::string sysroot = "/sysroot";
     const std::string ldflags = "-shared -lc -ldl -llog -landroid -lc++_static -lc++abi";
