@@ -1,4 +1,5 @@
 #include "Executor.h"
+#include "Reporter.h"
 #include "Project.h"
 #include "Toolset.h"
 
@@ -57,9 +58,10 @@ int main(int argc, const char **argv)
     std::string toolsetname = "ubuntu";
     std::string rootpath = boost::filesystem::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
+    std::string reporterName = "guess";
     bool compilation_database = false;
     bool verbose = false;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}}, {{"-cp", compilation_database}, {"-v", verbose}});
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}});
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
@@ -87,7 +89,8 @@ int main(int argc, const char **argv)
     {
         std::cout << op;
     }
-    Executor ex(std::stoul(jobcount));
+    std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
+    Executor ex(std::stoul(jobcount), *reporter);
     for(auto &comp : op.components)
     {
         for(auto &c : comp.second.commands)
@@ -96,11 +99,6 @@ int main(int argc, const char **argv)
                 ex.Run(c);
         }
     }
-    ex.Start();
-    while(ex.Busy())
-    {
-        std::this_thread::sleep_for(1s);
-    }
+    ex.Start().get();
     printf("\n\n");
-    return 0;
 }
