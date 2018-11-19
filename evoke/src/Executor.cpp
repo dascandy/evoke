@@ -1,5 +1,5 @@
 #include "Executor.h"
-
+#include "Reporter.h"
 #include "PendingCommand.h"
 
 #include <boost/process.hpp>
@@ -52,9 +52,12 @@ void Process::run()
     x(this);
 }
 
-Executor::Executor(size_t jobcount)
+Executor::Executor(size_t jobcount, Reporter& reporter, std::function<void()> OnComplete)
+: reporter(reporter)
+, OnComplete(OnComplete)
 {
     activeProcesses.resize(jobcount);
+    reporter.SetConcurrencyCount(jobcount);
 }
 
 Executor::~Executor()
@@ -81,18 +84,18 @@ bool Executor::Busy()
 
 void Executor::Start()
 {
+    std::lock_guard<std::mutex> l(m);
     RunMoreCommands();
 }
 
 void Executor::RunMoreCommands()
 {
-    std::lock_guard<std::mutex> l(m);
-    auto it = activeProcesses.begin();
+    size_t n = 0;
     for(auto &c : commands)
     {
-        while(it != activeProcesses.end() && *it)
-            ++it;
-        if(it == activeProcesses.end())
+        while(n != activeProcesses.size() && activeProcesses[n])
+            ++n;
+        if(n == activeProcesses.size())
             break;
         // TODO: take into account its relative load
         if(c->CanRun())
@@ -102,15 +105,17 @@ void Executor::RunMoreCommands()
             {
                 boost::filesystem::create_directories(o->path.parent_path());
             }
-            *it = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, [this, it, c](Process *t) {
-                *it = nullptr;
-                // TODO: print errors from this command first
+            reporter.SetRunningCommand(n, c);
+            activeProcesses[n] = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
+                std::lock_guard<std::mutex> l(m);
+                c->SetResult(t->errorcode == 0);
                 if(t->errorcode || !t->outbuffer.empty())
                 {
                     t->outbuffer.push_back(0);
-                    printf("\n\nError while running command for %s:\n$ %s\n%s\n", c->outputs[0]->path.filename().string().c_str(), c->commandToRun.c_str(), t->outbuffer.data());
+                    reporter.ReportFailure(c, t->errorcode, t->outbuffer.data());
                 }
-                c->SetResult(t->errorcode == 0);
+                activeProcesses[n] = nullptr;
+                reporter.SetRunningCommand(n, nullptr);
                 delete t;
                 RunMoreCommands();
             });
@@ -120,53 +125,6 @@ void Executor::RunMoreCommands()
             ;
         }
     }
-
-    size_t screenWidth = 80;
-    size_t w = screenWidth / activeProcesses.size();
-    size_t active = 0;
-    for(auto &t : activeProcesses)
-        if(t)
-            active++;
-
-    printf("%zu concurrent tasks, %zu active, %zu commands left to run\n", activeProcesses.size(), active, commands.size());
-    if(w == 0)
-    {
-        // If you have more cores than horizontal characters, we can't display one task per character. Instead make the horizontal line a "usage" bar representing proportional task use.
-        size_t activeCount = 0;
-        for(auto &t : activeProcesses)
-        {
-            if(t)
-                activeCount++;
-        }
-        std::cout << std::string((screenWidth - 1) * activeCount / activeProcesses.size(), '*') << std::string(screenWidth - (screenWidth - 1) * activeCount / activeProcesses.size() - 1, ' ');
-    }
-    else
-    {
-        for(auto &t : activeProcesses)
-        {
-            if(w >= 10)
-            {
-                std::string file;
-                if(t)
-                {
-                    file = ((Process *)t)->filename;
-                    if(file.size() > w - 2)
-                        file.resize(w - 2);
-                }
-                while(file.size() < w - 2)
-                    file.push_back(' ');
-                printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m", file.c_str());
-            }
-            else if(w >= 3)
-            {
-                printf("\033[1;37m[\033[0m%s\033[1;37m]\033[0m", t ? "*" : "_");
-            }
-            else if(w >= 1)
-            {
-                printf("\033[1;37m%s\033[0m", t ? "*" : "_");
-            }
-        }
-    }
-    printf("\r\033[1A");
-    fflush(stdout);
+    if (n == 0 && activeProcesses[0] == nullptr)
+        OnComplete();
 }
