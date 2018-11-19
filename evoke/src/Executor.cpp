@@ -52,9 +52,8 @@ void Process::run()
     x(this);
 }
 
-Executor::Executor(size_t jobcount, Reporter& reporter, std::function<void()> OnComplete)
+Executor::Executor(size_t jobcount, Reporter& reporter)
 : reporter(reporter)
-, OnComplete(OnComplete)
 {
     activeProcesses.resize(jobcount);
     reporter.SetConcurrencyCount(jobcount);
@@ -70,22 +69,11 @@ void Executor::Run(PendingCommand *cmd)
     commands.push_back(cmd);
 }
 
-bool Executor::Busy()
-{
-    // What if they just all finished and just haven't started another yet?
-    std::lock_guard<std::mutex> l(m);
-    for(auto &c : activeProcesses)
-    {
-        if(c && c->state != Process::Done)
-            return true;
-    }
-    return false;
-}
-
-void Executor::Start()
+std::future<void> Executor::Start()
 {
     std::lock_guard<std::mutex> l(m);
     RunMoreCommands();
+    return done.get_future();
 }
 
 void Executor::RunMoreCommands()
@@ -125,6 +113,9 @@ void Executor::RunMoreCommands()
             ;
         }
     }
-    if (n == 0 && activeProcesses[0] == nullptr)
-        OnComplete();
+
+    for (auto& p : activeProcesses)
+        if (p) return;
+
+    done.set_value();
 }

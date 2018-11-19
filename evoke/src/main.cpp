@@ -90,11 +90,7 @@ int main(int argc, const char **argv)
         std::cout << op;
     }
     std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
-    Executor ex(std::stoul(jobcount), *reporter, [&canExit](bool error){
-        canExit = true; 
-        printf("\n\n");
-        exit();
-    });
+    Executor ex(std::stoul(jobcount), *reporter);
     for(auto &comp : op.components)
     {
         for(auto &c : comp.second.commands)
@@ -103,10 +99,6 @@ int main(int argc, const char **argv)
                 ex.Run(c);
         }
     }
-    ex.Start();
-    while(true)
-    {
-        // This needs a minor redesign.
-        std::this_thread::sleep_for(1s);
-    }
+    ex.Start().get();
+    printf("\n\n");
 }
