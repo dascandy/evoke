@@ -3,6 +3,7 @@
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
+#include "dotted.h"
 
 #include <map>
 #include <set>
@@ -19,7 +20,7 @@ struct androidconfig
     };
     std::string compiler(const target &t)
     {
-        std::string accum = ndkpath + clangpp + " " + t.ccflags + " -sysroot " + ndkpath + sysroot;
+        std::string accum = ndkpath + clangpp + " " + t.ccflags + " --sysroot " + ndkpath + sysroot;
         for(auto &p : t.systemincludepaths)
         {
             accum += " -I" + ndkpath + p;
@@ -41,16 +42,17 @@ struct androidconfig
     }
     std::string aapt(const std::string &apkName, const std::string &manifestFile)
     {
-        return "aapt package -f -M " + manifestFile + " -S res -F apk/unsigned_" + apkName + ".apk so";
+        return "aapt package -f -I " + android_jar + " -M " + manifestFile + " -S res -F apk/unsigned_" + apkName + ".apk so";
     }
     std::string apksigner(const std::string &apkName)
     {
-        return "apksigner sign --ks ~/.ssh/keystore.jks --ks-key-alias androidkey --ks-pass pass:android --key-pass pass:android --out apk/" + apkName + ".apk apk/unsigned_" + apkName + ".apk";
+        return "apksigner sign --ks /home/pebi/.ssh/keystore.jks --ks-key-alias androidkey --ks-pass pass:android --key-pass pass:android --out apk/" + apkName + ".apk apk/unsigned_" + apkName + ".apk";
     }
     const std::string ndkpath = "/home/pebi/android-ndk-r17b";
     const std::string clangpp = "/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++";
     const std::string sysroot = "/sysroot";
-    const std::string ldflags = "-shared -lc -ldl -llog -landroid -lc++_static -lc++abi";
+    const std::string ldflags = "-shared -lc -llog -landroid -lc++_static -lc++abi";
+    const std::string android_jar = "/home/pebi/Android/Sdk/platforms/android-25/android.jar";
     std::map<std::string, target> targets = {{"aarch64", {
                                                              {"/sources/cxx-stl/llvm-libc++/include", "/sysroot/usr/include/aarch64-linux-android"},
                                                              {"/platforms/android-28/arch-arm64/usr/lib", "/sources/cxx-stl/llvm-libc++/libs/arm64-v8a"},
@@ -74,18 +76,18 @@ struct androidconfig
                                                      }},
                                              {"x86_64", {
                                                             {"/sources/cxx-stl/llvm-libc++/include", "/sysroot/usr/include/x86_64-linux-android"},
-                                                            {"/platforms/android-28/arch-x86_64/usr/lib", "/sources/cxx-stl/llvm-libc++/libs/x86_64"},
+                                                            {"/platforms/android-28/arch-x86_64/usr/lib64", "/sources/cxx-stl/llvm-libc++/libs/x86_64"},
                                                             "-std=c++17 -target x86_64-linux-android -DANDROID",
                                                             "/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin/x86_64-linux-android-ld",
                                                             "x86_64",
                                                         }}};
-    const std::string manifest1 =
+    static constexpr const char* manifest1 =
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
         "<!-- BEGIN_INCLUDE(manifest) -->\n"
         "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
         "          package=\"com.evoke.";
 
-    const std::string manifest2 =
+    static constexpr const char* manifest2 =
         "\"\n"
         "          android:versionCode=\"1\"\n"
         "          android:versionName=\"1.0\">\n"
@@ -101,14 +103,14 @@ struct androidconfig
         "    <activity android:name=\"android.app.NativeActivity\"\n"
         "              android:label=\"";
 
-    const std::string manifest3 =
+    static constexpr const char* manifest3 =
         "\"\n"
         "              android:configChanges=\"orientation|keyboardHidden\">\n"
         "      <!-- Tell NativeActivity the name of our .so -->\n"
         "      <meta-data android:name=\"android.app.lib_name\"\n"
         "                 android:value=\"";
 
-    const std::string manifest4 =
+    static constexpr const char* manifest4 =
         "\" />\n"
         "      <intent-filter>\n"
         "        <action android:name=\"android.intent.action.MAIN\" />\n"
@@ -121,19 +123,23 @@ struct androidconfig
         "<!-- END_INCLUDE(manifest) -->\n";
 };
 
-static std::string getLibNameFor(Component &component)
+static std::string getNameFor(Component& component) 
 {
-    // TODO: change commponent to dotted string before making
-    return "lib" + component.root.string() + ".a";
+    if(component.root.string() != ".")
+    {
+        return as_dotted(component.root.generic_string());
+    }
+    return boost::filesystem::canonical(component.root).filename().string();
 }
 
 static std::string getSoNameFor(Component &component)
 {
-    if(component.root.string() != ".")
-    {
-        return component.root.string();
-    }
-    return boost::filesystem::canonical(component.root).filename().string() + ".so";
+    return "lib" + getNameFor(component) + ".so";
+}
+
+static std::string getLibNameFor(Component &component)
+{
+    return "lib" + getNameFor(component) + ".a";
 }
 
 void AndroidToolset::CreateCommandsFor(Project &project)
@@ -196,8 +202,8 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                 }
                 else
                 {
-                    outputFile = "so/" + p.second.sofoldername + "/" + getSoNameFor(component);
-                    command = config.linker(p.second) + "-pthread -o " + outputFile.string();
+                    outputFile = "so/lib/" + p.second.sofoldername + "/" + getSoNameFor(component);
+                    command = config.linker(p.second) + " -o " + outputFile.string();
 
                     for(auto &file : objects)
                     {
@@ -274,6 +280,13 @@ void AndroidToolset::CreateCommandsFor(Project &project)
         {
             // Find manifest, if not then make one
             std::string manifest = "AndroidManifest.xml";
+            if (!boost::filesystem::is_regular_file(manifest)) {
+                std::ofstream(manifest) 
+                    << androidconfig::manifest1 << getNameFor(component)
+                    << androidconfig::manifest2 << getNameFor(component)
+                    << androidconfig::manifest3 << getNameFor(component)
+                    << androidconfig::manifest4;
+            }
 
             // Create apk from manifest & shared libraries
             std::string outputName = component.root.filename().string();

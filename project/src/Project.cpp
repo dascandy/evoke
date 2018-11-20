@@ -255,6 +255,20 @@ static std::map<std::string, Component *> PredefComponentList()
     list["boost/filesystem.hpp"] = boost_filesystem;
     list["boost/process.hpp"] = new Component("boost_process");
 
+    // Enable Android app
+    list["egl/egl.h"] = new Component("EGL", true);
+    list["gles/gl.h"] = new Component("GLESv1_CM", true);
+    list["dlfcn.h"] = new Component("dl", true);
+
+    list["android/log.h"] = new Component("log", true);
+
+    Component* android = new Component("android", true);
+    list["android/sensor.h"] = android;
+    list["android/native_activity.h"] = android;
+    list["android/looper.h"] = android;
+    list["android/configuration.h"] = android;
+
+    // Enable ssl/md5 use
     Component *crypto = new Component("crypto", true);
     list["md5.h"] = crypto;
 
