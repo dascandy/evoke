@@ -94,8 +94,9 @@ void ConsoleReporter::SetRunningCommand(size_t channel, PendingCommand* command)
     Redraw();
 }
 
-void ConsoleReporter::ReportFailure(PendingCommand* , int , const std::string& errors) {
+void ConsoleReporter::ReportFailure(PendingCommand* cmd, int err, const std::string& errors) {
     // Display error
+    std::cout << "\n\n" << "Error while running: " << cmd->commandToRun;
     std::cout << "\n\n" << errors << "\n\n";
     Redraw();
 }

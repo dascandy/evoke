@@ -3,17 +3,11 @@
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
-
+#include "dotted.h"
 #include <algorithm>
 
 static const std::string compiler = "g++";
 static const std::string archiver = "ar";
-
-std::string as_dotted(std::string str)
-{
-    std::replace(str.begin(), str.end(), '/', '.');
-    return str;
-}
 
 static std::string getLibNameFor(Component &component)
 {
