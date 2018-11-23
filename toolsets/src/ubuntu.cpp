@@ -1,9 +1,11 @@
 #include "Component.h"
+#include "Configuration.h"
 #include "File.h"
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
 #include "dotted.h"
+
 #include <algorithm>
 
 static const std::string compiler = "g++";
@@ -43,7 +45,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                 continue;
             boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand(compiler + " -c -std=c++17 -o " + outputFile.string() + " " + f->path.string() + includes);
+            PendingCommand *pc = new PendingCommand(compiler + " -c " + Configuration::Get().compileFlags + " -o " + outputFile.string() + " " + f->path.string() + includes);
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
