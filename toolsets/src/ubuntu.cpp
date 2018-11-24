@@ -7,6 +7,7 @@
 #include "dotted.h"
 
 #include <algorithm>
+#include <stack>
 
 static const std::string compiler = "g++";
 static const std::string archiver = "ar";
@@ -22,7 +23,7 @@ static std::string getExeNameFor(Component &component)
     {
         return as_dotted(component.root.string());
     }
-    return boost::filesystem::canonical(component.root).filename().string();
+    return filesystem::canonical(component.root).filename().string();
 }
 
 void UbuntuToolset::CreateCommandsFor(Project &project)
@@ -37,13 +38,13 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
         }
 
         // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
-        boost::filesystem::path outputFolder = component.root;
+        filesystem::path outputFolder = component.root;
         std::vector<File *> objects;
         for(auto &f : component.files)
         {
             if(!project.IsCompilationUnit(f->path.extension().string()))
                 continue;
-            boost::filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
+            filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
             File *of = project.CreateFile(component, outputFile);
             PendingCommand *pc = new PendingCommand(compiler + " -c " + Configuration::Get().compileFlags + " -o " + outputFile.string() + " " + f->path.string() + includes);
             objects.push_back(of);
@@ -68,7 +69,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
         if(!objects.empty())
         {
             std::string command;
-            boost::filesystem::path outputFile;
+            filesystem::path outputFile;
             PendingCommand *pc;
             if(component.type == "library")
             {

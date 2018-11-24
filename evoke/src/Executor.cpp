@@ -1,6 +1,7 @@
 #include "Executor.h"
-#include "Reporter.h"
+
 #include "PendingCommand.h"
+#include "Reporter.h"
 
 #include <boost/process.hpp>
 #include <cstring>
@@ -52,8 +53,8 @@ void Process::run()
     x(this);
 }
 
-Executor::Executor(size_t jobcount, Reporter& reporter)
-: reporter(reporter)
+Executor::Executor(size_t jobcount, Reporter &reporter) :
+    reporter(reporter)
 {
     activeProcesses.resize(jobcount);
     reporter.SetConcurrencyCount(jobcount);
@@ -91,7 +92,7 @@ void Executor::RunMoreCommands()
             c->state = PendingCommand::Running;
             for(auto &o : c->outputs)
             {
-                boost::filesystem::create_directories(o->path.parent_path());
+                filesystem::create_directories(o->path.parent_path());
             }
             reporter.SetRunningCommand(n, c);
             activeProcesses[n] = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
@@ -114,8 +115,9 @@ void Executor::RunMoreCommands()
         }
     }
 
-    for (auto& p : activeProcesses)
-        if (p) return;
+    for(auto &p : activeProcesses)
+        if(p)
+            return;
 
     done.set_value();
 }

@@ -15,7 +15,7 @@ bool isTranslationUnit(const std::string &str)
     return tus.find(str) != tus.end();
 }
 
-Component::Component(const boost::filesystem::path &path, bool isBinary) :
+Component::Component(const filesystem::path &path, bool isBinary) :
     root(path),
     type("library"),
     isBinary(isBinary)
@@ -46,8 +46,8 @@ bool Component::isHeaderOnly() const
 
 std::string Component::GetName() const
 {
-    if(root.size() < 1)
-        return boost::filesystem::absolute(root).filename().string();
+    if(filesystem::file_size(root) < 1)
+        return filesystem::absolute(root).filename().string();
     return root.generic_string();
 }
 

@@ -1,10 +1,11 @@
 #pragma once
 
 #include <functional>
+#include <future>
+#include <fw/filesystem.hpp>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <future>
 
 struct PendingCommand;
 class Reporter;
@@ -13,7 +14,7 @@ class Process;
 class Executor
 {
 public:
-    Executor(size_t jobcount, Reporter& reporter);
+    Executor(size_t jobcount, Reporter &reporter);
     ~Executor();
     void Run(PendingCommand *cmd);
     std::future<void> Start();
@@ -23,7 +24,6 @@ private:
     std::mutex m;
     std::vector<PendingCommand *> commands;
     std::vector<Process *> activeProcesses;
-    Reporter& reporter;
+    Reporter &reporter;
     std::promise<void> done;
 };
-
