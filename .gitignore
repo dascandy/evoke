@@ -1,5 +1,6 @@
 /obj
 /bin
+/build
 /o
 /lib
 .ninja*

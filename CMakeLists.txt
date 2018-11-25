@@ -39,7 +39,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
-target_link_directories(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 
 
-# cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:\Users\may64\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows-static -DCMAKE_BUILD_TYPE=Release 
+# cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:\Users\may64\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_BUILD_TYPE=Release 
