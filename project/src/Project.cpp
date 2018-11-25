@@ -6,6 +6,7 @@
 #include "known.h"
 
 #include <algorithm>
+#include <fstream>
 #include <fw/filesystem.hpp>
 #include <iostream>
 #include <map>
@@ -19,7 +20,7 @@
 Project::Project(const std::string &rootpath)
 {
     projectRoot = rootpath;
-    boost::filesystem::current_path(projectRoot);
+    filesystem::current_path(projectRoot);
     Reload();
 }
 
@@ -76,7 +77,7 @@ void Project::Reload()
     }
 }
 
-File *Project::CreateFile(Component &c, boost::filesystem::path p)
+File *Project::CreateFile(Component &c, filesystem::path p)
 {
     std::string subpath = p.string();
     if(subpath[0] == '.' && subpath[1] == '/')
@@ -100,14 +101,14 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
     return os;
 }
 
-void Project::ReadCode(std::unordered_map<std::string, File> &files, const boost::filesystem::path &path, Component &comp)
+void Project::ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp)
 {
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
 #ifdef _WIN32
     std::string buffer;
     buffer.resize(filesystem::file_size(path));
     {
-        filesystem::ifstream(path).read(&buffer[0], buffer.size());
+        std::ifstream(path.string()).read(&buffer[0], buffer.size());
     }
     ReadCodeFrom(f, buffer.data(), buffer.size());
 #else
@@ -149,7 +150,7 @@ bool Project::IsCompilationUnit(const std::string &ext)
     return exts.count(ext) > 0;
 }
 
-static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, boost::filesystem::path path)
+static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, filesystem::path path)
 {
     Component *rv = nullptr;
     size_t matchLength = 0;
@@ -167,11 +168,11 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 void Project::LoadFileList()
 {
     std::string root = ".";
-    for(boost::filesystem::recursive_directory_iterator it("."), end;
+    for(filesystem::recursive_directory_iterator it("."), end;
         it != end;
         ++it)
     {
-        boost::filesystem::path parent = it->path().parent_path();
+        filesystem::path parent = it->path().parent_path();
         // skip hidden files and dirs
         std::string fileName = it->path().filename().generic_string();
         if((fileName.size() >= 2 && fileName[0] == '.') || IsItemBlacklisted(it->path()))
@@ -180,18 +181,18 @@ void Project::LoadFileList()
             continue;
         }
 
-        if(boost::filesystem::is_directory(it->status()))
+        if(filesystem::is_directory(it->status()))
         {
-            if(boost::filesystem::is_directory(it->path() / "include") || boost::filesystem::is_directory(it->path() / "src"))
+            if(filesystem::is_directory(it->path() / "include") || filesystem::is_directory(it->path() / "src"))
             {
                 components.emplace(it->path().string(), it->path());
-                if(boost::filesystem::is_directory(it->path() / "test"))
+                if(filesystem::is_directory(it->path() / "test"))
                 {
                     components.emplace((it->path() / "test").string(), it->path() / "test").first->second.type = "unittest";
                 }
             }
         }
-        else if(boost::filesystem::is_regular_file(it->status()) && IsCode(it->path().extension().generic_string().c_str()))
+        else if(filesystem::is_regular_file(it->status()) && IsCode(it->path().extension().generic_string().c_str()))
         {
             Component *component = GetComponentFor(components, it->path());
             if(component)
@@ -263,7 +264,7 @@ static std::map<std::string, Component *> PredefComponentList()
 
     list["android/log.h"] = new Component("log", true);
 
-    Component* android = new Component("android", true);
+    Component *android = new Component("android", true);
     list["android/sensor.h"] = android;
     list["android/native_activity.h"] = android;
     list["android/looper.h"] = android;
@@ -293,7 +294,7 @@ static std::map<std::string, Component *> PredefComponentList()
     return list;
 }
 
-static Component *GetPredefComponent(const boost::filesystem::path &path)
+static Component *GetPredefComponent(const filesystem::path &path)
 {
     static auto list = PredefComponentList();
     if(list.find(path.string()) != list.end())
@@ -310,7 +311,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
         {
             // If this is a non-pointy bracket include, see if there's a local match first.
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
-            std::string fullFilePath = (boost::filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            std::string fullFilePath = (filesystem::path(fp.first).parent_path() / p.first).generic_string();
             if(!p.second && files.count(fullFilePath))
             {
                 // This file exists as a local include.
@@ -375,7 +376,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
         {
             // If this is a non-pointy bracket include, see if there's a local match first.
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
-            std::string fullFilePath = (boost::filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            std::string fullFilePath = (filesystem::path(fp.first).parent_path() / p.first).generic_string();
             if(!p.second && files.count(fullFilePath))
             {
                 // This file exists as a local include.

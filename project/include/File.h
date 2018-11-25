@@ -6,12 +6,13 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
 struct Component;
 
 struct File
 {
 private:
-    File(const boost::filesystem::path &path, Component &component) :
+    File(const filesystem::path &path, Component &component) :
         path(path),
         component(component),
         hasExternalInclude(false),
@@ -49,15 +50,15 @@ public:
     {
         if(lastwrite_ == 0)
         {
-            boost::system::error_code ec;
-            lastwrite_ = boost::filesystem::last_write_time(path, ec);
+            error_code ec;
+            lastwrite_ = filesystem::last_write_time(path, ec);
         }
         return lastwrite_;
     }
     // Cache for the last write time of this file.
     std::time_t lastwrite_ = 0;
     // Full path from the root of the project to this file. Always starts with "./".
-    boost::filesystem::path path;
+    filesystem::path path;
     // Module name, if any.
     std::string moduleName;
     // Whether the module (given above) is marked for export.

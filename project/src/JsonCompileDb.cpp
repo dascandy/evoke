@@ -19,7 +19,7 @@ static std::string escape(const std::string &str)
 
 static void dumpPendingCommand(std::ostream &os, PendingCommand &pc)
 {
-    os << "{ \"directory\": \"" << boost::filesystem::current_path().string() << "\",\n";
+    os << "{ \"directory\": \"" << filesystem::current_path().string() << "\",\n";
     os << "  \"command\": \"" << escape(pc.commandToRun) << "\", \n";
     os << "  \"file\": \"" << pc.inputs.front()->path.string() << "\", \n";
     os << "  \"output\": \"" << pc.outputs.front()->path.string() << "\" }";

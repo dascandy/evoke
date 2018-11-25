@@ -6,8 +6,8 @@ script:
   - ./b2 link=static threading=multi variant=release >/dev/null 2>&1
   - sudo ./b2 install >/dev/null 2>&1 
   - cd ..
-  - rm -rf boost_1_64_0
-  - make
+  - mkdir bin && cd bin
+  - cmake .. -DCMAKE_BUILD_TYPE=Release
 
 sudo: required
 dist: trusty

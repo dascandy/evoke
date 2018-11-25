@@ -5,8 +5,10 @@
 #include "Toolset.h"
 #include "dotted.h"
 
+#include <fstream>
 #include <map>
 #include <set>
+#include <stack>
 
 struct androidconfig
 {
@@ -81,13 +83,13 @@ struct androidconfig
                                                             "/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin/x86_64-linux-android-ld",
                                                             "x86_64",
                                                         }}};
-    static constexpr const char* manifest1 =
+    static constexpr const char *manifest1 =
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
         "<!-- BEGIN_INCLUDE(manifest) -->\n"
         "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
         "          package=\"com.evoke.";
 
-    static constexpr const char* manifest2 =
+    static constexpr const char *manifest2 =
         "\"\n"
         "          android:versionCode=\"1\"\n"
         "          android:versionName=\"1.0\">\n"
@@ -103,14 +105,14 @@ struct androidconfig
         "    <activity android:name=\"android.app.NativeActivity\"\n"
         "              android:label=\"";
 
-    static constexpr const char* manifest3 =
+    static constexpr const char *manifest3 =
         "\"\n"
         "              android:configChanges=\"orientation|keyboardHidden\">\n"
         "      <!-- Tell NativeActivity the name of our .so -->\n"
         "      <meta-data android:name=\"android.app.lib_name\"\n"
         "                 android:value=\"";
 
-    static constexpr const char* manifest4 =
+    static constexpr const char *manifest4 =
         "\" />\n"
         "      <intent-filter>\n"
         "        <action android:name=\"android.intent.action.MAIN\" />\n"
@@ -123,13 +125,13 @@ struct androidconfig
         "<!-- END_INCLUDE(manifest) -->\n";
 };
 
-static std::string getNameFor(Component& component) 
+static std::string getNameFor(Component &component)
 {
     if(component.root.string() != ".")
     {
         return as_dotted(component.root.generic_string());
     }
-    return boost::filesystem::canonical(component.root).filename().string();
+    return filesystem::canonical(component.root).filename().string();
 }
 
 static std::string getSoNameFor(Component &component)
@@ -157,13 +159,13 @@ void AndroidToolset::CreateCommandsFor(Project &project)
         std::vector<File *> libraries;
         for(auto &p : config.targets)
         {
-            boost::filesystem::path outputFolder = component.root;
+            filesystem::path outputFolder = component.root;
             std::vector<File *> objects;
             for(auto &f : component.files)
             {
                 if(!project.IsCompilationUnit(f->path.extension().string()))
                     continue;
-                boost::filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
+                filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
                 File *of = project.CreateFile(component, outputFile);
                 PendingCommand *pc = new PendingCommand(config.compiler(p.second) + " -c -o " + outputFile.string() + " " + f->path.string() + " " + includes);
                 objects.push_back(of);
@@ -188,7 +190,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
             if(!objects.empty())
             {
                 std::string command;
-                boost::filesystem::path outputFile;
+                filesystem::path outputFile;
                 PendingCommand *pc;
                 if(component.type == "library")
                 {
@@ -280,8 +282,9 @@ void AndroidToolset::CreateCommandsFor(Project &project)
         {
             // Find manifest, if not then make one
             std::string manifest = "AndroidManifest.xml";
-            if (!boost::filesystem::is_regular_file(manifest)) {
-                std::ofstream(manifest) 
+            if(!filesystem::is_regular_file(manifest))
+            {
+                std::ofstream(manifest)
                     << androidconfig::manifest1 << getNameFor(component)
                     << androidconfig::manifest2 << getNameFor(component)
                     << androidconfig::manifest3 << getNameFor(component)

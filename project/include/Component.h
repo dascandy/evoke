@@ -17,11 +17,11 @@ struct PendingCommand;
 struct Component
 {
 public:
-    Component(const boost::filesystem::path &path, bool isBinary = false);
+    Component(const filesystem::path &path, bool isBinary = false);
     ~Component();
     std::string GetName() const;
     bool isHeaderOnly() const;
-    boost::filesystem::path root;
+    filesystem::path root;
     std::unordered_set<File *> files;
     std::vector<PendingCommand *> commands;
     std::unordered_set<Component *> pubDeps, privDeps;
