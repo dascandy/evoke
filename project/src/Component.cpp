@@ -46,7 +46,7 @@ bool Component::isHeaderOnly() const
 
 std::string Component::GetName() const
 {
-    if(filesystem::file_size(root) < 1)
+    if(root.string().empty())
         return filesystem::absolute(root).filename().string();
     return root.generic_string();
 }
