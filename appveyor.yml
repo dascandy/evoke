@@ -8,18 +8,14 @@ environment:
     BOOST_ROOT: C:\Libraries\boost_1_67_0
     BOOST_INCLUDEDIR: C:\Libraries\boost_1_67_0\boost
     BOOST_LIBRARYDIR: C:\Libraries\boost_1_67_0\lib64-msvc-15.0
-    CMAKE_GENERATOR: 'NMake Makefiles'
+    CMAKE_GENERATOR: 'Visual Studio 15 2017'
 
 configuration: Release
 
-install:
-- if defined MSVC_ARCH call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" %MSVC_ARCH%
-
 build_script:
-  - cmake -E make_directory build
-  - cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" ..
-  - cmake --build build
+  - cmake cmake -G "%CMAKE_GENERATOR%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" .
+  - cmake --build .
 
 artifacts:
-- path: build\evoke.exe
+- path: evoke.exe
 
