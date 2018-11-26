@@ -1,0 +1,15 @@
+version: 1.0.{build}
+
+configuration: Release
+
+before_build:
+  - cmake -H. -Bbuild
+
+build:
+  parallel: true
+  project: build\PACKAGE.vcxproj
+  verbosity: minimal
+
+artifacts:
+- path: build\evoke.exe
+
