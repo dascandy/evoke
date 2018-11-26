@@ -33,6 +33,24 @@ Still to be implemented is minor customization around this:
 
 Everybody is free to help with Evoke development. The simpler things that need to be done are to create issues for things you would like it to do, or for asking help when it does not do what you want it to. You can join the discord at https://includecpp.org . If you want to do more, there are a few open issues already that require a bit more knowledge and time investment, like porting it to run on Windows or OSX.
 
+### Short term goals
+
+v0.2: Builds on Windows, MacOS and Linux.
+
+Next few milestones (in any order): 
+- Full C++20+ modules support on a supported compiler
+- Have easy imports for evoke-built projects in XCode, MSVC, VS Code and CLion.
+- Get to 30% test coverage. Not to aim for a number, but to have at least some target.
+- Have the toolset description out of the source tree. Might still be based on some toolset patterns (such as for Android) but should be mostly defined by a toolset file.
+- Full integration with at least one package manager - export of needed file list, and import of package inputs
+
+v1.0 will be hit when:
+- All of the above
+- Packaged & shipped as DEB in Debian (ie, set up to...)
+- Packaged & shipped as installer for Windows (same)
+- Packaged & shipped as DMG for MacOS (same)
+- Available in OS package managers where they exist (brew/macports for MacOS and apt/snap for Ubuntu/Debian) (same)
+
 ### Clang Format 
 
 Formatting of all source files is done using ClangFormat. Rules for it are specified in .clang-format file in the root of the repository.

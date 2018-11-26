@@ -1,11 +1,13 @@
 #include "Executor.h"
-#include "Reporter.h"
 #include "Project.h"
+#include "Reporter.h"
 #include "Toolset.h"
 
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <thread>
 using namespace std::literals::chrono_literals;
 
@@ -56,7 +58,7 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 int main(int argc, const char **argv)
 {
     std::string toolsetname = "ubuntu";
-    std::string rootpath = boost::filesystem::current_path().generic_string();
+    std::string rootpath = filesystem::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
     bool compilation_database = false;

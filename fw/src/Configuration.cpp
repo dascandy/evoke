@@ -1,5 +1,6 @@
 #include "Configuration.h"
 
+#include <fstream>
 #include <fw/filesystem.hpp>
 #include <iostream>
 //#include <stdlib.h>
@@ -49,7 +50,7 @@ static std::vector<std::string> splitWithQuotes(const std::string &str)
 Configuration::Configuration()
 {
     LoadDefaults();
-    boost::filesystem::ifstream in("evoke.conf");
+    std::ifstream in("evoke.conf");
     std::string line;
     while(in.good())
     {
