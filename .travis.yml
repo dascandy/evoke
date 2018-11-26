@@ -8,6 +8,7 @@ script:
   - cd ..
   - mkdir bin && cd bin
   - cmake .. -DCMAKE_BUILD_TYPE=Release
+  - make -j4
 
 sudo: required
 dist: trusty
