@@ -14,7 +14,7 @@ configuration: Release
 
 build_script:
   - cmake -E make_directory build
-  - cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%"
+  - cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" ..
   - cmake --build build
 
 artifacts:
