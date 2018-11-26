@@ -19,5 +19,5 @@ build_script:
 - cmake --build build
 
 artifacts:
-- path: evoke.exe
+- path: build/evoke.exe
 
