@@ -15,8 +15,7 @@ set(INCLUDES  ${CMAKE_CURRENT_SOURCE_DIR}/fw/include
               ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/include 
               ${CMAKE_CURRENT_SOURCE_DIR}/view/include 
               ${CMAKE_CURRENT_SOURCE_DIR}/evoke/include 
-              ${CMAKE_CURRENT_SOURCE_DIR}/reporter/include
-              ${CMAKE_CURRENT_SOURCE_DIR}/boost)
+              ${CMAKE_CURRENT_SOURCE_DIR}/reporter/include)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp 
@@ -45,6 +44,3 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
-
-
-# cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:\Users\may64\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_BUILD_TYPE=Release 
