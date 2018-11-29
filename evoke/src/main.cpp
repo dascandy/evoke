@@ -57,7 +57,16 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 
 int main(int argc, const char **argv)
 {
-    std::string toolsetname = "ubuntu";
+    std::string toolsetname;
+
+#if defined(_WIN32)
+    toolsetname = "windows";
+#else
+    toolsetname = "ubuntu";
+#endif
+
+    std::cout << "Building for " << toolsetname << std::endl;
+
     std::string rootpath = filesystem::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
