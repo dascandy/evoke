@@ -4,10 +4,13 @@
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
+#include "boost/algorithm/string/classification.hpp"
 #include "dotted.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <stack>
+#include <boost/algorithm/string/split.hpp>
 
 static const std::string compiler = "g++";
 static const std::string archiver = "ar";
@@ -166,4 +169,34 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
             }
         }
     }
+}
+
+GlobalOptions UbuntuToolset::ParseGeneralOptions(const std::string &options)
+{
+    GlobalOptions opts;
+    //std::vector<std::string> parts = splitWithQuotes(options);
+    std::vector<std::string> parts;
+    boost::split(parts, options, boost::algorithm::is_any_of(" \t"), boost::algorithm::token_compress_on);
+
+    for(const auto &opt : parts)
+    {
+        if(opt.find("-I") == 0)
+        {
+            opts.include.emplace_back(opt.substr(2));
+        }
+        else if(opt.find("-L") == 0)
+        {
+            opts.link.emplace_back(opt);
+        }
+        else if(opt == "-pthread")
+        {
+            opts.compile.emplace_back("-pthread");
+            opts.link.emplace_back("-lpthread");
+        }
+        else
+        {
+            opts.compile.emplace_back(opt);
+        }
+    }
+    return opts;
 }

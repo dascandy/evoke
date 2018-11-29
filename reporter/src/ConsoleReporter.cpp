@@ -1,47 +1,52 @@
-#include "Reporter.h"
 #include "PendingCommand.h"
-#include <string>
+#include "Reporter.h"
+
 #include <cstdio>
 #include <iostream>
-#include <iostream>
+#include <string>
 
 #ifndef _WIN32
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <signal.h>
+#    include <signal.h>
+#    include <sys/ioctl.h>
+#    include <unistd.h>
 #endif
-
 
 static size_t screenWidth = 80;
 
 #ifndef _WIN32
-void fetchDisplaySize() {
-#ifdef TIOCGSIZE
+void fetchDisplaySize()
+{
+#    ifdef TIOCGSIZE
     struct ttysize ts;
     ioctl(STDIN_FILENO, TIOCGSIZE, &ts);
     screenWidth = ts.ts_cols;
-#elif defined(TIOCGWINSZ)
+#    elif defined(TIOCGWINSZ)
     struct winsize ts;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &ts);
     screenWidth = ts.ws_col;
-#endif /* TIOCGSIZE */
+    // get a minimum set
+    if(screenWidth <= 0)
+        screenWidth = 10;
+#    endif /* TIOCGSIZE */
 }
 #endif
 
-ConsoleReporter::ConsoleReporter() {
+ConsoleReporter::ConsoleReporter()
+{
 #ifndef _WIN32
     fetchDisplaySize();
-    signal(SIGWINCH, [](int){ fetchDisplaySize(); });
+    signal(SIGWINCH, [](int) { fetchDisplaySize(); });
 #endif
 }
 
-void ConsoleReporter::Redraw() {
+void ConsoleReporter::Redraw()
+{
     size_t w = screenWidth / activeProcesses.size();
     size_t active = 0;
     for(auto &t : activeProcesses)
         if(t)
             active++;
-    
+
     std::cout << activeProcesses.size() << " concurrent tasks, " << active << " active\n";
     if(w == 0)
     {
@@ -84,21 +89,24 @@ void ConsoleReporter::Redraw() {
     std::cout << "\r\033[1A" << std::flush;
 }
 
-void ConsoleReporter::SetConcurrencyCount(size_t count) {
+void ConsoleReporter::SetConcurrencyCount(size_t count)
+{
     activeProcesses.resize(count);
     Redraw();
 }
 
-void ConsoleReporter::SetRunningCommand(size_t channel, PendingCommand* command) {
+void ConsoleReporter::SetRunningCommand(size_t channel, PendingCommand *command)
+{
     activeProcesses[channel] = command;
     Redraw();
 }
 
-void ConsoleReporter::ReportFailure(PendingCommand* cmd, int err, const std::string& errors) {
+void ConsoleReporter::ReportFailure(PendingCommand *cmd, int err, const std::string &errors)
+{
     // Display error
-    std::cout << "\n\n" << "Error while running: " << cmd->commandToRun;
-    std::cout << "\n\n" << errors << "\n\n";
+    std::cout << "\n\n"
+              << "Error while running: " << cmd->commandToRun;
+    std::cout << "\n\n"
+              << errors << "\n\n";
     Redraw();
 }
-
-

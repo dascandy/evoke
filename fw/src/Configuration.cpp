@@ -5,20 +5,6 @@
 #include <iostream>
 //#include <stdlib.h>
 
-void Configuration::LoadDefaults()
-{
-#ifdef _WIN32
-    toolchain = "msvc15";
-    compileFlags = "/permissive- -std=c++17";
-#elif APPLE
-    toolchain = "osx";
-    compileFlags = "-std=c++17";
-#else
-    toolchain = "ubuntu";
-    compileFlags = "-std=c++17 -pthread";
-#endif
-}
-
 static std::vector<std::string> splitWithQuotes(const std::string &str)
 {
     std::vector<std::string> rv;
@@ -47,6 +33,20 @@ static std::vector<std::string> splitWithQuotes(const std::string &str)
     return rv;
 }
 
+void Configuration::LoadDefaults()
+{
+#ifdef _WIN32
+    toolchain = "msvc15";
+    compileFlags = "/permissive- -std=c++17";
+#elif APPLE
+    toolchain = "osx";
+    compileFlags = "-std=c++17";
+#else
+    toolchain = "ubuntu";
+    compileFlags = "-std=c++17 -pthread";
+#endif
+}
+
 Configuration::Configuration()
 {
     LoadDefaults();
@@ -55,7 +55,7 @@ Configuration::Configuration()
     while(in.good())
     {
         std::getline(in, line);
-        while(in.good() && line.back() == '\\')
+        while(in.good() && !line.empty() && line.back() == '\\')
         {
             std::string nextLine;
             std::getline(in, nextLine);

@@ -17,3 +17,10 @@ std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
         return std::make_unique<UbuntuToolset>();
     }
 }
+
+GlobalOptions Toolset::ParseGeneralOptions(const std::string &options)
+{
+    GlobalOptions opts;
+    opts.compile.push_back(options);
+    return opts;
+}
