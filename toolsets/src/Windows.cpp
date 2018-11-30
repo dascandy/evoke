@@ -9,7 +9,9 @@
 #include <algorithm>
 #include <stack>
 
+
 static const std::string compiler = "cl.exe";
+static const std::string linker = "link.exe";
 static const std::string archiver = "lib.exe";
 //https://blogs.msdn.microsoft.com/vcblog/2015/12/03/c-modules-in-vs-2015-update-1/
 
@@ -51,9 +53,10 @@ void WindowsToolset::CreateCommandsFor(Project &project)
         {
             if(!project.IsCompilationUnit(f->path.extension().string()))
                 continue;
-            filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".obj");
+            filesystem::path temp = (f->path.string().substr(component.root.string().size() + 3) + ".obj");
+            filesystem::path outputFile = std::string("obj") / outputFolder / temp;
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + " /Fo" + filesystem::canonical(outputFile).string() + " " + f->path.string() + includes);
+            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::canonical(f->path).string() + includes);
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
@@ -80,8 +83,8 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             PendingCommand *pc;
             if(component.type == "library")
             {
-                outputFile = "lib/" + getLibNameFor(component);
-                command = archiver + " " + filesystem::canonical(outputFile).string();
+                outputFile = "lib\\" + getLibNameFor(component);
+                command = archiver + " " + filesystem::absolute(outputFile).string();
                 for(auto &file : objects)
                 {
                     command += " " + file->path.string();
@@ -90,8 +93,8 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             }
             else
             {
-                outputFile = "bin/" + getExeNameFor(component);
-                command = compiler + " /OUT:" + filesystem::canonical(outputFile).string();
+                outputFile = "bin\\" + getExeNameFor(component);
+                command = linker + " /OUT:" + filesystem::weakly_canonical(outputFile).string();
 
                 for(auto &file : objects)
                 {
@@ -149,7 +152,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                     {
                         if(c != &component)
                         {
-                            pc->AddInput(project.CreateFile(*c, "lib/" + getLibNameFor(*c)));
+                            pc->AddInput(project.CreateFile(*c, "lib\\" + getLibNameFor(*c)));
                         }
                     }
                 }

@@ -9,7 +9,7 @@ void Configuration::LoadDefaults()
 {
 #ifdef _WIN32
     toolchain = "msvc15";
-    compileFlags = "/permissive- -std=c++17";
+    compileFlags = "/permissive- /std:c++latest";
 #elif APPLE
     toolchain = "osx";
     compileFlags = "-std=c++17";
