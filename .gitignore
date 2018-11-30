@@ -8,4 +8,4 @@
 compile_commands.json
 /cmake-build-*
 .idea
-CMakeLists.txt
+*/CMakeLists.txt

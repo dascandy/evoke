@@ -1,4 +1,4 @@
-#include "../../utils/include/utils.h"
+#include "utils.h"
 #include "Configuration.h"
 #include "Project.h"
 
@@ -60,7 +60,9 @@ struct CMakeProjectExporter
                 {
                     target_modifier = " INTERFACE";
                     publicAccess = "INTERFACE";
-                    privateAccess = "INTERFACE"; // We probably should just abort here
+                    // No header only lib should have a private
+                    // dependency.  If it does, make it an public/interface.
+                    privateAccess = "INTERFACE";
                 }
             }
             os << target_type << target << target_modifier << "\n";
