@@ -19,3 +19,26 @@ Reading the project happens in the Project constructor.
 - Unit tests all over the place.
 - Online integration tests with Travis and Appveyor.
 
+# Design principles
+
+## Componentization required by Evoke
+
+Evoke requires you to restructure your code base, so that the code base structure explains how the code is laid out. After this, you can still use any descriptive build system to build the code, but you can also use Evoke to build it without adding configuration. It additionally means that anybody who knows the project layout method can read your code base to see what does what, and any tool using it will instantly know what is used where and how things are to be used, created and built. The idea is not to make a better configuration file, but to make it unnecessary.
+
+The idea is that a project buildable with Evoke is subdivided into components, which themselves do not have an internal subdivision. So a component is always either fully included, or not included, and at the same time if you include a header from a component you should logically need to use the whole component. Those components are called coherent.
+
+As far as Evoke is concerned, your folders are arbitrarily nested and contain components. You can have inner components, you can have any levels deep of components, you can have cyclic dependencies, you can have simple dependencies. It really does not care how you structure your components or dependencies themselves - that's up to you.  I would personally argue against inner components and cyclic dependencies, but there's no technical reason in Evoke they wouldn't work, so they just work. In the case of cyclic dependencies, the code base explicitly creates linker lines that always work when you have them (rather than the repeat-N-times thing that CMake does).
+
+Supporting large projects is the same as small projects; you're just more likely to accidentally have created problems in a large project. Dependency detection works the same, ambiguous headers are still ambiguous, projects that somebody includes a header of still are libraries.
+
+## Component detection
+
+Evoke requires
+
+- Each component has a `src` or `include` folder at its root
+- The unit test for a component is in a folder `test` next to its `src` and/or `include` folders.
+- All files found within a component, but not more closely in another component, are part of it
+
+The names of these folders are not modifiable - adding such a capability is not all that hard, but would remove much of the benefit you get from the recognizability of the code base structure.
+
+
