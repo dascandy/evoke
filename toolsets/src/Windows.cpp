@@ -99,10 +99,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                 {
                     command += " " + file->path.string();
                 }
-                if(filesystem::exists("lib"))
-                {
-                    command += " /LIBPATH:lib";
-                }
+                command += " /LIBPATH:lib";
                 std::vector<std::vector<Component *>> linkDeps = GetTransitiveAllDeps(component);
                 std::reverse(linkDeps.begin(), linkDeps.end());
                 for(auto d : linkDeps)

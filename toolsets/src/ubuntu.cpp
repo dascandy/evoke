@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <stack>
 
+
 static const std::string compiler = "g++";
 static const std::string archiver = "ar";
 
@@ -90,10 +91,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                 {
                     command += " " + file->path.string();
                 }
-                if(filesystem::exists("lib"))
-                {
-                    command += " -Llib";
-                }
+                command += " -Llib";
                 std::vector<std::vector<Component *>> linkDeps = GetTransitiveAllDeps(component);
                 std::reverse(linkDeps.begin(), linkDeps.end());
                 for(auto d : linkDeps)
