@@ -21,7 +21,7 @@ Component::Component(const filesystem::path &path, bool isBinary) :
     isBinary(isBinary)
 {
     std::string rp = path.string();
-    if(rp[0] == '.' && rp[1] == '/')
+    if(rp[0] == '.' && (rp[1] == '/' || rp[1] == '\\'))
         rp = rp.substr(2);
     root = rp;
 }

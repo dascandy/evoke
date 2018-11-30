@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <stack>
 
+
 static const std::string compiler = "g++";
 static const std::string archiver = "ar";
 

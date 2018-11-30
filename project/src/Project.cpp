@@ -15,6 +15,7 @@
 #    include <fcntl.h>
 #    include <sys/mman.h>
 #    include <unistd.h>
+
 #endif
 
 Project::Project(const std::string &rootpath)
@@ -80,7 +81,7 @@ void Project::Reload()
 File *Project::CreateFile(Component &c, filesystem::path p)
 {
     std::string subpath = p.string();
-    if(subpath[0] == '.' && subpath[1] == '/')
+    if(subpath[0] == '.' && (subpath[1] == '/' || subpath[1] == '\\'))
         subpath = subpath.substr(2);
     File f(p, c);
     auto f2 = files.emplace(p.string(), std::move(f));
