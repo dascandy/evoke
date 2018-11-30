@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <stack>
 
-
 static const std::string compiler = "cl.exe";
 static const std::string linker = "link.exe";
 static const std::string archiver = "lib.exe";
@@ -32,7 +31,7 @@ static std::string getExeNameFor(Component &component)
     {
         return as_dotted(component.root.string()) + ".exe";
     }
-    return filesystem::canonical(component.root).filename().string() + ".exe";
+    return filesystem::weakly_canonical(component.root).filename().string() + ".exe";
 }
 
 void WindowsToolset::CreateCommandsFor(Project &project)
@@ -56,7 +55,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             filesystem::path temp = (f->path.string().substr(component.root.string().size() + 3) + ".obj");
             filesystem::path outputFile = std::string("obj") / outputFolder / temp;
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::canonical(f->path).string() + includes);
+            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::weakly_canonical(f->path).string() + includes);
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
@@ -84,7 +83,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             if(component.type == "library")
             {
                 outputFile = "lib\\" + getLibNameFor(component);
-                command = archiver + " " + filesystem::absolute(outputFile).string();
+                command = archiver + " " + filesystem::weakly_canonical(outputFile).string();
                 for(auto &file : objects)
                 {
                     command += " " + file->path.string();
