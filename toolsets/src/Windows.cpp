@@ -42,7 +42,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
         std::string includes;
         for(auto &d : getIncludePathsFor(component))
         {
-            includes += " /I" + d;
+            includes += " /I" + filesystem::relative(d).string();
         }
 
         // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
@@ -52,10 +52,10 @@ void WindowsToolset::CreateCommandsFor(Project &project)
         {
             if(!project.IsCompilationUnit(f->path.extension().string()))
                 continue;
-            filesystem::path temp = (f->path.string().substr(component.root.string().size() + 3) + ".obj");
+            filesystem::path temp = (f->path.string().substr(component.root.string().size()) + ".obj");
             filesystem::path outputFile = std::string("obj") / outputFolder / temp;
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::weakly_canonical(f->path).string() + includes);
+            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + includes + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::weakly_canonical(f->path).string());
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
@@ -93,7 +93,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             else
             {
                 outputFile = "bin\\" + getExeNameFor(component);
-                command = linker + " /OUT:" + filesystem::weakly_canonical(outputFile).string();
+                command = linker + " /OUT:" + outputFile.string();
 
                 for(auto &file : objects)
                 {
