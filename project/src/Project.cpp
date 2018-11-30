@@ -11,7 +11,6 @@
 #include <iostream>
 #include <map>
 
-
 #ifndef _WIN32
 #    include <fcntl.h>
 #    include <sys/mman.h>
@@ -105,13 +104,7 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp)
 {
-
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
-//    File &f = files.emplace(filesystem::absolute(path).generic_string(), File(path.generic_string(), comp)).first->second;
-    std::cout << path.string() << std::endl;
-    std::cout << path << std::endl;
-
-
     comp.files.insert(&f);
 #ifdef _WIN32
     std::string buffer;
