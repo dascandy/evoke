@@ -5,6 +5,7 @@
 #include <iostream>
 //#include <stdlib.h>
 
+
 static std::vector<std::string> splitWithQuotes(const std::string &str)
 {
     std::vector<std::string> rv;
@@ -37,7 +38,7 @@ void Configuration::LoadDefaults()
 {
 #ifdef _WIN32
     toolchain = "msvc15";
-    compileFlags = "/permissive- -std=c++17";
+    compileFlags = "/permissive- /std:c++latest";
 #elif APPLE
     toolchain = "osx";
     compileFlags = "-std=c++17";

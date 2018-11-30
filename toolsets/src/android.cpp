@@ -211,7 +211,10 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                     {
                         command += " " + file->path.string();
                     }
-                    command += " -Llib";
+                    if(filesystem::exists("lib"))
+                    {
+                        command += " -Llib";
+                    }
                     std::vector<std::vector<Component *>> linkDeps = GetTransitiveAllDeps(component);
                     std::reverse(linkDeps.begin(), linkDeps.end());
                     for(auto d : linkDeps)

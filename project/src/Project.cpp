@@ -15,6 +15,7 @@
 #    include <fcntl.h>
 #    include <sys/mman.h>
 #    include <unistd.h>
+
 #endif
 
 Project::Project(const std::string &rootpath)
@@ -80,7 +81,7 @@ void Project::Reload()
 File *Project::CreateFile(Component &c, filesystem::path p)
 {
     std::string subpath = p.string();
-    if(subpath[0] == '.' && subpath[1] == '/')
+    if(subpath[0] == '.' && (subpath[1] == '/' || subpath[1] == '\\'))
         subpath = subpath.substr(2);
     File f(p, c);
     auto f2 = files.emplace(p.string(), std::move(f));
@@ -104,6 +105,7 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp)
 {
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
+    comp.files.insert(&f);
 #ifdef _WIN32
     std::string buffer;
     buffer.resize(filesystem::file_size(path));
@@ -112,7 +114,6 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const files
     }
     ReadCodeFrom(f, buffer.data(), buffer.size());
 #else
-    comp.files.insert(&f);
     int fd = open(path.c_str(), O_RDONLY);
     size_t fileSize = filesystem::file_size(path);
     void *p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
