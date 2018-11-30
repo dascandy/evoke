@@ -24,6 +24,9 @@ void fetchDisplaySize()
     struct winsize ts;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &ts);
     screenWidth = ts.ws_col;
+    // get a minimum set
+    if(screenWidth <= 0)
+        screenWidth = 10;
 #    endif /* TIOCGSIZE */
 }
 #endif

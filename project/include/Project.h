@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "File.h"
 #include "PendingCommand.h"
+#include "utils.h"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
@@ -25,7 +26,9 @@ public:
 
     bool IsCompilationUnit(const std::string &ext);
     bool IsCode(const std::string &ext);
+    bool IsSystemComponent(const std::string &name) const;
     void dumpJsonCompileDb(std::ostream &os);
+    void dumpCMakeListsTxt(const GlobalOptions &opts);
 
 private:
     void LoadFileList();

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "utils.h"
+
 #include <memory>
 #include <string>
+#include <vector>
 
 struct Component;
 class Project;
@@ -12,6 +15,7 @@ struct Toolset
     {
     }
     virtual void CreateCommandsFor(Project &project) = 0;
+    virtual GlobalOptions ParseGeneralOptions(const std::string &options);
 };
 
 struct AndroidToolset : public Toolset
@@ -27,6 +31,7 @@ struct ClangToolset : public Toolset
 struct UbuntuToolset : public Toolset
 {
     void CreateCommandsFor(Project &project) override;
+    GlobalOptions ParseGeneralOptions(const std::string &options) override;
 };
 
 struct WindowsToolset : public Toolset

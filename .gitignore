@@ -6,3 +6,6 @@
 .ninja*
 *.obj
 compile_commands.json
+/cmake-build-*
+.idea
+*/CMakeLists.txt

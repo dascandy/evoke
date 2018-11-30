@@ -139,6 +139,17 @@ bool Project::IsItemBlacklisted(const filesystem::path &path)
     return false;
 }
 
+bool Project::IsSystemComponent(const std::string &name) const
+{
+    auto result = (components.find(name) == components.cend());
+    if(result)
+    {
+        auto altName = "./" + name;
+        result = (components.find(altName) == components.cend());
+    }
+    return result;
+}
+
 bool Project::IsCode(const std::string &ext)
 {
     static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm", ".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc"};
@@ -256,6 +267,7 @@ static std::map<std::string, Component *> PredefComponentList()
     Component *boost_filesystem = new Component("boost_filesystem", true);
     boost_filesystem->pubDeps.insert(boost_system);
     list["boost/filesystem.hpp"] = boost_filesystem;
+    list["boost/filesystem/fstream.hpp"] = boost_filesystem;
     list["boost/process.hpp"] = new Component("boost_process");
 
     // Enable Android app

@@ -15,7 +15,8 @@ set(INCLUDES  ${CMAKE_CURRENT_SOURCE_DIR}/fw/include
               ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/include 
               ${CMAKE_CURRENT_SOURCE_DIR}/view/include 
               ${CMAKE_CURRENT_SOURCE_DIR}/evoke/include 
-              ${CMAKE_CURRENT_SOURCE_DIR}/reporter/include)
+              ${CMAKE_CURRENT_SOURCE_DIR}/reporter/include
+              ${CMAKE_CURRENT_SOURCE_DIR}/utils/include)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp 
@@ -24,8 +25,9 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/android.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/Configuration.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp 
-            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp  
-            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/JsonCompileDb.cpp 
+            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
+		    ${CMAKE_CURRENT_SOURCE_DIR}/project/src/JsonCompileDb.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PendingCommand.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Project.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/ReadCode.cpp 

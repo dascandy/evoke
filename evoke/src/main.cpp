@@ -1,3 +1,4 @@
+#include "Configuration.h"
 #include "Executor.h"
 #include "Project.h"
 #include "Reporter.h"
@@ -71,8 +72,9 @@ int main(int argc, const char **argv)
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
     bool compilation_database = false;
+    bool cmakelists = false;
     bool verbose = false;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}});
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}});
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
@@ -95,6 +97,11 @@ int main(int argc, const char **argv)
     {
         std::ofstream os("compile_commands.json");
         op.dumpJsonCompileDb(os);
+    }
+    if(cmakelists)
+    {
+        auto opts = toolset->ParseGeneralOptions(Configuration::Get().compileFlags);
+        op.dumpCMakeListsTxt(opts);
     }
     if(verbose)
     {

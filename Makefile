@@ -5,7 +5,7 @@ CXX ?= g++
 
 o/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -std=c++17 -O3 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include -Ireporter/include
+	$(CXX) -std=c++17 -O3 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Iutils/include -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include -Ireporter/include
 
 bin/evoke: bin/evoke_make
 	bin/evoke_make
