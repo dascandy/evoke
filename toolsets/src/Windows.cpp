@@ -104,40 +104,11 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                 std::reverse(linkDeps.begin(), linkDeps.end());
                 for(auto d : linkDeps)
                 {
-                    size_t index = 0;
-                    while(index < d.size())
+                    for (auto& c : d)
                     {
-                        if(d[index]->isHeaderOnly())
+                        if(c != &component && !c->isHeaderOnly())
                         {
-                            d[index] = d.back();
-                            d.pop_back();
-                        }
-                        else
-                        {
-                            ++index;
-                        }
-                    }
-                    if(d.empty())
-                        continue;
-                    if(d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component)))
-                    {
-                        if(d[0] != &component)
-                        {
-                            command += " " + d[0]->root.string();
-                        }
-                        else if(d.size() == 2)
-                        {
-                            command += " " + d[1]->root.string();
-                        }
-                    }
-                    else
-                    {
-                        for(auto &c : d)
-                        {
-                            if(c != &component)
-                            {
-                                command += " " + c->root.string();
-                            }
+                            command += " " + c->root.string();
                         }
                     }
                 }
@@ -146,7 +117,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                 {
                     for(auto &c : d)
                     {
-                        if(c != &component)
+                        if(c != &component && !c->isHeaderOnly())
                         {
                             pc->AddInput(project.CreateFile(*c, "lib\\" + getLibNameFor(*c)));
                         }

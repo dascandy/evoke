@@ -219,7 +219,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                         size_t index = 0;
                         while(index < d.size())
                         {
-                            if(d[index]->isHeaderOnly())
+                            if(d[index] == &component || d[index]->isHeaderOnly())
                             {
                                 d[index] = d.back();
                                 d.pop_back();
@@ -231,23 +231,16 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                         }
                         if(d.empty())
                             continue;
-                        if(d.size() == 1 || (d.size() == 2 && (d[0] == &component || d[1] == &component)))
+                        if(d.size() == 1)
                         {
-                            if(d[0] != &component)
-                            {
-                                command += " -l" + d[0]->root.string();
-                            }
-                            else if(d.size() == 2)
-                            {
-                                command += " -l" + d[1]->root.string();
-                            }
+                            command += " -l" + d[0]->root.string();
                         }
                         else
                         {
                             command += " -Wl,--start-group";
                             for(auto &c : d)
                             {
-                                if(c != &component)
+                                if(!c->isHeaderOnly())
                                 {
                                     command += " -l" + c->root.string();
                                 }
@@ -260,7 +253,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                     {
                         for(auto &c : d)
                         {
-                            if(c != &component)
+                            if(c != &component && !c->isHeaderOnly())
                             {
                                 pc->AddInput(project.CreateFile(*c, "lib/" + p.first + "/" + getLibNameFor(*c)));
                             }
