@@ -49,7 +49,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                 continue;
             filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand(compiler + " -c " + Configuration::Get().compileFlags + " -o " + outputFile.string() + " " + f->path.string() + includes);
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " -c " + Configuration::Get().compileFlags + " -o " + outputFile.string() + " " + f->path.string() + includes);
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
@@ -73,7 +73,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
         {
             std::string command;
             filesystem::path outputFile;
-            PendingCommand *pc;
+            std::shared_ptr<PendingCommand> pc;
             if(component.type == "library")
             {
                 outputFile = "lib/" + getLibNameFor(component);
@@ -82,7 +82,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                 {
                     command += " " + file->path.string();
                 }
-                pc = new PendingCommand(command);
+                pc = std::make_shared<PendingCommand>(command);
             }
             else
             {
@@ -130,7 +130,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                         command += " -Wl,--end-group";
                     }
                 }
-                pc = new PendingCommand(command);
+                pc = std::make_shared<PendingCommand>(command);
                 for(auto &d : linkDeps)
                 {
                     for(auto &c : d)
@@ -153,7 +153,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
             if(component.type == "unittest")
             {
                 command = outputFile.string();
-                pc = new PendingCommand(command);
+                pc = std::make_shared<PendingCommand>(command);
                 outputFile += ".log";
                 pc->AddInput(libraryFile);
                 pc->AddOutput(project.CreateFile(component, outputFile.string()));

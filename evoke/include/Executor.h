@@ -17,13 +17,13 @@ class Executor
 public:
     Executor(size_t jobcount, Reporter &reporter);
     ~Executor();
-    void Run(PendingCommand *cmd);
+    void Run(std::shared_ptr<PendingCommand> cmd);
     std::future<void> Start();
 
 private:
     void RunMoreCommands();
     std::mutex m;
-    std::vector<PendingCommand *> commands;
+    std::vector<std::shared_ptr<PendingCommand>> commands;
     std::vector<std::unique_ptr<Process>> activeProcesses;
     Reporter &reporter;
     std::promise<void> done;

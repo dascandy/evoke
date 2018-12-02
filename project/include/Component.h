@@ -18,12 +18,11 @@ struct Component
 {
 public:
     Component(const filesystem::path &path, bool isBinary = false);
-    ~Component();
     std::string GetName() const;
     bool isHeaderOnly() const;
     filesystem::path root;
     std::unordered_set<File *> files;
-    std::vector<PendingCommand *> commands;
+    std::vector<std::shared_ptr<PendingCommand>> commands;
     std::unordered_set<Component *> pubDeps, privDeps;
     std::unordered_set<std::string> pubIncl, privIncl;
     std::string type;

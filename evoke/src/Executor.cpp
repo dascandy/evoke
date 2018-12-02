@@ -64,7 +64,7 @@ Executor::~Executor()
 {
 }
 
-void Executor::Run(PendingCommand *cmd)
+void Executor::Run(std::shared_ptr<PendingCommand> cmd)
 {
     std::lock_guard<std::mutex> l(m);
     commands.push_back(cmd);

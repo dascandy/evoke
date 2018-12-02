@@ -7,14 +7,14 @@ void SimpleReporter::SetConcurrencyCount(size_t)
 {
 }
 
-void SimpleReporter::SetRunningCommand(size_t, PendingCommand *command)
+void SimpleReporter::SetRunningCommand(size_t, std::shared_ptr<PendingCommand> command)
 {
     if(command)
         std::cout << command->commandToRun << "\n"
                   << std::flush;
 }
 
-void SimpleReporter::ReportFailure(PendingCommand *command, int error, const std::string &errors)
+void SimpleReporter::ReportFailure(std::shared_ptr<PendingCommand> command, int error, const std::string &errors)
 {
     if(error)
     {

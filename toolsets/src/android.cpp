@@ -167,7 +167,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                     continue;
                 filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
                 File *of = project.CreateFile(component, outputFile);
-                PendingCommand *pc = new PendingCommand(config.compiler(p.second) + " -c -o " + outputFile.string() + " " + f->path.string() + " " + includes);
+                std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(config.compiler(p.second) + " -c -o " + outputFile.string() + " " + f->path.string() + " " + includes);
                 objects.push_back(of);
                 pc->AddOutput(of);
                 std::unordered_set<File *> d;
@@ -191,7 +191,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
             {
                 std::string command;
                 filesystem::path outputFile;
-                PendingCommand *pc;
+                std::shared_ptr<PendingCommand> pc;
                 if(component.type == "library")
                 {
                     outputFile = "lib/" + p.first + "/" + getLibNameFor(component);
@@ -200,7 +200,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                     {
                         command += " " + file->path.string();
                     }
-                    pc = new PendingCommand(command);
+                    pc = std::make_shared<PendingCommand>(command);
                 }
                 else
                 {
@@ -248,7 +248,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                             command += " -Wl,--end-group";
                         }
                     }
-                    pc = new PendingCommand(command);
+                    pc = std::make_shared<PendingCommand>(command);
                     for(auto &d : linkDeps)
                     {
                         for(auto &c : d)
@@ -286,7 +286,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
 
             // Create apk from manifest & shared libraries
             std::string outputName = component.root.filename().string();
-            PendingCommand *pc = new PendingCommand(config.aapt(outputName, manifest));
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(config.aapt(outputName, manifest));
             File *uapkfile = project.CreateFile(component, "apk/unsigned_" + outputName + ".apk");
             pc->AddOutput(uapkfile);
             for(auto &file : libraries)
@@ -297,7 +297,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
             component.commands.push_back(pc);
 
             // create signed apk from unsigned apk
-            pc = new PendingCommand(config.apksigner(outputName));
+            pc = std::make_shared<PendingCommand>(config.apksigner(outputName));
             File *apkfile = project.CreateFile(component, "apk/" + outputName + ".apk");
             pc->AddOutput(apkfile);
             pc->AddInput(uapkfile);

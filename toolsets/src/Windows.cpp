@@ -55,7 +55,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             filesystem::path temp = (f->path.string().substr(component.root.string().size()) + ".obj");
             filesystem::path outputFile = std::string("obj") / outputFolder / temp;
             File *of = project.CreateFile(component, outputFile);
-            PendingCommand *pc = new PendingCommand(compiler + " /c /EHsc " + Configuration::Get().compileFlags + includes + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::weakly_canonical(f->path).string());
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " /c /EHsc " + Configuration::Get().compileFlags + includes + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::weakly_canonical(f->path).string());
             objects.push_back(of);
             pc->AddOutput(of);
             std::unordered_set<File *> d;
@@ -79,7 +79,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
         {
             std::string command;
             filesystem::path outputFile;
-            PendingCommand *pc;
+            std::shared_ptr<PendingCommand> pc;
             if(component.type == "library")
             {
                 outputFile = "lib\\" + getLibNameFor(component);
@@ -88,7 +88,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                 {
                     command += " " + file->path.string();
                 }
-                pc = new PendingCommand(command);
+                pc = std::make_shared<PendingCommand>(command);
             }
             else
             {
@@ -112,7 +112,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                         }
                     }
                 }
-                pc = new PendingCommand(command);
+                pc = std::make_shared<PendingCommand>(command);
                 for(auto &d : linkDeps)
                 {
                     for(auto &c : d)
@@ -135,7 +135,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
             if(component.type == "unittest")
             {
                 command = outputFile.string();
-                pc = new PendingCommand(command);
+                pc = std::make_shared<PendingCommand>(command);
                 outputFile += ".log";
                 pc->AddInput(libraryFile);
                 pc->AddOutput(project.CreateFile(component, outputFile.string()));

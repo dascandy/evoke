@@ -26,12 +26,6 @@ Component::Component(const filesystem::path &path, bool isBinary) :
     root = rp;
 }
 
-Component::~Component()
-{
-    for(auto &c : commands)
-        delete c;
-}
-
 bool Component::isHeaderOnly() const
 {
     if(isBinary)

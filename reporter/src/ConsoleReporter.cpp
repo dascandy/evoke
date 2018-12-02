@@ -95,13 +95,13 @@ void ConsoleReporter::SetConcurrencyCount(size_t count)
     Redraw();
 }
 
-void ConsoleReporter::SetRunningCommand(size_t channel, PendingCommand *command)
+void ConsoleReporter::SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command)
 {
     activeProcesses[channel] = command;
     Redraw();
 }
 
-void ConsoleReporter::ReportFailure(PendingCommand *cmd, int err, const std::string &errors)
+void ConsoleReporter::ReportFailure(std::shared_ptr<PendingCommand> cmd, int err, const std::string &errors)
 {
     // Display error
     if(err)
