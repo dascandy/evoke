@@ -5,7 +5,6 @@
 #include <iostream>
 //#include <stdlib.h>
 
-
 static std::vector<std::string> splitWithQuotes(const std::string &str)
 {
     std::vector<std::string> rv;

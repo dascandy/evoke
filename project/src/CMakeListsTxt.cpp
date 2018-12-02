@@ -1,6 +1,6 @@
-#include "utils.h"
 #include "Configuration.h"
 #include "Project.h"
+#include "utils.h"
 
 #include <boost/filesystem/fstream.hpp>
 #include <ostream>

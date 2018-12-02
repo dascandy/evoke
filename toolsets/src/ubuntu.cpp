@@ -9,9 +9,8 @@
 #include "utils.h"
 
 #include <algorithm>
-#include <stack>
 #include <boost/algorithm/string/split.hpp>
-
+#include <stack>
 
 static const std::string compiler = "g++";
 static const std::string archiver = "ar";
