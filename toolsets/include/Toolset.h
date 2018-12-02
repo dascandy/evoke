@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils.h"
+#include "globaloptions.h"
 
 #include <memory>
 #include <string>

@@ -6,7 +6,7 @@
 #include "Toolset.h"
 #include "boost/algorithm/string/classification.hpp"
 #include "dotted.h"
-#include "utils.h"
+#include "globaloptions.h"
 
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>

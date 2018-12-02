@@ -3,7 +3,7 @@
 #include "Component.h"
 #include "File.h"
 #include "PendingCommand.h"
-#include "utils.h"
+#include "globaloptions.h"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
