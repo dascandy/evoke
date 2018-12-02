@@ -95,7 +95,7 @@ void Executor::RunMoreCommands()
                 filesystem::create_directories(o->path.parent_path());
             }
             reporter.SetRunningCommand(n, c);
-            activeProcesses[n] = new Process(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
+            activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
                 c->SetResult(t->errorcode == 0);
                 if(t->errorcode || !t->outbuffer.empty())
@@ -103,9 +103,8 @@ void Executor::RunMoreCommands()
                     t->outbuffer.push_back(0);
                     reporter.ReportFailure(c, t->errorcode, t->outbuffer.data());
                 }
-                activeProcesses[n] = nullptr;
                 reporter.SetRunningCommand(n, nullptr);
-                delete t;
+                activeProcesses[n].reset();
                 RunMoreCommands();
             });
         }
