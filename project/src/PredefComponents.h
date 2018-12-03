@@ -3,6 +3,6 @@
 #include <map>
 #include <string>
 
-class Component;
+struct Component;
 
 std::map<std::string, Component *> PredefComponentList();
