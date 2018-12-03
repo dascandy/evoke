@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Disable autolinking on Windows because it conflicts with FIND_BOOST.
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-	message(FATAL_ERROR "Prevented in-tree build. Please create a build directory outside of the source directory and call cmake from there.")
+  message(FATAL_ERROR "Prevented in-tree build. Please create a build directory outside of the source directory and call cmake from there.")
 endif()
 
 set(INCLUDES  ${CMAKE_CURRENT_SOURCE_DIR}/fw/include 
@@ -27,8 +27,9 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
-		    ${CMAKE_CURRENT_SOURCE_DIR}/project/src/JsonCompileDb.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/JsonCompileDb.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PendingCommand.cpp 
+            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PredefComponents.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Project.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/ReadCode.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/tarjan.cpp
