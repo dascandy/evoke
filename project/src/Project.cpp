@@ -4,6 +4,7 @@
 #include "Configuration.h"
 #include "File.h"
 #include "known.h"
+#include "PredefComponents.h"
 
 #include <algorithm>
 #include <fstream>
@@ -258,53 +259,6 @@ void Project::MapImportsToModules(std::unordered_map<std::string, File *> &modul
             }
         }
     }
-}
-
-static std::map<std::string, Component *> PredefComponentList()
-{
-    std::map<std::string, Component *> list;
-    Component *boost_system = new Component("boost_system", true);
-    Component *boost_filesystem = new Component("boost_filesystem", true);
-    boost_filesystem->pubDeps.insert(boost_system);
-    list["boost/filesystem.hpp"] = boost_filesystem;
-    list["boost/filesystem/fstream.hpp"] = boost_filesystem;
-    list["boost/process.hpp"] = new Component("boost_process");
-
-    // Enable Android app
-    list["egl/egl.h"] = new Component("EGL", true);
-    list["gles/gl.h"] = new Component("GLESv1_CM", true);
-    list["dlfcn.h"] = new Component("dl", true);
-
-    list["android/log.h"] = new Component("log", true);
-
-    Component *android = new Component("android", true);
-    list["android/sensor.h"] = android;
-    list["android/native_activity.h"] = android;
-    list["android/looper.h"] = android;
-    list["android/configuration.h"] = android;
-
-    // Enable ssl/md5 use
-    Component *crypto = new Component("crypto", true);
-    list["md5.h"] = crypto;
-
-    Component *ssl = new Component("ssl", true);
-    ssl->pubDeps.insert(crypto);
-    list["openssl/conf.h"] = ssl;
-    list["openssl/ssl.h"] = ssl;
-    list["openssl/engine.h"] = ssl;
-    list["openssl/dh.h"] = ssl;
-    list["openssl/err.h"] = ssl;
-    list["openssl/rsa.h"] = ssl;
-    list["openssl/x509v3.h"] = ssl;
-    list["openssl/x509_vfy.h"] = ssl;
-
-    list["zlib.h"] = new Component("z", true);
-
-    list["mysql/mysql.h"] = new Component("mysqlclient", true);
-    list["sdl2/sdl.h"] = new Component("SDL2", true);
-    list["sdl2/sdl_opengl.h"] = new Component("GL", true);
-    list["gl/glew.h"] = new Component("GLEW", true);
-    return list;
 }
 
 static Component *GetPredefComponent(const filesystem::path &path)
