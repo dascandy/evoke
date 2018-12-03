@@ -48,7 +48,7 @@ void Process::run()
     child.wait();
     errorcode = child.exit_code();
     state = Done;
-    // The callback will delete this object, so move out the callback before invoking it
+    // The callback will cause this object to be destructed, so move out the callback before invoking it
     auto x = std::move(onComplete);
     x(this);
 }
