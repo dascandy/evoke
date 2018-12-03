@@ -29,7 +29,7 @@ public:
 
 private:
     void Redraw();
-    std::vector<std::shared_ptr<PendingCommand> > activeProcesses;
+    std::vector<std::shared_ptr<PendingCommand>> activeProcesses;
 };
 
 class SimpleReporter : public Reporter

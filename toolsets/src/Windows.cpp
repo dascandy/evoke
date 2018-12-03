@@ -104,7 +104,7 @@ void WindowsToolset::CreateCommandsFor(Project &project)
                 std::reverse(linkDeps.begin(), linkDeps.end());
                 for(auto d : linkDeps)
                 {
-                    for (auto& c : d)
+                    for(auto &c : d)
                     {
                         if(c != &component && !c->isHeaderOnly())
                         {

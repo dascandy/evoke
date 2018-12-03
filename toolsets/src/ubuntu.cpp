@@ -113,7 +113,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
                     }
                     if(d.empty())
                         continue;
-                    if(d.size() == 1) 
+                    if(d.size() == 1)
                     {
                         command += " -l" + d[0]->root.string();
                     }

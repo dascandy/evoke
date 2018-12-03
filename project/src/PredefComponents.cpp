@@ -1,24 +1,26 @@
 #include "PredefComponents.h"
-#include <string>
-#include <map>
+
 #include "Component.h"
 
+#include <map>
+#include <string>
+
 static std::map<std::string, Component> predefComponents = {
-  { "boost_system", Component("boost_system", true) },
-  { "boost_filesystem", Component("boost_filesystem", true) },
-  { "boost_process", Component("boost_process") },
-  { "EGL", Component("EGL", true) },
-  { "GLESv1_CM", Component("GLESv1_CM ", true) },
-  { "dl", Component("dl", true) },
-  { "log", Component("log ", true) },
-  { "android", Component("android", true) },
-  { "crypto", Component("crypto", true) },
-  { "ssl", Component("ssl", true) },
-  { "z", Component("z ", true) },
-  { "mysqlclient", Component("mysqlclient", true) },
-  { "SDL2", Component("SDL2", true) },
-  { "GL", Component("GL", true) },
-  { "GLEW", Component("GLEW", true) },
+    {"boost_system", Component("boost_system", true)},
+    {"boost_filesystem", Component("boost_filesystem", true)},
+    {"boost_process", Component("boost_process")},
+    {"EGL", Component("EGL", true)},
+    {"GLESv1_CM", Component("GLESv1_CM ", true)},
+    {"dl", Component("dl", true)},
+    {"log", Component("log ", true)},
+    {"android", Component("android", true)},
+    {"crypto", Component("crypto", true)},
+    {"ssl", Component("ssl", true)},
+    {"z", Component("z ", true)},
+    {"mysqlclient", Component("mysqlclient", true)},
+    {"SDL2", Component("SDL2", true)},
+    {"GL", Component("GL", true)},
+    {"GLEW", Component("GLEW", true)},
 };
 
 std::map<std::string, Component *> PredefComponentList()
@@ -63,4 +65,3 @@ std::map<std::string, Component *> PredefComponentList()
 
     return list;
 }
-

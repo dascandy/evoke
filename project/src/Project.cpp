@@ -3,8 +3,8 @@
 #include "Component.h"
 #include "Configuration.h"
 #include "File.h"
-#include "known.h"
 #include "PredefComponents.h"
+#include "known.h"
 
 #include <algorithm>
 #include <fstream>

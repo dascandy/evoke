@@ -6,4 +6,3 @@
 class Component;
 
 std::map<std::string, Component *> PredefComponentList();
-
