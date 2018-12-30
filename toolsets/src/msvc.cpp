@@ -9,16 +9,9 @@
 #include <algorithm>
 #include <stack>
 
-static const std::string compiler = "cl.exe";
-static const std::string linker = "link.exe";
-static const std::string archiver = "lib.exe";
 //https://blogs.msdn.microsoft.com/vcblog/2015/12/03/c-modules-in-vs-2015-update-1/
-
 // Enable modules support for MSVC
 //"/experimental:module /module:stdIfcDir \"$(VC_IFCPath)\" /module:search obj/modules/"
-
-// Tell MSVC to act like a sane compiler (use the latest C++ version in standards conforming mode, use C++ exceptions as specified, and link to the C/C++ runtime)
-//"/std:c++latest /permissive- /EHsc /MD"
 
 static std::string getLibNameFor(Component &component)
 {
@@ -34,7 +27,22 @@ static std::string getExeNameFor(Component &component)
     return filesystem::weakly_canonical(component.root).filename().string() + ".exe";
 }
 
-void WindowsToolset::CreateCommandsFor(Project &project)
+MsvcToolset::MsvcToolset() 
+: compiler("cl.exe")
+, linker("link.exe")
+, archiver("lib.exe")
+{
+
+}
+
+void MsvcToolset::SetParameter(const std::string& key, const std::string& value) {
+  if (key == "compiler") compiler = value;
+  else if (key == "linker") linker = value;
+  else if (key == "archiver") archiver = value;
+  else throw std::runtime_error("Invalid parameter for MSVC toolchain: " + key);
+}
+
+void MsvcToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)
     {

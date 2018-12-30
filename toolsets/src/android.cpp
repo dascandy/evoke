@@ -144,6 +144,8 @@ static std::string getLibNameFor(Component &component)
     return "lib" + getNameFor(component) + ".a";
 }
 
+void AndroidToolset::SetParameter(const std::string& key, const std::string& value) {}
+
 void AndroidToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)

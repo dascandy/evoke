@@ -12,9 +12,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <stack>
 
-static const std::string compiler = "g++";
-static const std::string archiver = "ar";
-
 static std::string getLibNameFor(Component &component)
 {
     return "lib" + as_dotted(component.root.string()) + ".a";
@@ -29,7 +26,21 @@ static std::string getExeNameFor(Component &component)
     return filesystem::canonical(component.root).filename().string();
 }
 
-void UbuntuToolset::CreateCommandsFor(Project &project)
+GccToolset::GccToolset() 
+: compiler("g++")
+, linker("g++")
+, archiver("ar")
+{
+}
+
+void GccToolset::SetParameter(const std::string& key, const std::string& value) {
+  if (key == "compiler") compiler = value;
+  else if (key == "linker") linker = value;
+  else if (key == "archiver") archiver = value;
+  else throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
+}
+
+void GccToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)
     {
@@ -164,7 +175,7 @@ void UbuntuToolset::CreateCommandsFor(Project &project)
     }
 }
 
-GlobalOptions UbuntuToolset::ParseGeneralOptions(const std::string &options)
+GlobalOptions GccToolset::ParseGeneralOptions(const std::string &options)
 {
     GlobalOptions opts;
     //std::vector<std::string> parts = splitWithQuotes(options);
