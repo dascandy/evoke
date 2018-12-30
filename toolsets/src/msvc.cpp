@@ -42,6 +42,8 @@ void MsvcToolset::SetParameter(const std::string& key, const std::string& value)
   else throw std::runtime_error("Invalid parameter for MSVC toolchain: " + key);
 }
 
+void MsvcToolset::CreateCommandsForUnity(Project &project) {}
+
 void MsvcToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)

@@ -40,6 +40,66 @@ void GccToolset::SetParameter(const std::string& key, const std::string& value) 
   else throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
 }
 
+void GccToolset::CreateCommandsForUnity(Project &project)
+{
+    for(auto &p : project.components)
+    {
+        auto &component = p.second;
+        if (component.type == "library") continue;
+
+        std::vector<std::vector<Component *>> allDeps = GetTransitiveAllDeps(component);
+        std::vector<Component*> deps;
+        std::vector<File*> files;
+        std::string includes;
+        std::string assembleLine = "cat";
+        for (auto& v : allDeps) for (auto& c : v) {
+            for(auto &d : getIncludePathsFor(component))
+            {
+                includes += " -I" + d;
+            }
+            for (auto& f : c->files) {
+                files.push_back(f);
+                if(project.IsCompilationUnit(f->path.extension().string())) 
+                {
+                    assembleLine += " " + f->path.generic_string();
+                }
+            }
+        }
+
+        filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
+        File* of = project.CreateFile(component, outputFile);
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(assembleLine + " >" + outputFile.generic_string());
+        pc->AddOutput(of);
+        for (auto& f : files)
+            if(project.IsCompilationUnit(f->path.extension().string())) 
+                pc->AddInput(f);
+        pc->Check();
+        component.commands.push_back(pc);
+
+        std::string command = compiler + " -pthread -o " + outputFile.string() + " " + outputFile.generic_string();
+        filesystem::path exeFile = "bin/" + getExeNameFor(component);
+
+        File *executable = project.CreateFile(component, exeFile);
+        pc->AddOutput(executable);
+        for (auto& f : files)
+            if(!project.IsCompilationUnit(f->path.extension().string())) 
+                pc->AddInput(f);
+        pc->AddInput(of);
+        pc->Check();
+        component.commands.push_back(pc);
+        if(component.type == "unittest")
+        {
+            command = exeFile.string();
+            pc = std::make_shared<PendingCommand>(command);
+            exeFile += ".log";
+            pc->AddInput(executable);
+            pc->AddOutput(project.CreateFile(component, exeFile.string()));
+            pc->Check();
+            component.commands.push_back(pc);
+        }
+    }
+}
+
 void GccToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)

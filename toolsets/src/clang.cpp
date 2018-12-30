@@ -40,6 +40,8 @@ void ClangToolset::SetParameter(const std::string& key, const std::string& value
   else throw std::runtime_error("Invalid parameter for Clang toolchain: " + key);
 }
 
+void ClangToolset::CreateCommandsForUnity(Project &project) {}
+
 void ClangToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)

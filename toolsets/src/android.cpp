@@ -146,6 +146,8 @@ static std::string getLibNameFor(Component &component)
 
 void AndroidToolset::SetParameter(const std::string& key, const std::string& value) {}
 
+void AndroidToolset::CreateCommandsForUnity(Project &project) {}
+
 void AndroidToolset::CreateCommandsFor(Project &project)
 {
     for(auto &p : project.components)
