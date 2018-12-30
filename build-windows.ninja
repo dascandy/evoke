@@ -1,6 +1,0 @@
-cppflags = /std:c++17 /EHsc /Ox /MT /I . /I fw\include /I project\include /I toolsets\include /I view\include /I evoke/include /I C:\dev\Projects\boost_1_68_0\
-
-rule cpp
-    command = cl $cppflags $in /Fe$out
-
-build Evoke.exe: cpp evoke/src/main.cpp evoke/src/Executor.cpp toolsets/src/known.cpp toolsets/src/Toolset.cpp toolsets/src/ubuntu.cpp toolsets/src/Windows.cpp evoke/src/main.cpp fw/src/Configuration.cpp project/src/Component.cpp  project/src/JsonCompileDb.cpp  project/src/PendingCommand.cpp project/src/Project.cpp project/src/ReadCode.cpp project/src/tarjan.cpp

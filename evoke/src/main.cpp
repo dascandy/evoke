@@ -63,7 +63,7 @@ int main(int argc, const char **argv)
 #if defined(_WIN32)
     toolsetname = "windows";
 #else
-    toolsetname = "ubuntu";
+    toolsetname = "gcc";
 #endif
 
     std::cout << "Building for " << toolsetname << std::endl;

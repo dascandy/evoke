@@ -35,13 +35,13 @@ static std::vector<std::string> splitWithQuotes(const std::string &str)
 void Configuration::LoadDefaults()
 {
 #ifdef _WIN32
-    toolchain = "msvc15";
+    toolchain = "msvc";
     compileFlags = "/permissive- /std:c++latest";
 #elif APPLE
-    toolchain = "osx";
+    toolchain = "clang";
     compileFlags = "-std=c++17";
 #else
-    toolchain = "ubuntu";
+    toolchain = "gcc";
     compileFlags = "-std=c++17 -pthread";
 #endif
 }
