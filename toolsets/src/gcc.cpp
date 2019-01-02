@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>
 #include <stack>
-
+#include <unordered_set>
 static std::string getLibNameFor(Component &component)
 {
     return "lib" + as_dotted(component.root.string()) + ".a";
@@ -50,47 +50,41 @@ void GccToolset::CreateCommandsForUnity(Project &project)
         std::vector<std::vector<Component *>> allDeps = GetTransitiveAllDeps(component);
         std::vector<Component*> deps;
         std::vector<File*> files;
-        std::string includes;
-        std::string assembleLine = "cat";
+        std::unordered_set<std::string> includes;
+        filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
+        File* of = project.CreateFile(component, outputFile);
+        std::ofstream out(outputFile.generic_string());
         for (auto& v : allDeps) for (auto& c : v) {
             for(auto &d : getIncludePathsFor(component))
             {
-                includes += " -I" + d;
+                includes.insert(d);
             }
             for (auto& f : c->files) {
                 files.push_back(f);
                 if(project.IsCompilationUnit(f->path.extension().string())) 
                 {
-                    assembleLine += " " + f->path.generic_string();
+                    out << "#include \"../" + f->path.generic_string() << "\"\n";
                 }
             }
         }
 
-        filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
-        File* of = project.CreateFile(component, outputFile);
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(assembleLine + " >" + outputFile.generic_string());
-        pc->AddOutput(of);
-        for (auto& f : files)
-            if(project.IsCompilationUnit(f->path.extension().string())) 
-                pc->AddInput(f);
-        pc->Check();
-        component.commands.push_back(pc);
-
-        std::string command = compiler + " -pthread -o " + outputFile.string() + " " + outputFile.generic_string();
         filesystem::path exeFile = "bin/" + getExeNameFor(component);
+        std::string includeString;
+        for (auto& i : includes) {
+            includeString += " -I" + i;
+        }
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " " + Configuration::Get().compileFlags + " " + includeString + " -pthread -o " + exeFile.generic_string() + " " + outputFile.generic_string());
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
         for (auto& f : files)
-            if(!project.IsCompilationUnit(f->path.extension().string())) 
-                pc->AddInput(f);
+            pc->AddInput(f);
         pc->AddInput(of);
         pc->Check();
         component.commands.push_back(pc);
         if(component.type == "unittest")
         {
-            command = exeFile.string();
-            pc = std::make_shared<PendingCommand>(command);
+            pc = std::make_shared<PendingCommand>(exeFile.string());
             exeFile += ".log";
             pc->AddInput(executable);
             pc->AddOutput(project.CreateFile(component, exeFile.string()));
