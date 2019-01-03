@@ -47,21 +47,26 @@ void GccToolset::CreateCommandsForUnity(Project &project)
         std::vector<std::vector<Component *>> allDeps = GetTransitiveAllDeps(component);
         std::vector<Component*> deps;
         std::vector<File*> files;
+        std::string linkline;
         std::unordered_set<std::string> includes;
         filesystem::create_directories("unity");
         filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
         File* of = project.CreateFile(component, outputFile);
         std::ofstream out(outputFile.generic_string());
         for (auto& v : allDeps) for (auto& c : v) {
-            for(auto &d : getIncludePathsFor(component))
-            {
-                includes.insert(d);
-            }
-            for (auto& f : c->files) {
-                files.push_back(f);
-                if(project.IsCompilationUnit(f->path.extension().string())) 
+            if (c->isBinary) {
+                linkline += " -l" + getNameFor(*c);
+            } else {
+                for(auto &d : getIncludePathsFor(component))
                 {
-                    out << "#include \"../" + f->path.generic_string() << "\"\n";
+                    includes.insert(d);
+                }
+                for (auto& f : c->files) {
+                    files.push_back(f);
+                    if(project.IsCompilationUnit(f->path.extension().string())) 
+                    {
+                        out << "#include \"../" + f->path.generic_string() << "\"\n";
+                    }
                 }
             }
         }
@@ -71,7 +76,7 @@ void GccToolset::CreateCommandsForUnity(Project &project)
         for (auto& i : includes) {
             includeString += " -I" + i;
         }
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " " + Configuration::Get().compileFlags + " " + includeString + " -pthread -o " + exeFile.generic_string() + " " + outputFile.generic_string());
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " " + Configuration::Get().compileFlags + " " + includeString + " -pthread -o " + exeFile.generic_string() + " " + outputFile.generic_string() + linkline);
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
