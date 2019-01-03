@@ -13,18 +13,14 @@
 // Enable modules support for MSVC
 //"/experimental:module /module:stdIfcDir \"$(VC_IFCPath)\" /module:search obj/modules/"
 
-static std::string getLibNameFor(Component &component)
+std::string MsvcToolset::getLibNameFor(Component &component)
 {
-    return "lib" + as_dotted(component.root.string()) + ".lib";
+    return "lib" + getNameFor(component) + ".lib";
 }
 
-static std::string getExeNameFor(Component &component)
+std::string MsvcToolset::getExeNameFor(Component &component)
 {
-    if(component.root.string() != ".")
-    {
-        return as_dotted(component.root.string()) + ".exe";
-    }
-    return filesystem::weakly_canonical(component.root).filename().string() + ".exe";
+    return getNameFor(component) + ".exe";
 }
 
 MsvcToolset::MsvcToolset() 

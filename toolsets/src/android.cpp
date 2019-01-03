@@ -125,21 +125,12 @@ struct androidconfig
         "<!-- END_INCLUDE(manifest) -->\n";
 };
 
-static std::string getNameFor(Component &component)
-{
-    if(component.root.string() != ".")
-    {
-        return as_dotted(component.root.generic_string());
-    }
-    return filesystem::canonical(component.root).filename().string();
-}
-
-static std::string getSoNameFor(Component &component)
+std::string AndroidToolset::getExeNameFor(Component &component)
 {
     return "lib" + getNameFor(component) + ".so";
 }
 
-static std::string getLibNameFor(Component &component)
+std::string AndroidToolset::getLibNameFor(Component &component)
 {
     return "lib" + getNameFor(component) + ".a";
 }
@@ -208,7 +199,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                 }
                 else
                 {
-                    outputFile = "so/lib/" + p.second.sofoldername + "/" + getSoNameFor(component);
+                    outputFile = "so/lib/" + p.second.sofoldername + "/" + getExeNameFor(component);
                     command = config.linker(p.second) + " -o " + outputFile.string();
 
                     for(auto &file : objects)

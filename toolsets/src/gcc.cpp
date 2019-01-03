@@ -12,18 +12,15 @@
 #include <boost/algorithm/string/split.hpp>
 #include <stack>
 #include <unordered_set>
-static std::string getLibNameFor(Component &component)
+
+std::string GccToolset::getLibNameFor(Component &component)
 {
-    return "lib" + as_dotted(component.root.string()) + ".a";
+    return "lib" + getNameFor(component) + ".a";
 }
 
-static std::string getExeNameFor(Component &component)
+std::string GccToolset::getExeNameFor(Component &component)
 {
-    if(component.root.string() != ".")
-    {
-        return as_dotted(component.root.string());
-    }
-    return filesystem::canonical(component.root).filename().string();
+    return getNameFor(component);
 }
 
 GccToolset::GccToolset() 
@@ -51,6 +48,7 @@ void GccToolset::CreateCommandsForUnity(Project &project)
         std::vector<Component*> deps;
         std::vector<File*> files;
         std::unordered_set<std::string> includes;
+        filesystem::create_directories("unity");
         filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
         File* of = project.CreateFile(component, outputFile);
         std::ofstream out(outputFile.generic_string());
@@ -77,9 +75,9 @@ void GccToolset::CreateCommandsForUnity(Project &project)
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
+        pc->AddInput(of);
         for (auto& f : files)
             pc->AddInput(f);
-        pc->AddInput(of);
         pc->Check();
         component.commands.push_back(pc);
         if(component.type == "unittest")

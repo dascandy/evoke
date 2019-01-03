@@ -12,18 +12,14 @@
 #include <boost/algorithm/string/split.hpp>
 #include <stack>
 
-static std::string getLibNameFor(Component &component)
+std::string ClangToolset::getLibNameFor(Component &component)
 {
-    return "lib" + as_dotted(component.root.string()) + ".a";
+    return "lib" + getNameFor(component) + ".a";
 }
 
-static std::string getExeNameFor(Component &component)
+std::string ClangToolset::getExeNameFor(Component &component)
 {
-    if(component.root.string() != ".")
-    {
-        return as_dotted(component.root.string());
-    }
-    return filesystem::canonical(component.root).filename().string();
+    return getNameFor(component);
 }
 
 ClangToolset::ClangToolset()
