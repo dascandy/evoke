@@ -34,7 +34,7 @@ public:
 Process::Process(const std::string &filename, const std::string &cmd, std::function<void(Process *)> onComplete) :
     onComplete(onComplete),
     filename(filename),
-    child(cmd, boost::process::std_out > pipe_stream)
+    child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
 {
     std::thread([this] { run(); }).detach();
 }
