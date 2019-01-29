@@ -128,7 +128,6 @@ void ClangToolset::CreateCommandsFor(Project &project)
                     }
                     else
                     {
-                        command += " -Wl,--start-group";
                         for(auto &c : d)
                         {
                             if(c != &component && !c->isHeaderOnly())
@@ -136,7 +135,6 @@ void ClangToolset::CreateCommandsFor(Project &project)
                                 command += " -l" + c->root.string();
                             }
                         }
-                        command += " -Wl,--end-group";
                     }
                 }
                 pc = std::make_shared<PendingCommand>(command);
