@@ -24,8 +24,6 @@ public:
     std::vector<PendingCommand *> buildPipeline;
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
-    bool IsCompilationUnit(const std::string &ext);
-    bool IsCode(const std::string &ext);
     bool IsSystemComponent(const std::string &name) const;
     void dumpJsonCompileDb(std::ostream &os);
     void dumpCMakeListsTxt(const GlobalOptions &opts);

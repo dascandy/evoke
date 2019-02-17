@@ -54,7 +54,7 @@ void ClangToolset::CreateCommandsFor(Project &project)
         std::vector<File *> objects;
         for(auto &f : component.files)
         {
-            if(!project.IsCompilationUnit(f->path.extension().string()))
+            if(!File::isTranslationUnit(f->path))
                 continue;
             filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
             File *of = project.CreateFile(component, outputFile);

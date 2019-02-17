@@ -63,7 +63,7 @@ void GccToolset::CreateCommandsForUnity(Project &project)
                 }
                 for (auto& f : c->files) {
                     files.push_back(f);
-                    if(project.IsCompilationUnit(f->path.extension().string())) 
+                    if(File::isTranslationUnit(f->path))
                     {
                         out << "#include \"../" + f->path.generic_string() << "\"\n";
                     }
@@ -99,6 +99,11 @@ void GccToolset::CreateCommandsForUnity(Project &project)
 
 void GccToolset::CreateCommandsFor(Project &project)
 {
+    for(auto &p : project.components) 
+    {
+        // Precompile all modules (with dependencies on BMIs, for the graph)
+
+    }
     for(auto &p : project.components)
     {
         auto &component = p.second;
@@ -113,7 +118,7 @@ void GccToolset::CreateCommandsFor(Project &project)
         std::vector<File *> objects;
         for(auto &f : component.files)
         {
-            if(!project.IsCompilationUnit(f->path.extension().string()))
+            if(!File::isTranslationUnit(f->path))
                 continue;
             filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
             File *of = project.CreateFile(component, outputFile);

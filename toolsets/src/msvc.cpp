@@ -56,7 +56,7 @@ void MsvcToolset::CreateCommandsFor(Project &project)
         std::vector<File *> objects;
         for(auto &f : component.files)
         {
-            if(!project.IsCompilationUnit(f->path.extension().string()))
+            if(!File::isTranslationUnit(f->path))
                 continue;
             filesystem::path temp = (f->path.string().substr(component.root.string().size()) + ".obj");
             filesystem::path outputFile = std::string("obj") / outputFolder / temp;
