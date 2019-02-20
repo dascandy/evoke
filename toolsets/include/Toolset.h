@@ -7,7 +7,7 @@
 #include <vector>
 #include <set>
 
-class File;
+struct File;
 struct Component;
 class Project;
 
