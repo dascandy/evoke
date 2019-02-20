@@ -13,21 +13,11 @@
 #include <stack>
 #include <unordered_set>
 
-std::string GccToolset::getLibNameFor(Component &component)
-{
-    return "lib" + getNameFor(component) + ".a";
-}
-
-std::string GccToolset::getExeNameFor(Component &component)
-{
-    return getNameFor(component);
-}
-
 GccToolset::GccToolset() 
-: compiler("g++")
-, linker("g++")
-, archiver("ar")
 {
+  compiler = "g++";
+  linker = "g++";
+  archiver = "ar";
 }
 
 void GccToolset::SetParameter(const std::string& key, const std::string& value) {
@@ -37,6 +27,87 @@ void GccToolset::SetParameter(const std::string& key, const std::string& value) 
   else throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
 }
 
+std::string GccToolset::getObjNameFor(const File& file) {
+  return file.path.generic_string() + ".o";
+}
+
+std::string GccToolset::getLibNameFor(const Component &component)
+{
+    return "lib" + getNameFor(component) + ".a";
+}
+
+std::string GccToolset::getExeNameFor(const Component &component)
+{
+    return getNameFor(component);
+}
+
+std::string GccToolset::getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) {
+  std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+  for (auto& i : includes) command += " -I" + i;
+  for(auto d : linkDeps)
+  {
+    if(d.size() == 1)
+    {
+      command += " -l" + d.front()->root.string();
+    }
+    else
+    {
+      command += " -Wl,--start-group";
+      for(auto &c : d)
+      {
+        command += " -l" + c->root.string();
+      }
+      command += " -Wl,--end-group";
+    }
+  }
+  return command;
+}
+
+std::string GccToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) {
+  std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+  for (auto& i : includes) command += " -I" + i;
+  return command;
+}
+
+std::string GccToolset::getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) {
+  std::string command = program + " rcs " + outputFile;
+  for(auto &file : inputs)
+  {
+    command += " " + file->path.generic_string();
+  }
+  return command;
+}
+
+std::string GccToolset::getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) {
+  std::string command = program + " -pthread -o " + outputFile;
+  for(auto &file : objects)
+  {
+      command += " " + file->path.string();
+  }
+  command += " -Llib";
+  for(auto d : linkDeps)
+  {
+    if(d.size() == 1)
+    {
+      command += " -l" + d.front()->root.string();
+    }
+    else
+    {
+      command += " -Wl,--start-group";
+      for(auto &c : d)
+      {
+        command += " -l" + c->root.string();
+      }
+      command += " -Wl,--end-group";
+    }
+  }
+  return command;
+}
+
+std::string GccToolset::getUnittestCommand(const std::string& program) {
+  return "./" + program;
+}
+/*
 void GccToolset::CreateCommandsForUnity(Project &project)
 {
     for(auto &p : project.components)
@@ -96,147 +167,7 @@ void GccToolset::CreateCommandsForUnity(Project &project)
         }
     }
 }
-
-void GccToolset::CreateCommandsFor(Project &project)
-{
-    for(auto &p : project.components) 
-    {
-        // Precompile all modules (with dependencies on BMIs, for the graph)
-
-    }
-    for(auto &p : project.components)
-    {
-        auto &component = p.second;
-        std::string includes;
-        for(auto &d : getIncludePathsFor(component))
-        {
-            includes += " -I" + d;
-        }
-
-        // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
-        filesystem::path outputFolder = component.root;
-        std::vector<File *> objects;
-        for(auto &f : component.files)
-        {
-            if(!File::isTranslationUnit(f->path))
-                continue;
-            filesystem::path outputFile = std::string("obj") / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
-            File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " -c " + Configuration::Get().compileFlags + " -o " + outputFile.string() + " " + f->path.string() + includes);
-            objects.push_back(of);
-            pc->AddOutput(of);
-            std::unordered_set<File *> d;
-            std::stack<File *> deps;
-            deps.push(f);
-            size_t index = 0;
-            while(!deps.empty())
-            {
-                File *dep = deps.top();
-                deps.pop();
-                pc->AddInput(dep);
-                for(File *input : dep->dependencies)
-                    if(d.insert(input).second)
-                        deps.push(input);
-                index++;
-            }
-            pc->Check();
-            component.commands.push_back(pc);
-        }
-        if(!objects.empty())
-        {
-            std::string command;
-            filesystem::path outputFile;
-            std::shared_ptr<PendingCommand> pc;
-            if(component.type == "library")
-            {
-                outputFile = "lib/" + getLibNameFor(component);
-                command = archiver + " rcs " + outputFile.string();
-                for(auto &file : objects)
-                {
-                    command += " " + file->path.string();
-                }
-                pc = std::make_shared<PendingCommand>(command);
-            }
-            else
-            {
-                outputFile = "bin/" + getExeNameFor(component);
-                command = compiler + " -pthread -o " + outputFile.string();
-
-                for(auto &file : objects)
-                {
-                    command += " " + file->path.string();
-                }
-                command += " -Llib";
-                std::vector<std::vector<Component *>> linkDeps = GetTransitiveAllDeps(component);
-                std::reverse(linkDeps.begin(), linkDeps.end());
-                for(auto d : linkDeps)
-                {
-                    size_t index = 0;
-                    while(index < d.size())
-                    {
-                        if(d[index] == &component || d[index]->isHeaderOnly())
-                        {
-                            d[index] = d.back();
-                            d.pop_back();
-                        }
-                        else
-                        {
-                            ++index;
-                        }
-                    }
-                    if(d.empty())
-                        continue;
-                    if(d.size() == 1)
-                    {
-                        command += " -l" + d[0]->root.string();
-                    }
-                    else
-                    {
-                        command += " -Wl,--start-group";
-                        for(auto &c : d)
-                        {
-                            if(c != &component && !c->isHeaderOnly())
-                            {
-                                command += " -l" + c->root.string();
-                            }
-                        }
-                        command += " -Wl,--end-group";
-                    }
-                }
-                pc = std::make_shared<PendingCommand>(command);
-                for(auto &d : linkDeps)
-                {
-                    for(auto &c : d)
-                    {
-                        if(c != &component && !c->isHeaderOnly())
-                        {
-                            pc->AddInput(project.CreateFile(*c, "lib/" + getLibNameFor(*c)));
-                        }
-                    }
-                }
-            }
-            File *libraryFile = project.CreateFile(component, outputFile);
-            pc->AddOutput(libraryFile);
-            for(auto &file : objects)
-            {
-                pc->AddInput(file);
-            }
-            pc->Check();
-            component.commands.push_back(pc);
-            if(component.type == "unittest")
-            {
-                command = outputFile.string();
-                pc = std::make_shared<PendingCommand>(command);
-                outputFile += ".log";
-                pc->AddInput(libraryFile);
-                pc->AddOutput(project.CreateFile(component, outputFile.string()));
-                pc->Check();
-                component.commands.push_back(pc);
-            }
-        }
-    }
-}
-
+*/
 GlobalOptions GccToolset::ParseGeneralOptions(const std::string &options)
 {
     GlobalOptions opts;

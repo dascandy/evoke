@@ -5,7 +5,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
 
+class File;
 struct Component;
 class Project;
 
@@ -18,9 +20,25 @@ struct Toolset
     virtual void CreateCommandsForUnity(Project &project) = 0;
     virtual GlobalOptions ParseGeneralOptions(const std::string &options);
     virtual void SetParameter(const std::string& key, const std::string& value) = 0;
-    virtual std::string getLibNameFor(Component &component) = 0;
-    virtual std::string getExeNameFor(Component &component) = 0;
-    std::string getNameFor(Component &component);
+    virtual std::string getObjNameFor(const File& file) = 0;
+    virtual std::string getLibNameFor(const Component &component) = 0;
+    virtual std::string getExeNameFor(const Component &component) = 0;
+    std::string getNameFor(const Component &component);
+};
+
+class GenericToolset : public Toolset {
+public:
+    void CreateCommandsForUnity(Project &project) override;
+    void CreateCommandsFor(Project &project) override;
+protected:
+    virtual std::string getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) = 0;
+    virtual std::string getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) = 0;
+    virtual std::string getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) = 0;
+    virtual std::string getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) = 0;
+    virtual std::string getUnittestCommand(const std::string& program) = 0;
+    std::string compiler;
+    std::string linker;
+    std::string archiver;
 };
 
 struct AndroidToolset : public Toolset
@@ -28,43 +46,53 @@ struct AndroidToolset : public Toolset
     void CreateCommandsFor(Project &project) override;
     void CreateCommandsForUnity(Project &project) override;
     void SetParameter(const std::string& key, const std::string& value) override;
-    std::string getLibNameFor(Component &component) override;
-    std::string getExeNameFor(Component &component) override;
+    std::string getObjNameFor(const File& file) override;
+    std::string getLibNameFor(const Component &component) override;
+    std::string getExeNameFor(const Component &component) override;
 };
 
-struct ClangToolset : public Toolset
+struct ClangToolset : public GenericToolset
 {
     ClangToolset();
-    void CreateCommandsFor(Project &project) override;
-    void CreateCommandsForUnity(Project &project) override;
     GlobalOptions ParseGeneralOptions(const std::string &options) override;
     void SetParameter(const std::string& key, const std::string& value) override;
-    std::string getLibNameFor(Component &component) override;
-    std::string getExeNameFor(Component &component) override;
-    std::string compiler, linker, archiver;
+    std::string getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) override;
+    std::string getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) override;
+    std::string getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) override;
+    std::string getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) override;
+    std::string getUnittestCommand(const std::string& program) override;
+    std::string getObjNameFor(const File& file) override;
+    std::string getLibNameFor(const Component &component) override;
+    std::string getExeNameFor(const Component &component) override;
 };
 
-struct GccToolset : public Toolset
+struct GccToolset : public GenericToolset
 {
     GccToolset();
-    void CreateCommandsFor(Project &project) override;
-    void CreateCommandsForUnity(Project &project) override;
     GlobalOptions ParseGeneralOptions(const std::string &options) override;
     void SetParameter(const std::string& key, const std::string& value) override;
-    std::string getLibNameFor(Component &component) override;
-    std::string getExeNameFor(Component &component) override;
-    std::string compiler, linker, archiver;
+    std::string getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) override;
+    std::string getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) override;
+    std::string getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) override;
+    std::string getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) override;
+    std::string getUnittestCommand(const std::string& program) override;
+    std::string getObjNameFor(const File& file) override;
+    std::string getLibNameFor(const Component &component) override;
+    std::string getExeNameFor(const Component &component) override;
 };
 
-struct MsvcToolset : public Toolset
+struct MsvcToolset : public GenericToolset
 {
     MsvcToolset();
-    void CreateCommandsFor(Project &project) override;
-    void CreateCommandsForUnity(Project &project) override;
     void SetParameter(const std::string& key, const std::string& value) override;
-    std::string getLibNameFor(Component &component) override;
-    std::string getExeNameFor(Component &component) override;
-    std::string compiler, linker, archiver;
+    std::string getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) override;
+    std::string getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) override;
+    std::string getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) override;
+    std::string getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) override;
+    std::string getUnittestCommand(const std::string& program) override;
+    std::string getObjNameFor(const File& file) override;
+    std::string getLibNameFor(const Component &component) override;
+    std::string getExeNameFor(const Component &component) override;
 };
 
 std::unique_ptr<Toolset> GetToolsetByName(const std::string &name);

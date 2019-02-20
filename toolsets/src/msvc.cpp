@@ -13,22 +13,11 @@
 // Enable modules support for MSVC
 //"/experimental:module /module:stdIfcDir \"$(VC_IFCPath)\" /module:search obj/modules/"
 
-std::string MsvcToolset::getLibNameFor(Component &component)
-{
-    return "lib" + getNameFor(component) + ".lib";
-}
-
-std::string MsvcToolset::getExeNameFor(Component &component)
-{
-    return getNameFor(component) + ".exe";
-}
-
 MsvcToolset::MsvcToolset() 
-: compiler("cl.exe")
-, linker("link.exe")
-, archiver("lib.exe")
 {
-
+  compiler = "cl.exe";
+  linker = "link.exe";
+  archiver = "lib.exe";
 }
 
 void MsvcToolset::SetParameter(const std::string& key, const std::string& value) {
@@ -38,66 +27,62 @@ void MsvcToolset::SetParameter(const std::string& key, const std::string& value)
   else throw std::runtime_error("Invalid parameter for MSVC toolchain: " + key);
 }
 
-void MsvcToolset::CreateCommandsForUnity(Project &project) {}
+std::string MsvcToolset::getObjNameFor(const File& file) {
+  return file.path.generic_string() + ".obj";
+}
 
-void MsvcToolset::CreateCommandsFor(Project &project)
+std::string MsvcToolset::getLibNameFor(const Component &component)
 {
-    for(auto &p : project.components)
-    {
-        auto &component = p.second;
-        std::string includes;
-        for(auto &d : getIncludePathsFor(component))
-        {
-            includes += " /I" + filesystem::relative(d).string();
-        }
+    return "lib" + getNameFor(component) + ".lib";
+}
 
-        // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
-        filesystem::path outputFolder = component.root;
-        std::vector<File *> objects;
-        for(auto &f : component.files)
-        {
-            if(!File::isTranslationUnit(f->path))
-                continue;
-            filesystem::path temp = (f->path.string().substr(component.root.string().size()) + ".obj");
-            filesystem::path outputFile = std::string("obj") / outputFolder / temp;
-            File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " /c /EHsc " + Configuration::Get().compileFlags + includes + " /Fo" + filesystem::weakly_canonical(outputFile).string() + " " + filesystem::weakly_canonical(f->path).string());
-            objects.push_back(of);
-            pc->AddOutput(of);
-            std::unordered_set<File *> d;
-            std::stack<File *> deps;
-            deps.push(f);
-            size_t index = 0;
-            while(!deps.empty())
-            {
-                File *dep = deps.top();
-                deps.pop();
-                pc->AddInput(dep);
-                for(File *input : dep->dependencies)
-                    if(d.insert(input).second)
-                        deps.push(input);
-                index++;
-            }
-            pc->Check();
-            component.commands.push_back(pc);
-        }
-        if(!objects.empty())
-        {
-            std::string command;
-            filesystem::path outputFile;
-            std::shared_ptr<PendingCommand> pc;
-            if(component.type == "library")
-            {
-                outputFile = "lib\\" + getLibNameFor(component);
-                command = archiver + " " + filesystem::weakly_canonical(outputFile).string();
-                for(auto &file : objects)
-                {
-                    command += " " + file->path.string();
-                }
-                pc = std::make_shared<PendingCommand>(command);
-            }
-            else
-            {
+std::string MsvcToolset::getExeNameFor(const Component &component)
+{
+    return getNameFor(component) + ".exe";
+}
+
+std::string MsvcToolset::getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) {
+  std::string command = program + " /c /EHsc " + compileFlags + " /Fo" + outputFile + " " + inputFile->path.generic_string();
+  for (auto& i : includes) command += " /I" + i;
+  for(auto& d : linkDeps) for (auto& c : d) {
+      command += " -l" + c->root.string();
+  }
+  return command;
+}
+
+std::string MsvcToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) {
+  std::string command = program + " /c /EHsc " + compileFlags + " /Fo" + outputFile + " " + inputFile->path.generic_string();
+  for (auto& i : includes) command += " /I" + i;
+  return command;
+}
+
+std::string MsvcToolset::getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) {
+  std::terminate(); // TODO: not implemented.
+  std::string command = program + " " + outputFile;
+  for(auto &file : inputs)
+  {
+    command += " " + file->path.generic_string();
+  }
+  return command;
+}
+
+std::string MsvcToolset::getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) {
+  std::string command = program + " /OUT:" + outputFile;
+  for(auto &file : objects)
+  {
+      command += " " + file->path.string();
+  }
+  command += " /LIBPATH:lib";
+  for(auto& d : linkDeps) for (auto& c : d) {
+      command += " -l" + c->root.string();
+  }
+  return command;
+}
+
+std::string MsvcToolset::getUnittestCommand(const std::string& program) {
+  return "./" + program;
+}
+/*
                 outputFile = "bin\\" + getExeNameFor(component);
                 command = linker + " /OUT:" + outputFile.string();
 
@@ -151,3 +136,4 @@ void MsvcToolset::CreateCommandsFor(Project &project)
         }
     }
 }
+*/

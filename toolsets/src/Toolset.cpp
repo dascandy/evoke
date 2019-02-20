@@ -4,7 +4,7 @@
 #include "Component.h"
 #include "dotted.h"
 
-std::string Toolset::getNameFor(Component &component)
+std::string Toolset::getNameFor(const Component &component)
 {
     if(component.root.string() != ".")
     {

@@ -125,12 +125,17 @@ struct androidconfig
         "<!-- END_INCLUDE(manifest) -->\n";
 };
 
-std::string AndroidToolset::getExeNameFor(Component &component)
+std::string AndroidToolset::getObjNameFor(const File &file)
+{
+    return file.path.generic_string() + ".o";
+}
+
+std::string AndroidToolset::getExeNameFor(const Component &component)
 {
     return "lib" + getNameFor(component) + ".so";
 }
 
-std::string AndroidToolset::getLibNameFor(Component &component)
+std::string AndroidToolset::getLibNameFor(const Component &component)
 {
     return "lib" + getNameFor(component) + ".a";
 }
