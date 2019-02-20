@@ -24,6 +24,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/msvc.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/android.cpp 
+            ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/generic.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/Configuration.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
