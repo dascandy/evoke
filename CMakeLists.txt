@@ -35,6 +35,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Project.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/ReadCode.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/project/src/tarjan.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/project/src/File.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/ConsoleReporter.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
