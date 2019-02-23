@@ -26,6 +26,10 @@ void ClangToolset::SetParameter(const std::string& key, const std::string& value
   else throw std::runtime_error("Invalid parameter for Clang toolchain: " + key);
 }
 
+std::string ClangToolset::getBmiNameFor(const File& file) {
+  return file.path.generic_string() + ".bmi";
+}
+
 std::string ClangToolset::getObjNameFor(const File& file) {
   return file.path.generic_string() + ".o";
 }
@@ -45,25 +49,24 @@ std::string ClangToolset::getUnityCommand(const std::string& program, const std:
   for (auto& i : includes) command += " -I" + i;
   for(auto d : linkDeps)
   {
-    if(d.size() == 1)
+    for(auto &c : d)
     {
-      command += " -l" + d.front()->root.string();
-    }
-    else
-    {
-      command += " -Wl,--start-group";
-      for(auto &c : d)
-      {
-        command += " -l" + c->root.string();
-      }
-      command += " -Wl,--end-group";
+      command += " -l" + c->root.string();
     }
   }
   return command;
 }
 
-std::string ClangToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) {
+std::string ClangToolset::getPrecompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, bool hasModules) {
+  std::string command = program + " -fmodules-ts --precompile " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+  if (hasModules) command += " -fprebuilt-module-path=.";
+  for (auto& i : includes) command += " -I" + i;
+  return command;
+}
+
+std::string ClangToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, bool hasModules) {
   std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+  if (hasModules) command += " -fprebuilt-module-path=.";
   for (auto& i : includes) command += " -I" + i;
   return command;
 }

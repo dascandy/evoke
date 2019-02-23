@@ -92,7 +92,7 @@ std::ostream &operator<<(std::ostream &os, const Component &component)
             {
                 os << " " << d->path.generic_string() << "\n";
                 for(auto &dep : d->dependencies)
-                    os << "   " << dep->path.generic_string() << "\n";
+                    os << "   " << dep.second->path.generic_string() << "\n";
             }
         }
     }

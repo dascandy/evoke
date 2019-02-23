@@ -12,6 +12,27 @@
 #include <boost/algorithm/string/split.hpp>
 #include <stack>
 
+static std::unordered_set<File*> GetDependencies(File* file, std::unordered_map<std::string, File*>& moduleMap) {
+    std::unordered_set<File *> d;
+    std::stack<File *> deps;
+    deps.push(file);
+    size_t index = 0;
+    while(!deps.empty())
+    {
+        File *dep = deps.top();
+        deps.pop();
+        for(auto& input : dep->dependencies)
+            if(d.insert(input.second).second)
+                deps.push(input.second);
+        for(auto& p : dep->modImports)
+            deps.push(moduleMap[p.first]);
+        for(auto& p : dep->imports)
+            deps.push(moduleMap[p.first]);
+        index++;
+    }
+    return d;
+}
+
 void GenericToolset::CreateCommandsForUnity(Project &project)
 {
     for(auto &p : project.components)
@@ -45,6 +66,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
                 }
             }
         }
+        // TODO: missing header dependencies
 
         std::vector<std::vector<Component *>> inputLinkDeps = GetTransitiveAllDeps(component);
         std::reverse(inputLinkDeps.begin(), inputLinkDeps.end());
@@ -87,13 +109,45 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
 
 void GenericToolset::CreateCommandsFor(Project &project)
 {
+    std::unordered_map<std::string, File*> moduleMap;
+    std::set<File*> toPrecompile;
+    for(auto &[name, component] : project.components)
+    {
+        for(auto &f : component.files)
+        {
+            if (!f->moduleExported) continue;
+            
+            File* ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*f));
+            moduleMap.insert(std::make_pair(f->moduleName, ofile));
+            toPrecompile.insert(ofile);
+            for (auto& import : f->modImports) {
+                File* ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*import.second));
+                moduleMap.insert(std::make_pair(import.first, ofile));
+                toPrecompile.insert(ofile);
+            }
+        }
+    }
+    if (!moduleMap.empty()) {
+        std::ofstream os("module.map");
+        for (auto& p : moduleMap) {
+            os << p.first << "=" << p.second->path.generic_string() << "\n";
+        }
+    }
+    for (auto& f : toPrecompile) {
+        auto includes = getIncludePathsFor(f->component);
+        File* ofile = project.CreateFile(f->component, "modules/" + getBmiNameFor(*f));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(compiler, Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, !f->imports.empty() || !f->modImports.empty()));
+        pc->AddOutput(ofile);
+        for (auto& d : GetDependencies(f, moduleMap)) {
+            pc->AddInput(d);
+        }
+        pc->Check();
+        f->component.commands.push_back(pc);
+    }
     for(auto &p : project.components)
     {
         auto &component = p.second;
         auto includes = getIncludePathsFor(component);
-
-        // TODO: modules: -fmodules-ts --precompile  -fmodules-cache-path=<directory>-fprebuilt-module-path=<directory>
-        //          clang -fmodules-ts -x c++-module --precompile %s -o %t.pcm -v 2>&1 |
         filesystem::path outputFolder = component.root;
         std::vector<File *> objects;
         for(auto &f : component.files)
@@ -102,22 +156,11 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 continue;
             filesystem::path outputFile = std::string("obj") / outputFolder / getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), f, includes));
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
             pc->AddOutput(of);
-            std::unordered_set<File *> d;
-            std::stack<File *> deps;
-            deps.push(f);
-            size_t index = 0;
-            while(!deps.empty())
-            {
-                File *dep = deps.top();
-                deps.pop();
-                pc->AddInput(dep);
-                for(File *input : dep->dependencies)
-                    if(d.insert(input).second)
-                        deps.push(input);
-                index++;
+            for (auto& d : GetDependencies(f, moduleMap)) {
+                pc->AddInput(d);
             }
             pc->Check();
             component.commands.push_back(pc);

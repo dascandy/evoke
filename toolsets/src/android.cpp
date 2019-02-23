@@ -125,6 +125,11 @@ struct androidconfig
         "<!-- END_INCLUDE(manifest) -->\n";
 };
 
+std::string AndroidToolset::getBmiNameFor(const File &file)
+{
+    return file.path.generic_string() + ".bmi";
+}
+
 std::string AndroidToolset::getObjNameFor(const File &file)
 {
     return file.path.generic_string() + ".o";
@@ -179,7 +184,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                     File *dep = deps.top();
                     deps.pop();
                     pc->AddInput(dep);
-                    for(File *input : dep->dependencies)
+                    for(auto& [name, input] : dep->dependencies)
                         if(d.insert(input).second)
                             deps.push(input);
                     index++;

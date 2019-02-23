@@ -27,6 +27,10 @@ void MsvcToolset::SetParameter(const std::string& key, const std::string& value)
   else throw std::runtime_error("Invalid parameter for MSVC toolchain: " + key);
 }
 
+std::string MsvcToolset::getBmiNameFor(const File& file) {
+  return file.path.generic_string() + ".bmi";
+}
+
 std::string MsvcToolset::getObjNameFor(const File& file) {
   return file.path.generic_string() + ".obj";
 }
@@ -50,7 +54,13 @@ std::string MsvcToolset::getUnityCommand(const std::string& program, const std::
   return command;
 }
 
-std::string MsvcToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) {
+std::string MsvcToolset::getPrecompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, bool hasModules) {
+  std::string command = program + " /c /EHsc " + compileFlags + " /Fo" + outputFile + " " + inputFile->path.generic_string();
+  for (auto& i : includes) command += " /I" + i;
+  return command;
+}
+
+std::string MsvcToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, bool hasModules) {
   std::string command = program + " /c /EHsc " + compileFlags + " /Fo" + outputFile + " " + inputFile->path.generic_string();
   for (auto& i : includes) command += " /I" + i;
   return command;
@@ -80,60 +90,7 @@ std::string MsvcToolset::getLinkerCommand(const std::string& program, const std:
 }
 
 std::string MsvcToolset::getUnittestCommand(const std::string& program) {
-  return "./" + program;
+  return program;
 }
-/*
-                outputFile = "bin\\" + getExeNameFor(component);
-                command = linker + " /OUT:" + outputFile.string();
 
-                for(auto &file : objects)
-                {
-                    command += " " + file->path.string();
-                }
-                command += " /LIBPATH:lib";
-                std::vector<std::vector<Component *>> linkDeps = GetTransitiveAllDeps(component);
-                std::reverse(linkDeps.begin(), linkDeps.end());
-                for(auto d : linkDeps)
-                {
-                    for(auto &c : d)
-                    {
-                        if(c != &component && !c->isHeaderOnly())
-                        {
-                            command += " " + c->root.string();
-                        }
-                    }
-                }
-                pc = std::make_shared<PendingCommand>(command);
-                for(auto &d : linkDeps)
-                {
-                    for(auto &c : d)
-                    {
-                        if(c != &component && !c->isHeaderOnly())
-                        {
-                            pc->AddInput(project.CreateFile(*c, "lib\\" + getLibNameFor(*c)));
-                        }
-                    }
-                }
-            }
-            File *libraryFile = project.CreateFile(component, outputFile);
-            pc->AddOutput(libraryFile);
-            for(auto &file : objects)
-            {
-                pc->AddInput(file);
-            }
-            pc->Check();
-            component.commands.push_back(pc);
-            if(component.type == "unittest")
-            {
-                command = outputFile.string();
-                pc = std::make_shared<PendingCommand>(command);
-                outputFile += ".log";
-                pc->AddInput(libraryFile);
-                pc->AddOutput(project.CreateFile(component, outputFile.string()));
-                pc->Check();
-                component.commands.push_back(pc);
-            }
-        }
-    }
-}
-*/
+

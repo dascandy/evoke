@@ -27,6 +27,10 @@ void GccToolset::SetParameter(const std::string& key, const std::string& value) 
   else throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
 }
 
+std::string GccToolset::getBmiNameFor(const File& file) {
+  return file.path.generic_string() + ".bmi";
+}
+
 std::string GccToolset::getObjNameFor(const File& file) {
   return file.path.generic_string() + ".o";
 }
@@ -63,8 +67,21 @@ std::string GccToolset::getUnityCommand(const std::string& program, const std::s
   return command;
 }
 
-std::string GccToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) {
+std::string GccToolset::getPrecompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, bool hasModules) {
+  std::string command = program + " -fmodules-ts -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+  if (!inputFile->moduleExported)
+    command += " -fmodule-legacy";
+  if (hasModules)
+    command += " -fmodule-mapper=module.map";
+  for (auto& i : includes) command += " -I" + i;
+  return command;
+}
+
+std::string GccToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, bool hasModules) {
   std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+  if (hasModules)
+    command += " -fmodules-ts -fmodule-mapper=module.map";
+
   for (auto& i : includes) command += " -I" + i;
   return command;
 }
