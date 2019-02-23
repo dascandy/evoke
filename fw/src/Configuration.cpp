@@ -34,7 +34,7 @@ static std::vector<std::string> splitWithQuotes(const std::string &str)
 
 void Configuration::LoadDefaults()
 {
-    blacklist = { "unity" };
+    blacklist = {"unity"};
 #ifdef _WIN32
     toolchain = "msvc";
     compileFlags = "/permissive- /std:c++latest";

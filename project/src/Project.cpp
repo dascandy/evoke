@@ -250,8 +250,9 @@ void Project::MapImportsToModules(std::unordered_map<std::string, File *> &modul
     }
 }
 
-void Project::MoveIncludeToImport() {
-    std::unordered_set<File*> importedHeaders;
+void Project::MoveIncludeToImport()
+{
+    std::unordered_set<File *> importedHeaders;
     // Find all headers imported anywhere anyhow as an import (ie, precompiled)
     for(auto &f : files)
         for(auto &d : f.second.modImports)
@@ -260,11 +261,14 @@ void Project::MoveIncludeToImport() {
     // Move those that map to an imported file to the imports section, so it will view it as an import
     for(auto &f : files)
     {
-        for (auto it = f.second.dependencies.begin(); it != f.second.dependencies.end(); ) {
-            if (importedHeaders.find(it->second) != importedHeaders.end()) {
+        for(auto it = f.second.dependencies.begin(); it != f.second.dependencies.end();)
+        {
+            if(importedHeaders.find(it->second) != importedHeaders.end())
+            {
                 f.second.modImports.insert(*it);
                 f.second.dependencies.erase(it);
-            } else
+            }
+            else
                 ++it;
         }
     }

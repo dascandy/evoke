@@ -21,5 +21,5 @@ void SimpleReporter::ReportFailure(std::shared_ptr<PendingCommand> command, int 
         std::cout << "Error while running " << command->commandToRun << "\n";
     }
     std::cout << errors << "\n"
-                  << std::flush;
+              << std::flush;
 }

@@ -75,7 +75,7 @@ int main(int argc, const char **argv)
     bool cmakelists = false;
     bool verbose = false;
     bool unitybuild = false;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild }});
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}});
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
@@ -93,10 +93,13 @@ int main(int argc, const char **argv)
         std::cerr << "Unknown header: " << u << "\n";
     }
     std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
-    if (unitybuild) {
-      toolset->CreateCommandsForUnity(op);
-    } else {
-      toolset->CreateCommandsFor(op);
+    if(unitybuild)
+    {
+        toolset->CreateCommandsForUnity(op);
+    }
+    else
+    {
+        toolset->CreateCommandsFor(op);
     }
     if(compilation_database)
     {

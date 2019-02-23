@@ -44,9 +44,10 @@ private:
             imports[importName] = exported;
         }
     }
+
 public:
-    static bool isTranslationUnit(const boost::filesystem::path&);
-    static bool isHeader(const boost::filesystem::path&);
+    static bool isTranslationUnit(const boost::filesystem::path &);
+    static bool isHeader(const boost::filesystem::path &);
     bool isTranslationUnit() const;
     bool isHeader() const;
     std::time_t lastwrite()

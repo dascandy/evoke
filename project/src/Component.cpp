@@ -20,7 +20,7 @@ bool Component::isHeaderOnly() const
         return false;
     for(auto &d : files)
     {
-        if(d->isTranslationUnit()) 
+        if(d->isTranslationUnit())
             return false;
     }
     return true;

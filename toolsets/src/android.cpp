@@ -145,9 +145,13 @@ std::string AndroidToolset::getLibNameFor(const Component &component)
     return "lib" + getNameFor(component) + ".a";
 }
 
-void AndroidToolset::SetParameter(const std::string& key, const std::string& value) {}
+void AndroidToolset::SetParameter(const std::string &key, const std::string &value)
+{
+}
 
-void AndroidToolset::CreateCommandsForUnity(Project &project) {}
+void AndroidToolset::CreateCommandsForUnity(Project &project)
+{
+}
 
 void AndroidToolset::CreateCommandsFor(Project &project)
 {
@@ -184,7 +188,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                     File *dep = deps.top();
                     deps.pop();
                     pc->AddInput(dep);
-                    for(auto& [name, input] : dep->dependencies)
+                    for(auto &[name, input] : dep->dependencies)
                         if(d.insert(input).second)
                             deps.push(input);
                     index++;
