@@ -3,18 +3,6 @@
 #include "File.h"
 #include "PendingCommand.h"
 
-std::unordered_set<std::string> tus = {
-    ".cpp",
-    ".cxx",
-    ".C",
-    ".c",
-};
-
-bool isTranslationUnit(const std::string &str)
-{
-    return tus.find(str) != tus.end();
-}
-
 Component::Component(const filesystem::path &path, bool isBinary) :
     root(path),
     type("library"),
@@ -32,7 +20,7 @@ bool Component::isHeaderOnly() const
         return false;
     for(auto &d : files)
     {
-        if(isTranslationUnit(d->path.extension().string()))
+        if(d->isTranslationUnit()) 
             return false;
     }
     return true;
@@ -74,7 +62,7 @@ std::ostream &operator<<(std::ostream &os, const Component &component)
         else if(d->hasInclude)
             anyHeader = true;
 
-        if(isTranslationUnit(d->path.extension().string()))
+        if(d->isTranslationUnit())
             anySource = true;
     }
     if(anyExternal)
@@ -100,7 +88,7 @@ std::ostream &operator<<(std::ostream &os, const Component &component)
         os << "\n  Sources:\n";
         for(auto &d : component.files)
         {
-            if(isTranslationUnit(d->path.extension().string()))
+            if(d->isTranslationUnit())
             {
                 os << " " << d->path.generic_string() << "\n";
                 for(auto &dep : d->dependencies)

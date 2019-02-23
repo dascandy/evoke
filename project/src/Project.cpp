@@ -151,18 +151,6 @@ bool Project::IsSystemComponent(const std::string &name) const
     return result;
 }
 
-bool Project::IsCode(const std::string &ext)
-{
-    static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm", ".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc"};
-    return exts.count(ext) > 0;
-}
-
-bool Project::IsCompilationUnit(const std::string &ext)
-{
-    static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm"};
-    return exts.count(ext) > 0;
-}
-
 static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, filesystem::path path)
 {
     Component *rv = nullptr;
@@ -205,7 +193,7 @@ void Project::LoadFileList()
                 }
             }
         }
-        else if(filesystem::is_regular_file(it->status()) && IsCode(it->path().extension().generic_string().c_str()))
+        else if(filesystem::is_regular_file(it->status()) && (File::isHeader(it->path()) || File::isTranslationUnit(it->path())))
         {
             Component *component = GetComponentFor(components, it->path());
             if(component)

@@ -125,12 +125,17 @@ struct androidconfig
         "<!-- END_INCLUDE(manifest) -->\n";
 };
 
-std::string AndroidToolset::getExeNameFor(Component &component)
+std::string AndroidToolset::getObjNameFor(const File &file)
+{
+    return file.path.generic_string() + ".o";
+}
+
+std::string AndroidToolset::getExeNameFor(const Component &component)
 {
     return "lib" + getNameFor(component) + ".so";
 }
 
-std::string AndroidToolset::getLibNameFor(Component &component)
+std::string AndroidToolset::getLibNameFor(const Component &component)
 {
     return "lib" + getNameFor(component) + ".a";
 }
@@ -158,7 +163,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
             std::vector<File *> objects;
             for(auto &f : component.files)
             {
-                if(!project.IsCompilationUnit(f->path.extension().string()))
+                if(!File::isTranslationUnit(f->path))
                     continue;
                 filesystem::path outputFile = ("obj/" + p.first) / outputFolder / (f->path.string().substr(component.root.string().size()) + ".o");
                 File *of = project.CreateFile(component, outputFile);
