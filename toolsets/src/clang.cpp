@@ -107,16 +107,9 @@ std::string ClangToolset::getLinkerCommand(const std::string &program, const std
     command += " -Llib";
     for(auto d : linkDeps)
     {
-        if(d.size() == 1)
+        for(auto &c : d)
         {
-            command += " -l" + d.front()->root.string();
-        }
-        else
-        {
-            for(auto &c : d)
-            {
-                command += " -l" + c->root.string();
-            }
+            command += " -l" + c->root.string();
         }
     }
     return command;
