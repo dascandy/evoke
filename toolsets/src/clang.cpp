@@ -112,12 +112,10 @@ std::string ClangToolset::getLinkerCommand(const std::string &program, const std
         }
         else
         {
-            command += " -Wl,--start-group";
             for(auto &c : d)
             {
                 command += " -l" + c->root.string();
             }
-            command += " -Wl,--end-group";
         }
     }
     return command;
