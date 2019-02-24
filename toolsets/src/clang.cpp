@@ -33,7 +33,8 @@ void ClangToolset::SetParameter(const std::string &key, const std::string &value
 
 std::string ClangToolset::getBmiNameFor(const File &file)
 {
-    return file.path.generic_string() + ".bmi";
+    return file.moduleName + ".pcm";
+    //return file.path.generic_string() + ".bmi";
 }
 
 std::string ClangToolset::getObjNameFor(const File &file)
@@ -68,9 +69,9 @@ std::string ClangToolset::getUnityCommand(const std::string &program, const std:
 
 std::string ClangToolset::getPrecompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
 {
-    std::string command = program + " -fmodules-ts --precompile " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+    std::string command = program + " -fmodules-ts --precompile -x c++-module " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
     if(hasModules)
-        command += " -fprebuilt-module-path=.";
+        command += " -fprebuilt-module-path=modules";
     for(auto &i : includes)
         command += " -I" + i;
     return command;
@@ -80,7 +81,7 @@ std::string ClangToolset::getCompileCommand(const std::string &program, const st
 {
     std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
     if(hasModules)
-        command += " -fprebuilt-module-path=.";
+        command += " -fmodules-ts -fprebuilt-module-path=modules";
     for(auto &i : includes)
         command += " -I" + i;
     return command;

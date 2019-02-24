@@ -90,7 +90,8 @@ std::ostream &operator<<(std::ostream &os, const Component &component)
         {
             if(d->isTranslationUnit())
             {
-                os << " " << d->path.generic_string() << "\n";
+                os << " " << d->path.generic_string();
+                os << " (" << (d->moduleExported ? "export " : "") << d->moduleName << ")\n";
                 for(auto &dep : d->dependencies)
                     os << "   " << dep.second->path.generic_string() << "\n";
             }

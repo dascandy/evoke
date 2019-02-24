@@ -133,12 +133,12 @@ void GenericToolset::CreateCommandsFor(Project &project)
 
             File *ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*f));
             moduleMap.insert(std::make_pair(f->moduleName, ofile));
-            toPrecompile.insert(ofile);
+            toPrecompile.insert(f);
             for(auto &import : f->modImports)
             {
                 File *ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*import.second));
                 moduleMap.insert(std::make_pair(import.first, ofile));
-                toPrecompile.insert(ofile);
+                toPrecompile.insert(f);
             }
         }
     }
@@ -154,7 +154,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
     {
         auto includes = getIncludePathsFor(f->component);
         File *ofile = project.CreateFile(f->component, "modules/" + getBmiNameFor(*f));
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(compiler, Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, !f->imports.empty() || !f->modImports.empty()));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(compiler, Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, true));
         pc->AddOutput(ofile);
         for(auto &d : GetDependencies(f, moduleMap))
         {
@@ -167,15 +167,14 @@ void GenericToolset::CreateCommandsFor(Project &project)
     {
         auto &component = p.second;
         auto includes = getIncludePathsFor(component);
-        filesystem::path outputFolder = component.root;
         std::vector<File *> objects;
         for(auto &f : component.files)
         {
             if(!File::isTranslationUnit(f->path))
                 continue;
-            filesystem::path outputFile = std::string("obj") / outputFolder / getObjNameFor(*f);
+            filesystem::path outputFile = "obj/" + getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->imports.empty() || !f->modImports.empty()));
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
             pc->AddOutput(of);
             for(auto &d : GetDependencies(f, moduleMap))

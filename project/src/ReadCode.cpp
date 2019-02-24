@@ -16,8 +16,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
     enum State
     {
         None,
+        Dirty,
         AfterHash,
-        AfterSemicolon,
         AfterImport,
         AfterInclude,
         AfterModule
@@ -27,14 +27,10 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
         switch(state)
         {
         case None:
-        {
-            switch(buffer[offset])
+            switch(buffer[offset]) 
             {
             case '#':
                 state = AfterHash;
-                break;
-            case ';':
-                state = AfterSemicolon;
                 break;
             case '/': // Check for and skip comment blocks
                 if(buffer[offset + 1] == '/')
@@ -52,14 +48,6 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                     } while(buffer[offset - 1] != '*');
                 }
                 break;
-            default:
-                break;
-            }
-        }
-        break;
-        case AfterSemicolon:
-            switch(buffer[offset])
-            {
             case ' ':
             case '\t':
             case '\n':
@@ -67,41 +55,68 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
             case '\f':
                 break;
             case 'e':
-                if(buffer[offset + 1] == 'x' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't')
+                if(buffer[offset + 1] == 'x' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't' && isspace(buffer[offset+6]))
                 {
                     exported = true;
                     offset += 5;
                 }
                 else
                 {
-                    state = None;
+                    state = Dirty;
                 }
                 break;
             case 'i':
-                if(buffer[offset + 1] == 'm' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't')
+                if(buffer[offset + 1] == 'm' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't' && (isspace(buffer[offset+6]) || buffer[offset+6] == '<' || buffer[offset+6] == '"'))
                 {
                     state = AfterImport;
                     offset += 5;
                 }
                 else
                 {
-                    state = None;
+                    state = Dirty;
                 }
                 break;
             case 'm':
-                if(buffer[offset + 1] == 'o' && buffer[offset + 2] == 'd' && buffer[offset + 3] == 'u' && buffer[offset + 4] == 'l' && buffer[offset + 5] == 'e')
+                if(buffer[offset + 1] == 'o' && buffer[offset + 2] == 'd' && buffer[offset + 3] == 'u' && buffer[offset + 4] == 'l' && buffer[offset + 5] == 'e' && isspace(buffer[offset+6]))
                 {
                     state = AfterModule;
                     offset += 5;
                 }
                 else
                 {
-                    state = None;
+                    state = Dirty;
                 }
                 break;
 
             default:
+                state = Dirty;
+                break;
+            }
+            break;
+        case Dirty:
+            switch(buffer[offset]) 
+            {
+            case '#':
+                state = AfterHash;
+                break;
+            case ';':
                 state = None;
+                break;
+            case '/': // Check for and skip comment blocks
+                if(buffer[offset + 1] == '/')
+                {
+                    offset = static_cast<const char *>(memchr(buffer + offset, '\n', buffersize - offset)) - buffer;
+                }
+                else if(buffer[offset + 1] == '*')
+                {
+                    do
+                    {
+                        const char *endSlash = static_cast<const char *>(memchr(buffer + offset + 1, '/', buffersize - offset));
+                        if(!endSlash)
+                            return;
+                        offset = endSlash - buffer;
+                    } while(buffer[offset - 1] != '*');
+                }
                 break;
             }
             break;
@@ -112,12 +127,12 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
             case '\t':
                 break;
             case 'i':
-                if(buffer[offset + 1] == 'm' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't')
+                if(buffer[offset + 1] == 'm' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't' && (isspace(buffer[offset+6]) || buffer[offset+6] == '<' || buffer[offset+6] == '"'))
                 {
                     state = AfterImport;
                     offset += 5;
                 }
-                else if(buffer[offset + 1] == 'n' && buffer[offset + 2] == 'c' && buffer[offset + 3] == 'l' && buffer[offset + 4] == 'u' && buffer[offset + 5] == 'd' && buffer[offset + 6] == 'e')
+                else if(buffer[offset + 1] == 'n' && buffer[offset + 2] == 'c' && buffer[offset + 3] == 'l' && buffer[offset + 4] == 'u' && buffer[offset + 5] == 'd' && buffer[offset + 6] == 'e' && (isspace(buffer[offset+7]) || buffer[offset+7] == '<' || buffer[offset+7] == '"'))
                 {
                     state = AfterInclude;
                     offset += 6;
@@ -150,6 +165,7 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 {
                     switch(buffer[offset])
                     {
+                    case ';':
                     case '\n':
                         state = None; // Buggy code, skip over this include.
                         break;
@@ -180,16 +196,21 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                     {
                         if(state == AfterModule)
                         {
+                            printf("%s\n", modulename.c_str());
                             f.SetModule(modulename, exported);
                         }
                         else
                         {
+                            printf("%s\n", modulename.c_str());
                             f.AddImport(modulename, exported);
                         }
                         exported = false;
                     }
                 }
-                state = None;
+                if (buffer[offset] == ';')
+                    state = None;
+                else
+                    state = Dirty;
                 break;
             }
             break;
