@@ -41,6 +41,7 @@ void Project::Reload()
     std::unordered_map<std::string, File *> moduleMap;
     CreateModuleMap(moduleMap);
     MapImportsToModules(moduleMap);
+    MoveIncludeToImport();
 
     std::unordered_map<std::string, std::string> includeLookup;
     std::unordered_map<std::string, std::set<std::string>> collisions;
@@ -239,12 +240,36 @@ void Project::MapImportsToModules(std::unordered_map<std::string, File *> &modul
             File *target = moduleMap[import.first];
             if(target)
             {
-                f.second.modImports.insert(target);
+                f.second.modImports.insert(std::make_pair(import.first, target));
             }
             else
             {
                 std::cerr << "Could not find module " << import.first.c_str() << " imported by " << f.second.path.c_str() << '\n';
             }
+        }
+    }
+}
+
+void Project::MoveIncludeToImport()
+{
+    std::unordered_set<File *> importedHeaders;
+    // Find all headers imported anywhere anyhow as an import (ie, precompiled)
+    for(auto &f : files)
+        for(auto &d : f.second.modImports)
+            importedHeaders.insert(d.second);
+
+    // Move those that map to an imported file to the imports section, so it will view it as an import
+    for(auto &f : files)
+    {
+        for(auto it = f.second.dependencies.begin(); it != f.second.dependencies.end();)
+        {
+            if(importedHeaders.find(it->second) != importedHeaders.end())
+            {
+                f.second.modImports.insert(*it);
+                f.second.dependencies.erase(it);
+            }
+            else
+                ++it;
         }
     }
 }
@@ -272,7 +297,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 // This file exists as a local include.
                 File *dep = &files.find(fullFilePath)->second;
                 dep->hasInclude = true;
-                fp.second.modImports.insert(dep);
+                fp.second.modImports.insert(std::make_pair(p.first, dep));
             }
             else
             {
@@ -294,7 +319,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 else if(files.count(fullPath))
                 {
                     File *dep = &files.find(fullPath)->second;
-                    fp.second.modImports.insert(dep);
+                    fp.second.modImports.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
                     if(inclpath.size() == dep->component.root.generic_string().size())
@@ -337,7 +362,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 // This file exists as a local include.
                 File *dep = &files.find(fullFilePath)->second;
                 dep->hasInclude = true;
-                fp.second.dependencies.insert(dep);
+                fp.second.dependencies.insert(std::make_pair(p.first, dep));
             }
             else
             {
@@ -358,7 +383,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 else if(files.count(fullPath))
                 {
                     File *dep = &files.find(fullPath)->second;
-                    fp.second.dependencies.insert(dep);
+                    fp.second.dependencies.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
                     if(inclpath.size() == dep->component.root.generic_string().size())
@@ -406,9 +431,9 @@ void Project::PropagateExternalIncludes()
             {
                 for(auto &dep : fp.second.dependencies)
                 {
-                    if(!dep->hasExternalInclude && &dep->component == &fp.second.component)
+                    if(!dep.second->hasExternalInclude && &dep.second->component == &fp.second.component)
                     {
-                        dep->hasExternalInclude = true;
+                        dep.second->hasExternalInclude = true;
                         foundChange = true;
                     }
                 }
@@ -458,8 +483,8 @@ void Project::ExtractPublicDependencies()
                 hasExtIncludes = true;
                 for(auto &dep : fp->dependencies)
                 {
-                    comp.privDeps.erase(&dep->component);
-                    comp.pubDeps.insert(&dep->component);
+                    comp.privDeps.erase(&dep.second->component);
+                    comp.pubDeps.insert(&dep.second->component);
                 }
             }
         }

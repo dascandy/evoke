@@ -13,22 +13,33 @@
 #include <stack>
 #include <unordered_set>
 
-GccToolset::GccToolset() 
+GccToolset::GccToolset()
 {
-  compiler = "g++";
-  linker = "g++";
-  archiver = "ar";
+    compiler = "g++";
+    linker = "g++";
+    archiver = "ar";
 }
 
-void GccToolset::SetParameter(const std::string& key, const std::string& value) {
-  if (key == "compiler") compiler = value;
-  else if (key == "linker") linker = value;
-  else if (key == "archiver") archiver = value;
-  else throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
+void GccToolset::SetParameter(const std::string &key, const std::string &value)
+{
+    if(key == "compiler")
+        compiler = value;
+    else if(key == "linker")
+        linker = value;
+    else if(key == "archiver")
+        archiver = value;
+    else
+        throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
 }
 
-std::string GccToolset::getObjNameFor(const File& file) {
-  return file.path.generic_string() + ".o";
+std::string GccToolset::getBmiNameFor(const File &file)
+{
+    return file.path.generic_string() + ".bmi";
+}
+
+std::string GccToolset::getObjNameFor(const File &file)
+{
+    return file.path.generic_string() + ".o";
 }
 
 std::string GccToolset::getLibNameFor(const Component &component)
@@ -41,71 +52,93 @@ std::string GccToolset::getExeNameFor(const Component &component)
     return getNameFor(component);
 }
 
-std::string GccToolset::getUnityCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes, std::vector<std::vector<Component*>> linkDeps) {
-  std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
-  for (auto& i : includes) command += " -I" + i;
-  for(auto d : linkDeps)
-  {
-    if(d.size() == 1)
+std::string GccToolset::getUnityCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps)
+{
+    std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+    for(auto &i : includes)
+        command += " -I" + i;
+    for(auto d : linkDeps)
     {
-      command += " -l" + d.front()->root.string();
+        if(d.size() == 1)
+        {
+            command += " -l" + d.front()->root.string();
+        }
+        else
+        {
+            command += " -Wl,--start-group";
+            for(auto &c : d)
+            {
+                command += " -l" + c->root.string();
+            }
+            command += " -Wl,--end-group";
+        }
     }
-    else
-    {
-      command += " -Wl,--start-group";
-      for(auto &c : d)
-      {
-        command += " -l" + c->root.string();
-      }
-      command += " -Wl,--end-group";
-    }
-  }
-  return command;
+    return command;
 }
 
-std::string GccToolset::getCompileCommand(const std::string& program, const std::string& compileFlags, const std::string& outputFile, const File* inputFile, const std::set<std::string>& includes) {
-  std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
-  for (auto& i : includes) command += " -I" + i;
-  return command;
+std::string GccToolset::getPrecompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
+{
+    std::string command = program + " -fmodules-ts -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+    if(!inputFile->moduleExported)
+        command += " -fmodule-legacy";
+    if(hasModules)
+        command += " -fmodule-mapper=module.map";
+    for(auto &i : includes)
+        command += " -I" + i;
+    return command;
 }
 
-std::string GccToolset::getArchiverCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> inputs) {
-  std::string command = program + " rcs " + outputFile;
-  for(auto &file : inputs)
-  {
-    command += " " + file->path.generic_string();
-  }
-  return command;
+std::string GccToolset::getCompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
+{
+    std::string command = program + " -c " + compileFlags + " -o " + outputFile + " " + inputFile->path.generic_string();
+    if(hasModules)
+        command += " -fmodules-ts -fmodule-mapper=module.map";
+
+    for(auto &i : includes)
+        command += " -I" + i;
+    return command;
 }
 
-std::string GccToolset::getLinkerCommand(const std::string& program, const std::string& outputFile, const std::vector<File*> objects, std::vector<std::vector<Component*>> linkDeps) {
-  std::string command = program + " -pthread -o " + outputFile;
-  for(auto &file : objects)
-  {
-      command += " " + file->path.string();
-  }
-  command += " -Llib";
-  for(auto d : linkDeps)
-  {
-    if(d.size() == 1)
+std::string GccToolset::getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs)
+{
+    std::string command = program + " rcs " + outputFile;
+    for(auto &file : inputs)
     {
-      command += " -l" + d.front()->root.string();
+        command += " " + file->path.generic_string();
     }
-    else
-    {
-      command += " -Wl,--start-group";
-      for(auto &c : d)
-      {
-        command += " -l" + c->root.string();
-      }
-      command += " -Wl,--end-group";
-    }
-  }
-  return command;
+    return command;
 }
 
-std::string GccToolset::getUnittestCommand(const std::string& program) {
-  return "./" + program;
+std::string GccToolset::getLinkerCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> objects, std::vector<std::vector<Component *>> linkDeps)
+{
+    std::string command = program + " -pthread -o " + outputFile;
+    for(auto &file : objects)
+    {
+        command += " " + file->path.string();
+    }
+    command += " -Llib";
+    for(auto d : linkDeps)
+    {
+        if(d.size() == 1)
+        {
+            command += " -l" + d.front()->root.string();
+        }
+        else
+        {
+            command += " -Wl,--start-group";
+            for(auto &c : d)
+            {
+                command += " -l" + c->root.string();
+            }
+            command += " -Wl,--end-group";
+        }
+    }
+    return command;
+}
+
+std::string GccToolset::getUnittestCommand(const std::string &program)
+{
+    return "./" + program;
 }
 /*
 void GccToolset::CreateCommandsForUnity(Project &project)

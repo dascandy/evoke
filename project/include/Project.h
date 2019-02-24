@@ -31,6 +31,7 @@ public:
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);
+    void MoveIncludeToImport();
     void MapImportsToModules(std::unordered_map<std::string, File *> &moduleMap);
     void CreateIncludeLookupTable(std::unordered_map<std::string, std::string> &includeLookup,
                                   std::unordered_map<std::string, std::set<std::string>> &collisions);

@@ -1,8 +1,10 @@
 #include "Toolset.h"
-#include <string>
-#include <fw/filesystem.hpp>
+
 #include "Component.h"
 #include "dotted.h"
+
+#include <fw/filesystem.hpp>
+#include <string>
 
 std::string Toolset::getNameFor(const Component &component)
 {
@@ -13,11 +15,11 @@ std::string Toolset::getNameFor(const Component &component)
     return filesystem::weakly_canonical(component.root).filename().string();
 }
 
-std::unique_ptr<Toolset> ParseToolset(const std::string& name);
+std::unique_ptr<Toolset> ParseToolset(const std::string &name);
 
 std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
 {
-    if (boost::filesystem::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_") 
+    if(boost::filesystem::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
     {
         return ParseToolset("toolsets/" + name + ".toolset");
     }
@@ -29,11 +31,11 @@ std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
     {
         return std::make_unique<MsvcToolset>();
     }
-    else if (name == "apple" || name == "osx" || name == "clang" || name == "__builtin_clang")
+    else if(name == "apple" || name == "osx" || name == "clang" || name == "__builtin_clang")
     {
         return std::make_unique<ClangToolset>();
     }
-    else if (name == "linux" || name == "gcc" || name == "__builtin_gcc")
+    else if(name == "linux" || name == "gcc" || name == "__builtin_gcc")
     {
         return std::make_unique<GccToolset>();
     }
@@ -43,23 +45,32 @@ std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
     }
 }
 
-std::unique_ptr<Toolset> ParseToolset(const std::string& name) {
+std::unique_ptr<Toolset> ParseToolset(const std::string &name)
+{
     std::unique_ptr<Toolset> toolset;
     std::ifstream in(name);
-    while (!in.eof() && in.good()) {
+    while(!in.eof() && in.good())
+    {
         std::string line;
         std::getline(in, line);
         size_t colon = line.find_first_of(':');
-        if (colon == line.npos) continue;
+        if(colon == line.npos)
+            continue;
         std::string key = line.substr(0, colon);
         colon++;
-        while (line[colon] == ' ') colon++; 
-        std::string value = line.substr(colon+1);
-        while (!value.empty() && value[value.size()-1] == ' ') value.resize(value.size() - 1);
-        if (key == "template") toolset = GetToolsetByName(value);
-        else if (!toolset) {
+        while(line[colon] == ' ')
+            colon++;
+        std::string value = line.substr(colon + 1);
+        while(!value.empty() && value[value.size() - 1] == ' ')
+            value.resize(value.size() - 1);
+        if(key == "template")
+            toolset = GetToolsetByName(value);
+        else if(!toolset)
+        {
             throw std::runtime_error("No template toolset found before parameters while loading " + name);
-        } else {
+        }
+        else
+        {
             toolset->SetParameter(key, value);
         }
     }

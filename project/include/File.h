@@ -44,9 +44,10 @@ private:
             imports[importName] = exported;
         }
     }
+
 public:
-    static bool isTranslationUnit(const boost::filesystem::path&);
-    static bool isHeader(const boost::filesystem::path&);
+    static bool isTranslationUnit(const boost::filesystem::path &);
+    static bool isHeader(const boost::filesystem::path &);
     bool isTranslationUnit() const;
     bool isHeader() const;
     std::time_t lastwrite()
@@ -73,9 +74,9 @@ public:
     // Import of headers by filename. Specifically C++ imports; Obj-C imports are treated as includes (as they do not need a precompile step)
     std::unordered_map<std::string, bool> rawImports;
     // Files where the compilation of this TU depends on the precompiled dependency (and not the dependency itself). Think modules.
-    std::unordered_set<File *> modImports;
+    std::unordered_map<std::string, File *> modImports;
     // Files where the compilation of this TU depends on the actual dependency directly. Think includes.
-    std::unordered_set<File *> dependencies;
+    std::unordered_map<std::string, File *> dependencies;
     // All include paths needed to make the include and import statements to this file function.
     std::unordered_set<std::string> includePaths;
     // If this is a generated file, this is the generator making it.

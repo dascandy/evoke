@@ -54,7 +54,7 @@ void PendingCommand::Check()
             {
                 o->state = File::ToRebuild;
                 for(auto &d : o->dependencies)
-                    d->generator->Check();
+                    d.second->generator->Check();
             }
             return;
         }
@@ -69,7 +69,7 @@ void PendingCommand::Check()
                 {
                     o->state = File::ToRebuild;
                     for(auto &d : o->dependencies)
-                        d->generator->Check();
+                        d.second->generator->Check();
                 }
                 return;
             }
@@ -83,7 +83,7 @@ void PendingCommand::Check()
         {
             o->state = File::ToRebuild;
             for(auto &d : o->dependencies)
-                d->generator->Check();
+                d.second->generator->Check();
         }
         return;
     }
