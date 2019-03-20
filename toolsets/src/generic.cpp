@@ -181,6 +181,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
             std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
             pc->AddOutput(of);
+            pc->AddInput(f);
             for(auto &d : GetDependencies(f, moduleMap))
             {
                 pc->AddInput(d);
