@@ -25,10 +25,14 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
         for(auto &input : dep->dependencies)
             if(d.insert(input.second).second)
                 deps.push(input.second);
-        for(auto &p : dep->modImports)
-            deps.push(moduleMap[p.first]);
-        for(auto &p : dep->imports)
-            deps.push(moduleMap[p.first]);
+        for(auto &p : dep->modImports) {
+            auto it = moduleMap.find(p.first);
+            if (it != moduleMap.end()) deps.push(it->second);
+        }
+        for(auto &p : dep->imports) {
+            auto it = moduleMap.find(p.first);
+            if (it != moduleMap.end()) deps.push(it->second);
+        }
         index++;
     }
     return d;
