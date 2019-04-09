@@ -46,16 +46,21 @@ private:
     }
 
 public:
-    static bool isTranslationUnit(const boost::filesystem::path &);
-    static bool isHeader(const boost::filesystem::path &);
+    static bool isTranslationUnit(const filesystem::path &);
+    static bool isHeader(const filesystem::path &);
     bool isTranslationUnit() const;
     bool isHeader() const;
     std::time_t lastwrite()
     {
         if(lastwrite_ == 0)
         {
-            error_code ec;
+            filesystem::error_code ec;
+#if defined(_MSC_VER)
             lastwrite_ = filesystem::last_write_time(path, ec);
+#else
+            auto ftime = filesystem::last_write_time(path, ec);
+            lastwrite_ = decltype(ftime)::clock::to_time_t(ftime);
+#endif
         }
         return lastwrite_;
     }
