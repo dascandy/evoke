@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
-project(evoke_cmake)
+project(evoke)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(
     FATAL_ERROR
     "Prevented in-tree build. Please create a build directory outside of the source directory and call cmake from there."
@@ -50,7 +50,7 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES})
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   find_package(Boost REQUIRED COMPONENTS filesystem system)
   target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
 else()
