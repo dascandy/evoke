@@ -7,8 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(
     FATAL_ERROR
-      "Prevented in-tree build. Please create a build directory outside of the source directory and call cmake from there."
-    )
+    "Prevented in-tree build. Please create a build directory outside of the source directory and call cmake from there."
+  )
 endif()
 
 set(INCLUDES
@@ -18,7 +18,8 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/include
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/include
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/view/include)
+    ${CMAKE_CURRENT_SOURCE_DIR}/view/include
+)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/src/Executor.cpp
@@ -43,11 +44,11 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/generic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/msvc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp
+)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES})
-
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   find_package(Boost REQUIRED COMPONENTS filesystem system)
