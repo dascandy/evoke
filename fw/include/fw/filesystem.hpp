@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || (__GNUC__ < 8)
 
 #    include <boost/filesystem.hpp>
 

@@ -50,7 +50,9 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES})
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+   OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+       AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0"))
   find_package(Boost REQUIRED COMPONENTS filesystem system)
   target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
 else()
