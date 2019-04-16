@@ -224,8 +224,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                     if(!in.empty())
                         linkDeps.push_back(std::move(in));
                 }
-                command = getLinkerCommand(compiler, outputFile.generic_string(), objects, linkDeps);
-                command += " -Llib";
+                command = getLinkerCommand(linker, outputFile.generic_string(), objects, linkDeps);
                 pc = std::make_shared<PendingCommand>(command);
                 for(auto &d : linkDeps)
                 {
