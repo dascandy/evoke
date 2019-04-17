@@ -48,7 +48,9 @@ set(SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES})
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
    OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
@@ -60,5 +62,7 @@ else()
   target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
+target_include_directories(${PROJECT_NAME}
+                           PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME}
+                      PRIVATE Threads::Threads ${Boost_LIBRARIES})
