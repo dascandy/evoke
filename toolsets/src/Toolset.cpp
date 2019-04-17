@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "dotted.h"
 
+#include <fstream>
 #include <fw/filesystem.hpp>
 #include <string>
 
@@ -19,7 +20,7 @@ std::unique_ptr<Toolset> ParseToolset(const std::string &name);
 
 std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
 {
-    if(boost::filesystem::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
+    if(filesystem::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
     {
         return ParseToolset("toolsets/" + name + ".toolset");
     }

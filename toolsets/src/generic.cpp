@@ -4,12 +4,13 @@
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
-#include "boost/algorithm/string/classification.hpp"
 #include "dotted.h"
 #include "globaloptions.h"
 
 #include <algorithm>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <fstream>
 #include <stack>
 
 static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map<std::string, File *> &moduleMap)
@@ -25,13 +26,17 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
         for(auto &input : dep->dependencies)
             if(d.insert(input.second).second)
                 deps.push(input.second);
-        for(auto &p : dep->modImports) {
+        for(auto &p : dep->modImports)
+        {
             auto it = moduleMap.find(p.first);
-            if (it != moduleMap.end()) deps.push(it->second);
+            if(it != moduleMap.end())
+                deps.push(it->second);
         }
-        for(auto &p : dep->imports) {
+        for(auto &p : dep->imports)
+        {
             auto it = moduleMap.find(p.first);
-            if (it != moduleMap.end()) deps.push(it->second);
+            if(it != moduleMap.end())
+                deps.push(it->second);
         }
         index++;
     }
