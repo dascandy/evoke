@@ -83,8 +83,7 @@ std::string MsvcToolset::getCompileCommand(const std::string &program, const std
 
 std::string MsvcToolset::getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs)
 {
-    std::terminate(); // TODO: not implemented.
-    std::string command = program + " " + outputFile;
+    std::string command = program + " /OUT:" + outputFile;
     for(auto &file : inputs)
     {
         command += " " + file->path.generic_string();
@@ -103,7 +102,7 @@ std::string MsvcToolset::getLinkerCommand(const std::string &program, const std:
     for(auto &d : linkDeps)
         for(auto &c : d)
         {
-            command += " -l" + c->root.string();
+            command += " " + getLibNameFor(*c);
         }
     return command;
 }
