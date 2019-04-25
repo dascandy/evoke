@@ -25,6 +25,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/src/Executor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/Configuration.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FileParser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
