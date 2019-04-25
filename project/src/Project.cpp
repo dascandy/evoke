@@ -106,7 +106,6 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp)
 {
-    printf("Reading from %s\n", path.generic_string().c_str());
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
 #ifdef _WIN32
