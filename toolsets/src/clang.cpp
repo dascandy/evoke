@@ -4,11 +4,11 @@
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
-#include "boost/algorithm/string/classification.hpp"
 #include "dotted.h"
 #include "globaloptions.h"
 
 #include <algorithm>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <stack>
 

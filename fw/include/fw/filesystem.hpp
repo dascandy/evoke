@@ -1,11 +1,25 @@
 #pragma once
 
-#if 1
-#    include <boost/filesystem.hpp>
-namespace filesystem = boost::filesystem;
-#else
-#    include <filesystem>
-namespace filesystem = std::experimental::filesystem;
-#endif
+#if defined(_MSC_VER) || (__GNUC__ < 8)
 
-using error_code = boost::system::error_code;
+#    include <boost/filesystem.hpp>
+
+namespace filesystem
+{
+using namespace boost::filesystem;
+using boost::system::error_code;
+}
+
+#else
+
+#    include <filesystem>
+#    include <fstream>
+
+namespace filesystem
+{
+using namespace std::filesystem;
+using std::error_code;
+using std::ofstream;
+}
+
+#endif

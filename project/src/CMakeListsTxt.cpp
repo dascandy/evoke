@@ -2,7 +2,7 @@
 #include "Project.h"
 #include "globaloptions.h"
 
-#include <boost/filesystem/fstream.hpp>
+#include <fw/filesystem.hpp>
 #include <ostream>
 
 struct CMakeProjectExporter
@@ -33,10 +33,10 @@ struct CMakeProjectExporter
 
         for(const auto &comp : project_.components)
         {
-            boost::filesystem::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
-            boost::system::error_code ec;
-            boost::filesystem::remove(filePath, ec);
-            boost::filesystem::ofstream os{filePath};
+            filesystem::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
+            filesystem::error_code ec;
+            filesystem::remove(filePath, ec);
+            filesystem::ofstream os{filePath};
 
             std::string target = comp.second.GetName();
 
@@ -70,8 +70,8 @@ struct CMakeProjectExporter
             {
                 for(const auto &file_entry : comp.second.files)
                 {
-                    auto relpath = boost::filesystem::relative(project_.projectRoot / file_entry->path,
-                                                               comp.second.root);
+                    auto relpath = filesystem::relative(project_.projectRoot / file_entry->path,
+                                                        comp.second.root);
                     os << "    " << relpath.string() << "\n";
                 }
             }
@@ -88,10 +88,10 @@ struct CMakeProjectExporter
         {
             std::vector<const Component *> systemComponents = extractSystemComponents();
 
-            boost::filesystem::path filePath = project_.projectRoot / cmakelists_txt;
-            boost::system::error_code ec;
-            boost::filesystem::remove(filePath, ec);
-            boost::filesystem::ofstream os{filePath};
+            filesystem::path filePath = project_.projectRoot / cmakelists_txt;
+            filesystem::error_code ec;
+            filesystem::remove(filePath, ec);
+            filesystem::ofstream os{filePath};
             os << "cmake_minimum_required(VERSION 3.12)\n";
             os << "project(" << project_.projectRoot.filename().string() << ")\n\n";
 
