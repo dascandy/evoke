@@ -6,9 +6,9 @@ script:
   - ./b2 link=static threading=multi variant=release >/dev/null 2>&1
   - sudo ./b2 install >/dev/null 2>&1 
   - cd ..
-  - mkdir bin && cd bin
-  - cmake .. -DCMAKE_BUILD_TYPE=Release
-  - make -j4
+  - cmake -E make_directory bin
+  - cmake -E chdir bin cmake -D CMAKE_BUILD_TYPE=Release ..
+  - cmake --build -j 4 bin
 
 sudo: required
 dist: trusty
