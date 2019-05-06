@@ -1,5 +1,4 @@
-channels:
-  - defaults
+name: evoke
 dependencies:
   - cmake>=3.8
   - libboost>=1.64

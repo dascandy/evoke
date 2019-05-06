@@ -1,10 +1,18 @@
 # Evoke  <!-- omit in toc -->
 
+[![Apache License](https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Travis CI](https://img.shields.io/travis/dascandy/evoke/master.svg?style=flat-square)](https://travis-ci.org/dascandy/evoke)
+[![AppVeyor](https://img.shields.io/appveyor/ci/dascandy/evoke/master.svg?style=flat-square)]()
+
 Evoke is the simple solution to the complicated problem of build software for C++ and related languages.
+
+> Right now it is not available as a package for common operating systems yet. To install it, you will need to compile it from source.
 
 ## Table of Contents  <!-- omit in toc -->
 
 - [Build Instructions](#build-instructions)
+  - [Standard Build](#standard-build)
+  - [Docker Build](#docker-build)
 - [Usage](#usage)
 - [Development](#development)
   - [Short Term Goals](#short-term-goals)
@@ -13,14 +21,35 @@ Evoke is the simple solution to the complicated problem of build software for C+
 
 ## Build Instructions
 
-Right now it is not available as a package for common operating systems yet. To install it, you will need to compile it from source.
+### Standard Build
 
-It requires Boost 1.64 or higher; it uses boost.process (and boost.filesystem for MSVC). To compile, download the full source tree and type `make` in the place you downloaded it to. Then, run `bin/evoke_make` to build evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
+Requirements:
+
+- [Boost](https://www.boost.org/) 1.64 or higher for boost.process (and boost.filesystem if standard filesystem is not available)
+- [CMake](https://cmake.org/) 3.8 or higher
+
+Using [Anaconda](https://www.anaconda.com/), one can install the requirements using the [environment.yml](environment.yml) file:
 
 ```console
-mkdir build && cd build  # create build directory
-cmake ..  # generate build system
-cmake --build .  # build evoke
+conda env create -f environment.yml  # create environment and install requirements
+conda activate evoke  # activate environment
+```
+
+Then, run following commands to build Evoke:
+
+```console
+cmake -E make_directory build  # create build directory
+cmake -E chdir build cmake ..  # generate build system
+cmake --build build  # build Evoke
+```
+
+Finally, run `evoke` to build Evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
+
+### Docker Build
+
+```console
+docker build -f docker/gcc.dockerfile -t evoke .  # build image
+docker run evoke  # run Evoke
 ```
 
 ## Usage
@@ -61,9 +90,7 @@ v1.0 will be hit when:
 
 ### Clang Format
 
-Formatting of all source files is done using ClangFormat. Rules for it are specified in .clang-format file in the root of the repository.
-
-**Path:** /.clang-format
+Formatting of all source files is done using ClangFormat. Rules for it are specified in [.clang-format](.clang-format) file in the root of the repository.
 
 **Requires:** [LLVM](http://llvm.org/) version 6.0
 
