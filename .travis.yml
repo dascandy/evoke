@@ -8,7 +8,7 @@ script:
   - cd ..
   - cmake -E make_directory bin
   - cmake -E chdir bin cmake -D CMAKE_BUILD_TYPE=Release ..
-  - cmake --build -j 4 bin
+  - cmake --build bin -- -j4
 
 sudo: required
 dist: trusty
