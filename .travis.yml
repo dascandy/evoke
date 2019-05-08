@@ -1,16 +1,5 @@
-script:
-  - wget -O boost_1_64_0.tar.gz http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.gz/download
-  - tar xzf boost_1_64_0.tar.gz 
-  - cd boost_1_64_0/
-  - ./bootstrap.sh --with-libraries=program_options,filesystem,system >/dev/null 2>&1
-  - ./b2 link=static threading=multi variant=release >/dev/null 2>&1
-  - sudo ./b2 install >/dev/null 2>&1 
-  - cd ..
-  - cmake -E make_directory bin
-  - cmake -E chdir bin cmake -D CMAKE_BUILD_TYPE=Release ..
-  - cmake --build -j 4 bin
-
-sudo: required
+language: cpp
+compiler: gcc
 dist: trusty
 
 matrix:
@@ -24,6 +13,17 @@ matrix:
           packages:
             - g++-7
             - g++-7-multilib
-      env: CXX=g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
+before_script:
+  - wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.bz2
+  - tar -xjf boost_1_64_0.tar.bz2
+  - cd boost_1_64_0
+  - ./bootstrap.sh --with-libraries=filesystem,system >/dev/null
+  - ./b2 install variant=release link=static threading=multi >/dev/null
 
+script:
+  - cmake -E make_directory bin
+  - cmake -E chdir bin cmake -D CMAKE_BUILD_TYPE=Release ..
+  - cmake --build bin -- -j 4
