@@ -4,8 +4,7 @@ dist: trusty
 
 matrix:
   include:
-    - compiler: gcc
-      os: linux
+    - os: linux
       addons:
         apt:
           sources:
