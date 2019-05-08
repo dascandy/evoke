@@ -21,7 +21,7 @@ before_script:
   - tar -xjf boost_1_64_0.tar.bz2
   - cd boost_1_64_0
   - ./bootstrap.sh --with-libraries=filesystem,system >/dev/null
-  - ./b2 install variant=release link=static threading=multi
+  - sudo ./b2 install variant=release link=static threading=multi >/dev/null
 
 script:
   - cmake -E make_directory bin
