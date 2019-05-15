@@ -42,8 +42,8 @@ Process::Process(const std::string &filename, const std::string &cmd, std::funct
 void Process::run()
 {
     std::string line;
-    while(pipe_stream && std::getline(pipe_stream, line) && !line.empty())
-        outbuffer += line;
+    while(std::getline(pipe_stream, line))
+        outbuffer += line + "\n";
 
     child.wait();
     errorcode = child.exit_code();
