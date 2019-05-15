@@ -1,7 +1,7 @@
 #include "dotted.h"
 
 #include <algorithm>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 namespace btt = boost::test_tools;
 
 BOOST_AUTO_TEST_CASE(remove_dot)
