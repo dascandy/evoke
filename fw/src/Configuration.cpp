@@ -35,10 +35,10 @@ static std::vector<std::string> splitWithQuotes(const std::string &str)
 void Configuration::LoadDefaults()
 {
     blacklist = {"unity"};
-#ifdef _WIN32
+#if defined(_WIN32)
     toolchain = "msvc";
     compileFlags = "/permissive- /std:c++latest";
-#elif APPLE
+#elif defined(APPLE)
     toolchain = "clang";
     compileFlags = "-std=c++17";
 #else
