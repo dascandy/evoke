@@ -60,7 +60,7 @@ std::string MsvcToolset::getUnityCommand(const std::string &program, const std::
     for(auto &d : linkDeps)
         for(auto &c : d)
         {
-            command += " -l" + c->root.string();
+            command += " -l" + c->GetName();
         }
     return command;
 }
@@ -102,7 +102,7 @@ std::string MsvcToolset::getLinkerCommand(const std::string &program, const std:
     for(auto &d : linkDeps)
         for(auto &c : d)
         {
-            command += " " + getLibNameFor(*c);
+            command += " -l" + c->GetName();
         }
     return command;
 }

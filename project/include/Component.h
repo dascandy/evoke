@@ -29,6 +29,7 @@ public:
     bool buildSuccess;
     bool isBinary;
     std::string accumulatedErrors;
+    std::string name;
 };
 
 std::ostream &operator<<(std::ostream &os, const Component &component);

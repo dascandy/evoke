@@ -2,16 +2,42 @@
 
 #include "File.h"
 #include "PendingCommand.h"
+#include "dotted.h"
+
+#include <iterator>
+
+static std::string toName(const filesystem::path &path)
+{
+    using namespace std;
+
+    auto start = find_if_not(begin(path), end(path), [](auto &part) {
+        return part.filename_is_dot();
+    });
+
+    if(start == end(path))
+    {
+        return "#anonymous#";
+    }
+
+    string out = start->string();
+
+    while(++start != end(path))
+    {
+        if(!start->filename_is_dot())
+        {
+            out.append("_").append(start->string());
+        }
+    }
+
+    return out;
+}
 
 Component::Component(const filesystem::path &path, bool isBinary) :
-    root(path),
+    root(removeDot(path)),
     type("library"),
-    isBinary(isBinary)
+    isBinary(isBinary),
+    name(toName(path))
 {
-    std::string rp = path.string();
-    if(rp[0] == '.' && (rp[1] == '/' || rp[1] == '\\'))
-        rp = rp.substr(2);
-    root = rp;
 }
 
 bool Component::isHeaderOnly() const
@@ -28,9 +54,7 @@ bool Component::isHeaderOnly() const
 
 std::string Component::GetName() const
 {
-    if(root.string().empty())
-        return filesystem::absolute(root).filename().string();
-    return root.generic_string();
+    return name;
 }
 
 std::ostream &operator<<(std::ostream &os, const Component &component)

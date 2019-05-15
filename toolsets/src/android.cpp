@@ -242,7 +242,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                             continue;
                         if(d.size() == 1)
                         {
-                            command += " -l" + d[0]->root.string();
+                            command += " -l" + d[0]->GetName();
                         }
                         else
                         {
@@ -251,7 +251,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
                             {
                                 if(!c->isHeaderOnly())
                                 {
-                                    command += " -l" + c->root.string();
+                                    command += " -l" + c->GetName();
                                 }
                             }
                             command += " -Wl,--end-group";
@@ -294,7 +294,7 @@ void AndroidToolset::CreateCommandsFor(Project &project)
             }
 
             // Create apk from manifest & shared libraries
-            std::string outputName = component.root.filename().string();
+            std::string outputName = component.GetName();
             std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(config.aapt(outputName, manifest));
             File *uapkfile = project.CreateFile(component, "apk/unsigned_" + outputName + ".apk");
             pc->AddOutput(uapkfile);
