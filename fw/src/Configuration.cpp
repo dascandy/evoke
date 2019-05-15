@@ -38,7 +38,7 @@ void Configuration::LoadDefaults()
 #if defined(_WIN32)
     toolchain = "msvc";
     compileFlags = "/permissive- /std:c++latest";
-#elif defined(APPLE)
+#elif defined(__APPLE__)
     toolchain = "clang";
     compileFlags = "-std=c++17";
 #else
