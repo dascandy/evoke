@@ -58,13 +58,7 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 
 int main(int argc, const char **argv)
 {
-    std::string toolsetname;
-
-#if defined(_WIN32)
-    toolsetname = "windows";
-#else
-    toolsetname = "gcc";
-#endif
+    std::string toolsetname = Configuration::Get().toolchain;
 
     std::cout << "Building for " << toolsetname << std::endl;
 
