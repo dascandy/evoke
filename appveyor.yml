@@ -10,14 +10,23 @@ environment:
 build_script:
 - cmd: >-
     set MINGW=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64
+
     set PATH=%MINGW%\bin;%PATH:C:\Program Files\Git\usr\bin;=%
+
     if not exist %MINGW%\bin\make.exe copy %MINGW%\bin\mingw32-make.exe %MINGW%\bin\make.exe
+
     cd %BOOSTROOT%
+
     if not exist b2.exe bootstrap
+
     b2 toolset=%TOOLSET% address-model=64 link=static variant=release --with-filesystem --with-system
+
     cd c:\projects\evoke
+
     cmake -E make_directory build
+
     cmake -E chdir build cmake %BUILD% ..
+
     cmake --build build --config Release
 
 artifacts:
