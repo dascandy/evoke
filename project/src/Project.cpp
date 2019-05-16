@@ -12,12 +12,8 @@
 #include <iostream>
 #include <map>
 
-#ifndef _WIN32
-#    include <fcntl.h>
-#    include <sys/mman.h>
-#    include <unistd.h>
-
-#endif
+#include <boost/interprocess/file_mapping.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 
 Project::Project(const std::string &rootpath)
 {
@@ -106,24 +102,14 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp)
 {
-    printf("Reading from %s\n", path.generic_string().c_str());
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
-#ifdef _WIN32
-    std::string buffer;
-    buffer.resize(filesystem::file_size(path));
-    {
-        std::ifstream(path.string()).read(&buffer[0], buffer.size());
-    }
-    ReadCodeFrom(f, buffer.data(), buffer.size());
-#else
-    int fd = open(path.c_str(), O_RDONLY);
-    size_t fileSize = filesystem::file_size(path);
-    void *p = mmap(NULL, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
-    ReadCodeFrom(f, static_cast<const char *>(p), fileSize);
-    munmap(p, fileSize);
-    close(fd);
-#endif
+
+    using namespace boost::interprocess;
+    file_mapping file(path.string().c_str(), read_only);
+    mapped_region region(file, read_only);
+
+    ReadCodeFrom(f, static_cast<const char *>(region.get_address()), region.get_size());
 }
 
 bool Project::IsItemBlacklisted(const filesystem::path &path)
