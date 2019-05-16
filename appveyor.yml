@@ -1,23 +1,24 @@
 version: 1.0.{build}
-
-os: Visual Studio 2017
-
+image: Visual Studio 2017
 environment:
+  BOOSTROOT: C:\Libraries\boost_1_69_0
   matrix:
-  - MSVC_ARCH: x64
-    BOOST_ROOT: C:\Libraries\boost_1_67_0
-    BOOST_INCLUDEDIR: C:\Libraries\boost_1_67_0\boost
-    BOOST_LIBRARYDIR: C:\Libraries\boost_1_67_0\lib64-msvc-15.0
-    CMAKE_GENERATOR: 'Visual Studio 15 2017'
-
-configuration: Release
-
+  - BUILD: -G "Visual Studio 15 2017" -A x64
+    TOOLSET: msvc-14.1
+  - BUILD: -G "MinGW Makefiles"
+    TOOLSET: gcc
 build_script:
-- set PATH=%BOOST_LIBRARYDIR%;%PATH%
-- cmake -E make_directory build
-- cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -A "%MSVC_ARCH%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" ..
-- cmake --build build --config Release
+- cmd: >-
+    set MINGW=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64
+    set PATH=%MINGW%\bin;%PATH:C:\Program Files\Git\usr\bin;=%
+    if not exist %MINGW%\bin\make.exe copy %MINGW%\bin\mingw32-make.exe %MINGW%\bin\make.exe
+    cd %BOOSTROOT%
+    if not exist b2.exe bootstrap
+    b2 toolset=%TOOLSET% address-model=64 link=static variant=release --with-filesystem --with-system
+    cd c:\projects\evoke
+    cmake -E make_directory build
+    cmake -E chdir build cmake %BUILD% ..
+    cmake --build build --config Release
 
 artifacts:
 - path: build/Release/evoke.exe
-

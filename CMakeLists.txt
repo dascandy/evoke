@@ -49,6 +49,10 @@ set(SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+if (MINGW)
+  set(Boost_ARCHITECTURE -x64)
+endif()
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
@@ -66,3 +70,6 @@ target_include_directories(${PROJECT_NAME}
                            PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE Threads::Threads ${Boost_LIBRARIES})
+if (MINGW)
+  target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
+endif()
