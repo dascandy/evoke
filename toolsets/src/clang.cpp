@@ -61,7 +61,7 @@ std::string ClangToolset::getUnityCommand(const std::string &program, const std:
     {
         for(auto &c : d)
         {
-            command += " -l" + c->root.string();
+            command += " -l" + c->GetName();
         }
     }
     return command;
@@ -109,7 +109,7 @@ std::string ClangToolset::getLinkerCommand(const std::string &program, const std
     {
         for(auto &c : d)
         {
-            command += " -l" + c->root.string();
+            command += " -l" + c->GetName();
         }
     }
     return command;

@@ -9,11 +9,7 @@
 
 std::string Toolset::getNameFor(const Component &component)
 {
-    if(component.root.string() != ".")
-    {
-        return as_dotted(component.root.generic_string());
-    }
-    return filesystem::weakly_canonical(component.root).filename().string();
+    return component.GetName();
 }
 
 std::unique_ptr<Toolset> ParseToolset(const std::string &name);

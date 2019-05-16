@@ -11,7 +11,7 @@ bin/evoke: bin/evoke_make
 	bin/evoke_make
 	@echo Build complete. Please copy bin/evoke to wherever you want to install it.
 
-bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find ./ -name *.cpp))
+bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find . -name *.cpp -not -regex ".*/test/.*"))
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 -std=c++17 -pthread -o $@ $^ -L$(BOOST_LIB_DIR) -lboost_filesystem -lboost_system -Wl,-rpath -Wl,$(BOOST_LIB_DIR)
 

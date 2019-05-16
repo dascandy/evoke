@@ -49,7 +49,11 @@ std::string GccToolset::getLibNameFor(const Component &component)
 
 std::string GccToolset::getExeNameFor(const Component &component)
 {
+#if defined(_WIN32)
+    return getNameFor(component) + ".exe";
+#else
     return getNameFor(component);
+#endif
 }
 
 std::string GccToolset::getUnityCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps)
@@ -68,7 +72,7 @@ std::string GccToolset::getUnityCommand(const std::string &program, const std::s
             command += " -Wl,--start-group";
             for(auto &c : d)
             {
-                command += " -l" + c->root.string();
+                command += " -l" + getNameFor(*c);
             }
             command += " -Wl,--end-group";
         }
@@ -121,14 +125,14 @@ std::string GccToolset::getLinkerCommand(const std::string &program, const std::
     {
         if(d.size() == 1)
         {
-            command += " -l" + d.front()->root.string();
+            command += " -l" + getNameFor(*d.front());
         }
         else
         {
             command += " -Wl,--start-group";
             for(auto &c : d)
             {
-                command += " -l" + c->root.string();
+                command += " -l" + getNameFor(*c);
             }
             command += " -Wl,--end-group";
         }
