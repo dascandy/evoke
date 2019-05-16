@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(
     FATAL_ERROR
@@ -54,7 +57,8 @@ find_package(Threads REQUIRED)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
    OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-       AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0"))
+       AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0")
+   OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
   find_package(Boost REQUIRED COMPONENTS filesystem system)
   target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
 else()
