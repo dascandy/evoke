@@ -1,5 +1,5 @@
 channels:
   - defaults
 dependencies:
-  - cmake>=3.13
+  - cmake>=3.9
   - libboost>=1.64
