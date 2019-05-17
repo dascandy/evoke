@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.9)
 project(evoke)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,12 +49,17 @@ set(SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+if (MINGW)
+  set(Boost_ARCHITECTURE -x64)
+  target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
+endif()
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
-   OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-       AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0"))
+   OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0")
+   OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   find_package(Boost REQUIRED COMPONENTS filesystem system)
   target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
 else()
