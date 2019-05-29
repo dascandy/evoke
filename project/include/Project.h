@@ -25,7 +25,6 @@ public:
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
     bool IsSystemComponent(const std::string &name) const;
-    void dumpJsonCompileDb(std::ostream &os);
 
 private:
     void LoadFileList();
