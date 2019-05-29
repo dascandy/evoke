@@ -1,6 +1,7 @@
 #include <fstream>
 #include <fw/filesystem.hpp>
 #include <iostream>
+#include <functional>
 
 std::vector<std::string> splitWithQuotes(const std::string &str)
 {
@@ -25,11 +26,12 @@ std::vector<std::string> splitWithQuotes(const std::string &str)
         }
         s++;
     }
-    if(p != s)
+    if(p != s) {
         if(*p != '"')
             rv.push_back(std::string(p, s));
         else
             rv.push_back(std::string(p + 1, s - 1));
+    }
 
     return rv;
 }

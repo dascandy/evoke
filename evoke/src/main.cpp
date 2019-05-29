@@ -3,13 +3,15 @@
 #include "Project.h"
 #include "Reporter.h"
 #include "Toolset.h"
-
+#include "JsonCompileDb.h"
+#include "CMakeListsTxt.h"
 #include <chrono>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <thread>
+
 using namespace std::literals::chrono_literals;
 
 template<typename T>
@@ -79,6 +81,7 @@ int main(int argc, const char **argv)
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
+        // Report missing headers as error. Build script should handle this gracefully and reinvoke Evoke after fetching the missing headers.
         /*
       // TODO: allow building without package fetching somehow
       std::string fetch = "accio fetch";
@@ -104,12 +107,13 @@ int main(int argc, const char **argv)
     if(compilation_database)
     {
         std::ofstream os("compile_commands.json");
-        op.dumpJsonCompileDb(os);
+        dumpJsonCompileDb(os, op);
     }
     if(cmakelists)
     {
         auto opts = toolset->ParseGeneralOptions(Configuration::Get().compileFlags);
-        op.dumpCMakeListsTxt(opts);
+        CMakeProjectExporter exporter{op};
+        exporter.createCMakeListsFiles(opts);
     }
     if(verbose)
     {

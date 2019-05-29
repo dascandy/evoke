@@ -26,7 +26,6 @@ public:
 
     bool IsSystemComponent(const std::string &name) const;
     void dumpJsonCompileDb(std::ostream &os);
-    void dumpCMakeListsTxt(const GlobalOptions &opts);
 
 private:
     void LoadFileList();
