@@ -136,5 +136,9 @@ std::ostream &operator<<(std::ostream &os, const PendingCommand &pc)
         os << "done";
         break;
     }
+    for(auto &in : pc.inputs)
+    {
+        printf("  depends on %s\n", in->path.filename().c_str());
+    }
     return os;
 }
