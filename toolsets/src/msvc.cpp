@@ -90,7 +90,7 @@ std::string MsvcToolset::getLinkerCommand(const std::string &program, const std:
     for(auto &d : linkDeps)
         for(auto &c : d)
         {
-            command += " -l" + c->GetName();
+            command += " " + getLibNameFor(*c);
         }
     return command;
 }
