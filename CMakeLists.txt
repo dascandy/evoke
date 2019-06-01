@@ -11,6 +11,8 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   )
 endif()
 
+add_subdirectory("toolsets/test")
+
 set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/include
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/include
