@@ -7,7 +7,7 @@
 #include <set>
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(gcc_comile)
+BOOST_AUTO_TEST_CASE(gcc_compile)
 {
     Component c("hello", true);
     Project p("./");
@@ -17,6 +17,7 @@ BOOST_AUTO_TEST_CASE(gcc_comile)
     auto cmd = gcc.getCompileCommand("g++", "-std=c++17", "obj/hello/src/gretting.cpp.obj", input, includes, false);
     BOOST_TEST(cmd == "g++ -c -std=c++17 -o obj/hello/src/gretting.cpp.obj hello/src/gretting.cpp -Ihello/include");
 }
+
 BOOST_AUTO_TEST_CASE(gcc_archive)
 {
     Component c("mylib", true);
@@ -25,7 +26,8 @@ BOOST_AUTO_TEST_CASE(gcc_archive)
     GccToolset gcc;
     auto cmd = gcc.getArchiverCommand("ar", "lib/libmylib.lib", {input});
     BOOST_TEST(cmd == "ar rcs lib/libmylib.lib obj/mylib/src/mylib.cpp.obj");
-} 
+}
+
 BOOST_AUTO_TEST_CASE(gcc_link)
 {
     Component c("mylib", true);
@@ -38,4 +40,3 @@ BOOST_AUTO_TEST_CASE(gcc_link)
     auto cmd = gcc.getLinkerCommand("g++", "bin/hello.exe", {input1, input2}, {{&c}});
     BOOST_TEST(cmd == "g++ -pthread -o bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj -Llib -lmylib");
 }
-
