@@ -7,7 +7,7 @@
 #include <set>
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(comile)
+BOOST_AUTO_TEST_CASE(msvc_comile)
 {
     Component c("hello", true);
     Project p("./");
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(comile)
     auto cmd = msvc.getCompileCommand("cl.exe", "/permissive- /std:c++latest", "obj/hello/src/gretting.cpp.obj", input, includes, false);
     BOOST_TEST(cmd == "cl.exe /c /EHsc /permissive- /std:c++latest /Foobj/hello/src/gretting.cpp.obj hello/src/gretting.cpp /Ihello\include");
 }
-BOOST_AUTO_TEST_CASE(archive)
+BOOST_AUTO_TEST_CASE(msvc_archive)
 {
     Component c("mylib", true);
     Project p("./");
@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(archive)
     auto cmd = msvc.getArchiverCommand("lib.exe", "lib/libmylib.lib", {input});
     BOOST_TEST(cmd == "lib.exe /OUT:lib/libmylib.lib obj/mylib/src/mylib.cpp.obj");
 } 
-BOOST_AUTO_TEST_CASE(link)
+BOOST_AUTO_TEST_CASE(msvc_link)
 {
     Component c("mylib", true);
     c.type = "library";

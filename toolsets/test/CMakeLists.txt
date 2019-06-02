@@ -43,6 +43,8 @@ set(LINKED_SOURCES
 set(SOURCES
     main.cpp
     msvc_test.cpp
+    clang_test.cpp
+    gcc_test.cpp
 )
 
 if(MSVC)
