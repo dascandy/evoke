@@ -91,7 +91,11 @@ std::set<std::string> getIncludePathsFor(Component &component)
         {
             for(auto &p : c->pubIncl)
             {
-                inclpaths.insert((c->root / p).string());
+                if (p.front() == '/') {
+                    inclpaths.insert(p);
+                } else {
+                    inclpaths.insert((c->root / p).string());
+                }
             }
         }
     }

@@ -18,6 +18,10 @@ std::map<std::string, Component *> PredefComponentList()
             for (auto& f : splitWithQuotes(value)) {
                 list[f] = current;
             }
+        } else if (key == "paths") {
+            for (auto& path : splitWithQuotes(value)) {
+                current->pubIncl.insert(path);
+            }
         } else if (key == "binary") {
             current->isBinary = true;
         } else if (key == "public_dependencies") {
