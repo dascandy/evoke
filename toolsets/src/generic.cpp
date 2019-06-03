@@ -53,7 +53,7 @@ void GenericToolset::SetParameter(const std::string &key, const std::string &val
 }
 
 std::string GenericToolset::GetCompilerFor(std::string extension) {
-  auto it = parameters.find("compiler-" + extension);
+  auto it = parameters.find("compiler-" + extension.substr(1));
   if (it != parameters.end()) return it->second;
   return parameters["compiler"];
 }
@@ -123,7 +123,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         }
 
         filesystem::path exeFile = "bin/" + getExeNameFor(component);
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor("cpp"), Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor(".cpp"), Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
