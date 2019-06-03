@@ -274,6 +274,15 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
 {
     for(auto &fp : files)
     {
+        for (auto& p : fp.second.modImports) {
+            if(&fp.second.component != &p.second->component)
+            {
+                fp.second.component.privDeps.insert(&p.second->component);
+                p.second->hasExternalInclude = true;
+            }
+            p.second->hasInclude = true;
+        }
+        // TODO: add the by-name imports here too as a component level dependency
         for(auto &p : fp.second.rawImports)
         {
             // If this is a non-pointy bracket include, see if there's a local match first.

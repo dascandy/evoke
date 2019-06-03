@@ -141,7 +141,7 @@ std::ostream &operator<<(std::ostream &os, const Component &component)
     for(auto &command : component.commands)
     {
         os << "\n"
-           << command->commandToRun;
+           << *command;
     }
 
     os << "\n\n";

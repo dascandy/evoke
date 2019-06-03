@@ -1,5 +1,5 @@
 #include "Project.h"
-
+#include "JsonCompileDb.h"
 #include <ostream>
 
 static std::string escape(const std::string &str)
@@ -25,11 +25,11 @@ static void dumpPendingCommand(std::ostream &os, PendingCommand &pc)
     os << "  \"output\": \"" << pc.outputs.front()->path.string() << "\" }";
 }
 
-void Project::dumpJsonCompileDb(std::ostream &os)
+void dumpJsonCompileDb(std::ostream &os, Project& op)
 {
     os << "[\n";
     bool first = true;
-    for(auto &c : components)
+    for(auto &c : op.components)
     {
         for(auto &pc : c.second.commands)
         {

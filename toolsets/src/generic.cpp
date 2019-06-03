@@ -29,14 +29,18 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
         for(auto &p : dep->modImports)
         {
             auto it = moduleMap.find(p.first);
-            if(it != moduleMap.end())
-                deps.push(it->second);
+            if(it != moduleMap.end()) {
+                if(d.insert(it->second).second)
+                    deps.push(it->second);
+            }
         }
         for(auto &p : dep->imports)
         {
             auto it = moduleMap.find(p.first);
-            if(it != moduleMap.end())
-                deps.push(it->second);
+            if(it != moduleMap.end()) {
+                if(d.insert(it->second).second)
+                    deps.push(it->second);
+            }
         }
         index++;
     }
@@ -133,6 +137,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
 {
     std::unordered_map<std::string, File *> moduleMap;
     std::set<File *> toPrecompile;
+    std::unordered_map<File*, File*> precompileds;
     for(auto &[name, component] : project.components)
     {
         for(auto &f : component.files)
@@ -143,6 +148,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
             File *ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*f));
             moduleMap.insert(std::make_pair(f->moduleName, ofile));
             toPrecompile.insert(f);
+            precompileds.insert(std::make_pair(f, ofile));
             for(auto &import : f->modImports)
             {
                 File *ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*import.second));
@@ -165,9 +171,13 @@ void GenericToolset::CreateCommandsFor(Project &project)
         File *ofile = project.CreateFile(f->component, "modules/" + getBmiNameFor(*f));
         std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(compiler, Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, true));
         pc->AddOutput(ofile);
+        pc->AddInput(f);
         for(auto &d : GetDependencies(f, moduleMap))
         {
             pc->AddInput(d);
+            auto it = precompileds.find(d);
+            if (it != precompileds.end()) 
+                pc->AddInput(it->second);
         }
         pc->Check();
         f->component.commands.push_back(pc);
@@ -190,6 +200,9 @@ void GenericToolset::CreateCommandsFor(Project &project)
             for(auto &d : GetDependencies(f, moduleMap))
             {
                 pc->AddInput(d);
+                auto it = precompileds.find(d);
+                if (it != precompileds.end()) 
+                    pc->AddInput(it->second);
             }
             pc->Check();
             component.commands.push_back(pc);

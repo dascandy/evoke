@@ -29,12 +29,6 @@ To use evoke, create a folder that is named after your project target, and creat
 
 Evoke reads all the source code found inside components this way and analyzes their dependencies through use of `#include` and `import` statements. It derives the full dependency tree of the source tree and uses it to determine which components will become a library and which will become an executable. Its rule is that any component *with* a link coming from something else must be a library (because something else is including its files), and any component *without* a link coming from something else must be an executable. To compile, simply type `evoke` at the root of your project and it will compile the full set of source files with appropriate flags for the current version of c++ into libraries and executables.
 
-Still to be implemented is minor customization around this:
-
-- It needs to allow overriding for when you have an unused library (that it will now compile as an executable) and when you want to use shared libraries.
-- It needs to allow customization of compile flags for the project-wide compilation, so that you can disable some warnings.
-- It needs to allow customization of the toolchain, so that you can use it for cross-compiling to other targets, or tune it for some CPU type.
-
 ## Development
 
 Everybody is free to help with Evoke development. The simpler things that need to be done are to create issues for things you would like it to do, or for asking help when it does not do what you want it to. You can join the discord at https://includecpp.org . If you want to do more, there are a few open issues already that require a bit more knowledge and time investment, like porting it to run on Windows or OSX.
@@ -43,13 +37,14 @@ Everybody is free to help with Evoke development. The simpler things that need t
 
 v0.2: Builds on Windows, MacOS and Linux.
 
-Next few milestones (in any order):
+v0.3: Toolsets fully separate, chainable and overrideable. Android is still a weird one out; need to make up my mind on how it should work. Package import config also fully separate. Modules support on Clang.
 
-- Full C++20+ modules support on a supported compiler
+Next few milestones (in any order):
 - Have easy imports for evoke-built projects in XCode, MSVC, VS Code and CLion.
 - Get to 30% test coverage. Not to aim for a number, but to have at least some target.
-- Have the toolset description out of the source tree. Might still be based on some toolset patterns (such as for Android) but should be mostly defined by a toolset file.
-- Full integration with at least one package manager - export of needed file list, and import of package inputs
+- Full integration with at least one package manager - export of needed file list, and import of package inputs. 
+
+- 
 
 v1.0 will be hit when:
 
