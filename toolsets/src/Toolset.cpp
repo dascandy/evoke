@@ -57,7 +57,7 @@ std::unique_ptr<Toolset> ParseToolset(const std::string &name)
         colon++;
         while(line[colon] == ' ')
             colon++;
-        std::string value = line.substr(colon + 1);
+        std::string value = line.substr(colon);
         while(!value.empty() && value[value.size() - 1] == ' ')
             value.resize(value.size() - 1);
         if(key == "template")

@@ -34,6 +34,7 @@ public:
     void CreateCommandsFor(Project &project) override;
 
 protected:
+    std::string GetCompilerFor(std::string extension);
     virtual std::string getUnityCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) = 0;
     virtual std::string getCompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool usesModules) = 0;
     virtual std::string getPrecompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool usesModules) = 0;

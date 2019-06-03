@@ -47,6 +47,10 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
     return d;
 }
 
+std::string GenericToolset::GetCompilerFor(std::string extension) {
+  return compiler;
+}
+
 void GenericToolset::CreateCommandsForUnity(Project &project)
 {
     for(auto &p : project.components)
@@ -112,7 +116,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         }
 
         filesystem::path exeFile = "bin/" + getExeNameFor(component);
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor("cpp"), Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
@@ -169,7 +173,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
     {
         auto includes = getIncludePathsFor(f->component);
         File *ofile = project.CreateFile(f->component, "modules/" + getBmiNameFor(*f));
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(compiler, Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, true));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, true));
         pc->AddOutput(ofile);
         pc->AddInput(f);
         for(auto &d : GetDependencies(f, moduleMap))
@@ -193,7 +197,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 continue;
             filesystem::path outputFile = "obj/" + getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(compiler, Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
             pc->AddOutput(of);
             pc->AddInput(f);
