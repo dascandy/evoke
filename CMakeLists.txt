@@ -11,7 +11,9 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   )
 endif()
 
-add_subdirectory("toolsets/test")
+if(EVOKE_BUILD_WITH_UNITTEST)
+    add_subdirectory("toolsets/test")
+endif()
 
 set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/include
