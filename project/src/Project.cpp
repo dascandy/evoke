@@ -105,6 +105,9 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const files
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
 
+    size_t fileSize = filesystem::file_size(path.string());
+    if (fileSize == 0) return; // Boost::interprocess fails (and throws) on mapping a 0-byte file
+
     using namespace boost::interprocess;
     file_mapping file(path.string().c_str(), read_only);
     mapped_region region(file, read_only);
