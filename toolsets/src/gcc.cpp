@@ -15,21 +15,9 @@
 
 GccToolset::GccToolset()
 {
-    compiler = "g++";
-    linker = "g++";
-    archiver = "ar";
-}
-
-void GccToolset::SetParameter(const std::string &key, const std::string &value)
-{
-    if(key == "compiler")
-        compiler = value;
-    else if(key == "linker")
-        linker = value;
-    else if(key == "archiver")
-        archiver = value;
-    else
-        throw std::runtime_error("Invalid parameter for GCC toolchain: " + key);
+    parameters["compiler"] = "g++";
+    parameters["linker"] = "g++";
+    parameters["archiver"] = "ar";
 }
 
 std::string GccToolset::getBmiNameFor(const File &file)
@@ -184,7 +172,7 @@ void GccToolset::CreateCommandsForUnity(Project &project)
         for (auto& i : includes) {
             includeString += " -I" + i;
         }
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(compiler + " " + Configuration::Get().compileFlags + " " + includeString + " -pthread -o " + exeFile.generic_string() + " " + outputFile.generic_string() + linkline);
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(program + " " + Configuration::Get().compileFlags + " " + includeString + " -pthread -o " + exeFile.generic_string() + " " + outputFile.generic_string() + linkline);
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);

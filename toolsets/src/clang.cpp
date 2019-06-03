@@ -14,21 +14,9 @@
 
 ClangToolset::ClangToolset()
 {
-    compiler = "clang++";
-    linker = "clang++";
-    archiver = "ar";
-}
-
-void ClangToolset::SetParameter(const std::string &key, const std::string &value)
-{
-    if(key == "compiler")
-        compiler = value;
-    else if(key == "linker")
-        linker = value;
-    else if(key == "archiver")
-        archiver = value;
-    else
-        throw std::runtime_error("Invalid parameter for Clang toolchain: " + key);
+    parameters["compiler"] = "clang++";
+    parameters["linker"] = "clang++";
+    parameters["archiver"] = "ar";
 }
 
 std::string ClangToolset::getBmiNameFor(const File &file)

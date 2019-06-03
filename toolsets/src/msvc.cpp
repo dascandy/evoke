@@ -15,21 +15,9 @@
 
 MsvcToolset::MsvcToolset()
 {
-    compiler = "cl.exe";
-    linker = "link.exe";
-    archiver = "lib.exe";
-}
-
-void MsvcToolset::SetParameter(const std::string &key, const std::string &value)
-{
-    if(key == "compiler")
-        compiler = value;
-    else if(key == "linker")
-        linker = value;
-    else if(key == "archiver")
-        archiver = value;
-    else
-        throw std::runtime_error("Invalid parameter for MSVC toolchain: " + key);
+    parameters["compiler"] = "cl.exe";
+    parameters["linker"] = "link.exe";
+    parameters["archiver"] = "lib.exe";
 }
 
 std::string MsvcToolset::getBmiNameFor(const File &file)

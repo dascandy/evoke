@@ -47,8 +47,15 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
     return d;
 }
 
+void GenericToolset::SetParameter(const std::string &key, const std::string &value)
+{
+    parameters[key] = value;
+}
+
 std::string GenericToolset::GetCompilerFor(std::string extension) {
-  return compiler;
+  auto it = parameters.find("compiler-" + extension);
+  if (it != parameters.end()) return it->second;
+  return parameters["compiler"];
 }
 
 void GenericToolset::CreateCommandsForUnity(Project &project)
@@ -219,7 +226,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
             if(component.type == "library")
             {
                 outputFile = "lib/" + getLibNameFor(component);
-                command = getArchiverCommand(archiver, outputFile.generic_string(), objects);
+                command = getArchiverCommand(parameters["archiver"], outputFile.generic_string(), objects);
                 pc = std::make_shared<PendingCommand>(command);
             }
             else
@@ -246,7 +253,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                     if(!in.empty())
                         linkDeps.push_back(std::move(in));
                 }
-                command = getLinkerCommand(linker, outputFile.generic_string(), objects, linkDeps);
+                command = getLinkerCommand(parameters["linker"], outputFile.generic_string(), objects, linkDeps);
                 pc = std::make_shared<PendingCommand>(command);
                 for(auto &d : linkDeps)
                 {

@@ -2,6 +2,7 @@
 
 #include "globaloptions.h"
 
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -18,8 +19,8 @@ struct Toolset
     }
     virtual void CreateCommandsFor(Project &project) = 0;
     virtual void CreateCommandsForUnity(Project &project) = 0;
-    virtual GlobalOptions ParseGeneralOptions(const std::string &options);
     virtual void SetParameter(const std::string &key, const std::string &value) = 0;
+    virtual GlobalOptions ParseGeneralOptions(const std::string &options);
     virtual std::string getBmiNameFor(const File &file) = 0;
     virtual std::string getObjNameFor(const File &file) = 0;
     virtual std::string getLibNameFor(const Component &component) = 0;
@@ -32,6 +33,7 @@ class GenericToolset : public Toolset
 public:
     void CreateCommandsForUnity(Project &project) override;
     void CreateCommandsFor(Project &project) override;
+    void SetParameter(const std::string &key, const std::string &value) override;
 
 protected:
     std::string GetCompilerFor(std::string extension);
@@ -41,16 +43,14 @@ protected:
     virtual std::string getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs) = 0;
     virtual std::string getLinkerCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> objects, std::vector<std::vector<Component *>> linkDeps) = 0;
     virtual std::string getUnittestCommand(const std::string &program) = 0;
-    std::string compiler;
-    std::string linker;
-    std::string archiver;
+    std::map<std::string, std::string> parameters;
 };
 
 struct AndroidToolset : public Toolset
 {
+    void SetParameter(const std::string &key, const std::string &value) override;
     void CreateCommandsFor(Project &project) override;
     void CreateCommandsForUnity(Project &project) override;
-    void SetParameter(const std::string &key, const std::string &value) override;
     std::string getBmiNameFor(const File &file) override;
     std::string getObjNameFor(const File &file) override;
     std::string getLibNameFor(const Component &component) override;
@@ -61,7 +61,6 @@ struct ClangToolset : public GenericToolset
 {
     ClangToolset();
     GlobalOptions ParseGeneralOptions(const std::string &options) override;
-    void SetParameter(const std::string &key, const std::string &value) override;
     std::string getUnityCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getPrecompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
@@ -78,7 +77,6 @@ struct GccToolset : public GenericToolset
 {
     GccToolset();
     GlobalOptions ParseGeneralOptions(const std::string &options) override;
-    void SetParameter(const std::string &key, const std::string &value) override;
     std::string getUnityCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getPrecompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
@@ -94,7 +92,6 @@ struct GccToolset : public GenericToolset
 struct MsvcToolset : public GenericToolset
 {
     MsvcToolset();
-    void SetParameter(const std::string &key, const std::string &value) override;
     std::string getUnityCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getPrecompileCommand(const std::string &program, const std::string &compileFlags, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
