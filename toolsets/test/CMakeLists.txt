@@ -31,6 +31,7 @@ set(LINKED_SOURCES
     ../../project/src/File.cpp
     ../../fw/src/Configuration.cpp
     ../../fw/src/dotted.cpp
+    ../../fw/src/FileParser.cpp
     ../src/msvc.cpp
     ../src/known.cpp
     ../src/Toolset.cpp
