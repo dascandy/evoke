@@ -8,7 +8,7 @@ bool File::isHeader(const filesystem::path &path)
 
 bool File::isTranslationUnit(const filesystem::path &path)
 {
-    static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm"};
+    static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm", ".s", ".S"};
     return exts.find(path.extension().generic_string()) != exts.end();
 }
 

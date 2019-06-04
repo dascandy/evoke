@@ -196,12 +196,10 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                     {
                         if(state == AfterModule)
                         {
-                            printf("%s\n", modulename.c_str());
                             f.SetModule(modulename, exported);
                         }
                         else
                         {
-                            printf("%s\n", modulename.c_str());
                             f.AddImport(modulename, exported);
                         }
                         exported = false;
