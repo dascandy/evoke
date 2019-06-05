@@ -132,67 +132,7 @@ std::string GccToolset::getUnittestCommand(const std::string &program)
 {
     return "./" + program;
 }
-/*
-void GccToolset::CreateCommandsForUnity(Project &project)
-{
-    for(auto &p : project.components)
-    {
-        auto &component = p.second;
-        if (component.type == "library") continue;
 
-        std::vector<std::vector<Component *>> allDeps = GetTransitiveAllDeps(component);
-        std::vector<Component*> deps;
-        std::vector<File*> files;
-        std::string linkline;
-        std::unordered_set<std::string> includes;
-        filesystem::create_directories("unity");
-        filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
-        File* of = project.CreateFile(component, outputFile);
-        std::ofstream out(outputFile.generic_string());
-        for (auto& v : allDeps) for (auto& c : v) {
-            if (c->isBinary) {
-                linkline += " -l" + getNameFor(*c);
-            } else {
-                for(auto &d : getIncludePathsFor(component))
-                {
-                    includes.insert(d);
-                }
-                for (auto& f : c->files) {
-                    files.push_back(f);
-                    if(File::isTranslationUnit(f->path))
-                    {
-                        out << "#include \"../" + f->path.generic_string() << "\"\n";
-                    }
-                }
-            }
-        }
-
-        filesystem::path exeFile = "bin/" + getExeNameFor(component);
-        std::string includeString;
-        for (auto& i : includes) {
-            includeString += " -I" + i;
-        }
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(program + " " + Configuration::Get().compileFlags + " " + includeString + " -pthread -o " + exeFile.generic_string() + " " + outputFile.generic_string() + linkline);
-
-        File *executable = project.CreateFile(component, exeFile);
-        pc->AddOutput(executable);
-        pc->AddInput(of);
-        for (auto& f : files)
-            pc->AddInput(f);
-        pc->Check();
-        component.commands.push_back(pc);
-        if(component.type == "unittest")
-        {
-            pc = std::make_shared<PendingCommand>(exeFile.string());
-            exeFile += ".log";
-            pc->AddInput(executable);
-            pc->AddOutput(project.CreateFile(component, exeFile.string()));
-            pc->Check();
-            component.commands.push_back(pc);
-        }
-    }
-}
-*/
 GlobalOptions GccToolset::ParseGeneralOptions(const std::string &options)
 {
     GlobalOptions opts;

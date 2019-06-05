@@ -8,6 +8,8 @@
 #include <functional>
 #include <thread>
 
+static std::promise<void> done;
+
 class Process
 {
 public:
@@ -66,15 +68,30 @@ Executor::~Executor()
 
 void Executor::Run(std::shared_ptr<PendingCommand> cmd)
 {
-    std::lock_guard<std::mutex> l(m);
     commands.push_back(cmd);
 }
 
-std::future<void> Executor::Start()
+std::future<void> Executor::Mode(bool isDaemon)
 {
     std::lock_guard<std::mutex> l(m);
-    RunMoreCommands();
+    daemonMode = isDaemon;
+    if (isDaemon) {
+        void (*signalHandler)(int) = [](int){ done.set_value(); };
+        signal(SIGTERM, signalHandler);
+        signal(SIGHUP, signalHandler);
+        signal(SIGINT, signalHandler);
+        signal(SIGQUIT, signalHandler);
+        signal(SIGTSTP, signalHandler);
+    }
     return done.get_future();
+}
+
+bool Executor::AllSuccess() {
+    return allSuccess;
+}
+
+void Executor::WipeCommands() {
+    commands.clear();
 }
 
 void Executor::RunMoreCommands()
@@ -98,6 +115,7 @@ void Executor::RunMoreCommands()
             activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
                 c->SetResult(t->errorcode == 0);
+                if (t->errorcode) allSuccess = false;
                 if(t->errorcode || !t->outbuffer.empty())
                 {
                     t->outbuffer.push_back(0);
@@ -118,5 +136,6 @@ void Executor::RunMoreCommands()
         if(p)
             return;
 
-    done.set_value();
+    if (!daemonMode)
+        done.set_value();
 }

@@ -17,8 +17,8 @@ struct Toolset
     virtual ~Toolset()
     {
     }
-    virtual void CreateCommandsFor(Project &project) = 0;
-    virtual void CreateCommandsForUnity(Project &project) = 0;
+    virtual void CreateCommandsFor(Project &project, const std::vector<std::string> &targets) = 0;
+    virtual void CreateCommandsForUnity(Project &project, const std::vector<std::string> &targets) = 0;
     virtual void SetParameter(const std::string &key, const std::string &value) = 0;
     virtual GlobalOptions ParseGeneralOptions(const std::string &options);
     virtual std::string getBmiNameFor(const File &file) = 0;
@@ -31,8 +31,8 @@ struct Toolset
 class GenericToolset : public Toolset
 {
 public:
-    void CreateCommandsForUnity(Project &project) override;
-    void CreateCommandsFor(Project &project) override;
+    void CreateCommandsForUnity(Project &project, const std::vector<std::string> &targets) override;
+    void CreateCommandsFor(Project &project, const std::vector<std::string> &targets) override;
     void SetParameter(const std::string &key, const std::string &value) override;
 
 protected:
@@ -49,8 +49,8 @@ protected:
 struct AndroidToolset : public Toolset
 {
     void SetParameter(const std::string &key, const std::string &value) override;
-    void CreateCommandsFor(Project &project) override;
-    void CreateCommandsForUnity(Project &project) override;
+    void CreateCommandsFor(Project &project, const std::vector<std::string> &targets) override;
+    void CreateCommandsForUnity(Project &project, const std::vector<std::string> &targets) override;
     std::string getBmiNameFor(const File &file) override;
     std::string getObjNameFor(const File &file) override;
     std::string getLibNameFor(const Component &component) override;

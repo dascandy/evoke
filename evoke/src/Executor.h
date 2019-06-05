@@ -18,13 +18,16 @@ public:
     Executor(size_t jobcount, Reporter &reporter);
     ~Executor();
     void Run(std::shared_ptr<PendingCommand> cmd);
-    std::future<void> Start();
+    std::future<void> Mode(bool isDaemon);
 
-private:
+    bool AllSuccess();
+    void WipeCommands();
     void RunMoreCommands();
     std::mutex m;
     std::vector<std::shared_ptr<PendingCommand>> commands;
+private:
     std::vector<std::unique_ptr<Process>> activeProcesses;
     Reporter &reporter;
-    std::promise<void> done;
+    bool daemonMode = false;
+    bool allSuccess = true;
 };

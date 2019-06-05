@@ -58,7 +58,7 @@ std::string GenericToolset::GetCompilerFor(std::string extension) {
   return parameters["compiler"];
 }
 
-void GenericToolset::CreateCommandsForUnity(Project &project)
+void GenericToolset::CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets)
 {
     for(auto &p : project.components)
     {
@@ -144,7 +144,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
     }
 }
 
-void GenericToolset::CreateCommandsFor(Project &project)
+void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::string>& targets)
 {
     std::unordered_map<std::string, File *> moduleMap;
     std::set<File *> toPrecompile;

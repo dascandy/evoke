@@ -13,7 +13,7 @@ bin/evoke: bin/evoke_make
 
 bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find . -name *.cpp -not -regex ".*/test/.*"))
 	@mkdir -p $(dir $@)
-	$(CXX) -g2 -std=c++17 -pthread -o $@ $^ -L$(BOOST_LIB_DIR) -lboost_filesystem -lboost_system -Wl,-rpath -Wl,$(BOOST_LIB_DIR)
+	$(CXX) -g2 -std=c++17 -pthread -o $@ $^ -L$(BOOST_LIB_DIR) -lboost_filesystem -lboost_system -linotify-cpp -Wl,-rpath -Wl,$(BOOST_LIB_DIR)
 
 clean:
 	@mkdir -p $(dir $@)

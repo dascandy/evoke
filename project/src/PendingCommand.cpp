@@ -102,7 +102,7 @@ void PendingCommand::SetResult(bool success)
         o->state = (success ? File::Done : File::Error);
     }
 }
-
+// may become runnable, precondition-fail, already running, already finished
 bool PendingCommand::CanRun()
 {
     if(state != PendingCommand::ToBeRun)
