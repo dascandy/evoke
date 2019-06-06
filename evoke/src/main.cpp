@@ -127,12 +127,12 @@ int main(int argc, const char **argv)
                 toolset->CreateCommandsFor(op, p.second);
             }
         }
+        // TODO: filter this on actually useful commands
         for(auto &comp : op.components)
         {
             for(auto &c : comp.second.commands)
             {
-                if(c->state == PendingCommand::ToBeRun)
-                    ex.Run(c);
+                ex.Run(c);
             }
         }
         ex.RunMoreCommands();

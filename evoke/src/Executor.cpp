@@ -66,6 +66,13 @@ Executor::~Executor()
 {
 }
 
+bool Executor::AllSuccess() {
+    for (auto& command : commands) {
+        if (command->errorcode) return false;
+    }
+    return true;
+}
+
 void Executor::Run(std::shared_ptr<PendingCommand> cmd)
 {
     commands.push_back(cmd);
@@ -89,16 +96,14 @@ std::future<void> Executor::Mode(bool isDaemon)
     return done.get_future();
 }
 
-bool Executor::AllSuccess() {
-    return allSuccess;
-}
-
 void Executor::WipeCommands() {
     commands.clear();
+    reporter.ReportCommandQueue(commands);
 }
 
 void Executor::RunMoreCommands()
 {
+    reporter.ReportCommandQueue(commands);
     size_t n = 0;
     for(auto &c : commands)
     {
@@ -117,14 +122,9 @@ void Executor::RunMoreCommands()
             reporter.SetRunningCommand(n, c);
             activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
-                c->SetResult(t->errorcode == 0);
-                if (t->errorcode) allSuccess = false;
-                if(t->errorcode || !t->outbuffer.empty())
-                {
-                    t->outbuffer.push_back(0);
-                    reporter.ReportFailure(c, t->errorcode, t->outbuffer.data());
-                }
-                reporter.SetRunningCommand(n, nullptr);
+                t->outbuffer.push_back(0);
+                c->SetResult(t->errorcode, t->outbuffer.data());
+                reporter.ReportCommand(n, c);
                 activeProcesses[n].reset();
                 RunMoreCommands();
             });

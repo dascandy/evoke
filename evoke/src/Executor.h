@@ -29,5 +29,4 @@ private:
     std::vector<std::unique_ptr<Process>> activeProcesses;
     Reporter &reporter;
     bool daemonMode = false;
-    bool allSuccess = true;
 };

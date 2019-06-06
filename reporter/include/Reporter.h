@@ -11,7 +11,8 @@ class Reporter
 public:
     virtual void SetConcurrencyCount(size_t count) = 0;
     virtual void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command) = 0;
-    virtual void ReportFailure(std::shared_ptr<PendingCommand> command, int error, const std::string &errors) = 0;
+    virtual void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) = 0;
+    virtual void ReportCommandQueue(std::vector<std::shared_ptr<PendingCommand>>& ) {}
     virtual ~Reporter() = default;
     static std::unique_ptr<Reporter> Get(const std::string &name);
 
@@ -23,9 +24,9 @@ class ConsoleReporter : public Reporter
 {
 public:
     ConsoleReporter();
-    void SetConcurrencyCount(size_t count);
-    void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command);
-    void ReportFailure(std::shared_ptr<PendingCommand> command, int error, const std::string &errors);
+    void SetConcurrencyCount(size_t count) override;
+    void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+    void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
 
 private:
     void Redraw();
@@ -35,7 +36,29 @@ private:
 class SimpleReporter : public Reporter
 {
 public:
-    void SetConcurrencyCount(size_t count);
-    void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command);
-    void ReportFailure(std::shared_ptr<PendingCommand> command, int error, const std::string &errors);
+    void SetConcurrencyCount(size_t count) override;
+    void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+    void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
 };
+
+class DaemonConsoleReporter : public Reporter
+{
+public:
+    DaemonConsoleReporter();
+    void SetConcurrencyCount(size_t count) override;
+    void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+    void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+    void ReportCommandQueue(std::vector<std::shared_ptr<PendingCommand>>& allCommands) override;
+private:
+    void Redraw();
+    std::vector<std::shared_ptr<PendingCommand>> activeProcesses;
+};
+
+class IDEReporter : public Reporter
+{
+public:
+    void SetConcurrencyCount(size_t count) override;
+    void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+    void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+};
+
