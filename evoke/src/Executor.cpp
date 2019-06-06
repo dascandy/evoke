@@ -76,12 +76,15 @@ std::future<void> Executor::Mode(bool isDaemon)
     std::lock_guard<std::mutex> l(m);
     daemonMode = isDaemon;
     if (isDaemon) {
+#ifndef _WIN32
+    // TODO: Add the Windows side of signal handling
         void (*signalHandler)(int) = [](int){ done.set_value(); };
         signal(SIGTERM, signalHandler);
         signal(SIGHUP, signalHandler);
         signal(SIGINT, signalHandler);
         signal(SIGQUIT, signalHandler);
         signal(SIGTSTP, signalHandler);
+#endif
     }
     return done.get_future();
 }

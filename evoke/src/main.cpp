@@ -13,12 +13,6 @@
 #include <thread>
 #include "FsWatcher.hpp"
 
-#ifdef _WIN32
-int isatty(int) { return 0; }
-#else
-#include <unistd.h>
-#endif
-
 using namespace std::literals::chrono_literals;
 
 template<typename T>
@@ -97,7 +91,7 @@ int main(int argc, const char **argv)
     });
     if (targetsToBuild.empty()) targetsToBuild[toolsetname];
     if (daemon) {
-        reporterName = (isatty(0) ? "daemon-cli" : "daemon-protocol");
+        reporterName = "daemon";
     }
     std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
     Executor ex(std::stoul(jobcount), *reporter);
