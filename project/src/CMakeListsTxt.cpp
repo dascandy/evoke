@@ -10,9 +10,9 @@ CMakeProjectExporter::CMakeProjectExporter(const Project &project) :
 {
 }
 
-std::string CMakeProjectExporter::LookupLibraryName(const std::string &componentName)
+std::string CMakeProjectExporter::LookupLibraryName(const Component &comp)
 {
-    return (project_.IsSystemComponent(componentName) ? cmakeSystemProjectPrefix + componentName : componentName);
+    return (project_.IsSystemComponent(comp) ? cmakeSystemProjectPrefix + comp.GetName() : comp.GetName());
 }
 
 void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
@@ -100,7 +100,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
             os << "# System components\n";
             for(const auto &comp : systemComponents)
             {
-                auto target = LookupLibraryName(comp->GetName());
+                auto target = LookupLibraryName(*comp);
                 if(target == comp->GetName())
                 {
                     std::cout << "Error " << target << " = " << comp->GetName() << "\n";
@@ -116,7 +116,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
                     }
                     for(const auto &subComp : comp->pubDeps)
                     {
-                        os << "    " << LookupLibraryName(subComp->GetName());
+                        os << "    " << LookupLibraryName(*subComp);
                     }
                     os << ")\n";
                 }
@@ -128,14 +128,14 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
         {
             if(comp.second.type == "library")
             {
-                os << "add_subdirectory(" << comp.second.GetName() << ")\n";
+                os << "add_subdirectory(" << comp.second.GetCMakeSubdirectoryName() << ")\n";
             }
         }
         for(const auto &comp : project_.components)
         {
             if(comp.second.type == "executable")
             {
-                os << "add_subdirectory(" << comp.second.GetName() << ")\n";
+                os << "add_subdirectory(" << comp.second.GetCMakeSubdirectoryName() << ")\n";
             }
         }
     }
@@ -171,7 +171,7 @@ void CMakeProjectExporter::extractSystemComponents(const Component &comp, std::u
         }
         extractSystemComponents(*subComp, visited, results);
     }
-    if(project_.IsSystemComponent(comp.GetName()))
+    if(project_.IsSystemComponent(comp))
     {
         results.push_back(&comp);
     }
@@ -208,7 +208,7 @@ void CMakeProjectExporter::dumpTargetLibraries(std::ostream &os, const std::stri
         os << "target_link_libraries(" << target << " " << access << "\n";
         for(const auto &comp : components)
         {
-            os << "    " << LookupLibraryName(comp->GetName()) << "\n";
+            os << "    " << LookupLibraryName(*comp) << "\n";
         }
         os << ")\n";
     }

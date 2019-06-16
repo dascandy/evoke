@@ -6,7 +6,7 @@
 
 #include <iterator>
 
-static std::string toName(const filesystem::path &path)
+static std::string toName(const filesystem::path &path, char separator)
 {
     using namespace std;
 
@@ -25,7 +25,7 @@ static std::string toName(const filesystem::path &path)
     {
         if(!start->filename_is_dot())
         {
-            out.append("_").append(start->string());
+            out.append(1, separator).append(start->string());
         }
     }
 
@@ -36,7 +36,8 @@ Component::Component(const filesystem::path &path, bool isBinary) :
     root(removeDot(path)),
     type("library"),
     isBinary(isBinary),
-    name(toName(path))
+    name(toName(path, '_')),
+    cmake_subdir_name(toName(path, '/'))
 {
 }
 
@@ -55,6 +56,11 @@ bool Component::isHeaderOnly() const
 std::string Component::GetName() const
 {
     return name;
+}
+
+std::string Component::GetCMakeSubdirectoryName() const
+{
+    return cmake_subdir_name;
 }
 
 std::ostream &operator<<(std::ostream &os, const Component &component)

@@ -8,7 +8,7 @@
 struct CMakeProjectExporter
 {
     explicit CMakeProjectExporter(const Project &project);
-    std::string LookupLibraryName(const std::string &componentName);
+    std::string LookupLibraryName(const Component &comp);
     void createCMakeListsFiles(const GlobalOptions &opts);
 private:
     void dumpDoNotModifyWarning(std::ostream &os);

@@ -24,7 +24,7 @@ public:
     std::vector<PendingCommand *> buildPipeline;
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
-    bool IsSystemComponent(const std::string &name) const;
+    bool IsSystemComponent(const Component &comp) const;
 
 private:
     void LoadFileList();
@@ -41,6 +41,8 @@ private:
     void ReadCodeFrom(File &f, const char *buffer, size_t buffersize);
     void ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp);
     bool IsItemBlacklisted(const filesystem::path &path);
+    bool IsSystemComponent(const std::string &name) const;
+
     friend std::ostream &operator<<(std::ostream &os, const Project &p);
 };
 
