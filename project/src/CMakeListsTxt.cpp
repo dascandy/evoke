@@ -128,14 +128,14 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
         {
             if(comp.second.type == "library")
             {
-                os << "add_subdirectory(" << comp.second.GetCMakeSubdirectoryName() << ")\n";
+                os << "add_subdirectory(" << comp.second.GetHierarchicalName() << ")\n";
             }
         }
         for(const auto &comp : project_.components)
         {
             if(comp.second.type == "executable")
             {
-                os << "add_subdirectory(" << comp.second.GetCMakeSubdirectoryName() << ")\n";
+                os << "add_subdirectory(" << comp.second.GetHierarchicalName() << ")\n";
             }
         }
     }

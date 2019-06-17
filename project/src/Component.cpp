@@ -37,7 +37,7 @@ Component::Component(const filesystem::path &path, bool isBinary) :
     type("library"),
     isBinary(isBinary),
     name(toName(path, '_')),
-    cmake_subdir_name(toName(path, '/'))
+    hierarchical_name(toName(path, '/'))
 {
 }
 
@@ -58,9 +58,9 @@ std::string Component::GetName() const
     return name;
 }
 
-std::string Component::GetCMakeSubdirectoryName() const
+std::string Component::GetHierarchicalName() const
 {
-    return cmake_subdir_name;
+    return hierarchical_name;
 }
 
 std::ostream &operator<<(std::ostream &os, const Component &component)

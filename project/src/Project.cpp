@@ -133,11 +133,7 @@ bool Project::IsItemBlacklisted(const filesystem::path &path)
 
 bool Project::IsSystemComponent(const Component &comp) const
 {
-    return IsSystemComponent(comp.GetName()) && IsSystemComponent(comp.GetCMakeSubdirectoryName());
-}
-
-bool Project::IsSystemComponent(const std::string &name) const
-{
+    const auto name = comp.GetHierarchicalName();
     auto result = (components.find(name) == components.cend());
     if(result)
     {

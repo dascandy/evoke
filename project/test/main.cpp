@@ -24,26 +24,26 @@ BOOST_AUTO_TEST_CASE(cmake_subdir_depth_1_without_last_slash)
 {
     Component c("./component", true);
 
-    BOOST_TEST(c.cmake_subdir_name == "component");
+    BOOST_TEST(c.GetHierarchicalName() == "component");
 }
 
 BOOST_AUTO_TEST_CASE(cmake_subdir_depth_1_with_last_slash)
 {
     Component c("./component/", true);
 
-    BOOST_TEST(c.cmake_subdir_name == "component");
+    BOOST_TEST(c.GetHierarchicalName() == "component");
 }
 
 BOOST_AUTO_TEST_CASE(cmake_subdir_depth_2_without_last_slash)
 {
     Component c("./comp/subcomp", true);
 
-    BOOST_TEST(c.cmake_subdir_name == "comp/subcomp");
+    BOOST_TEST(c.GetHierarchicalName() == "comp/subcomp");
 }
 
 BOOST_AUTO_TEST_CASE(cmake_subdir_depth_2_with_last_slash)
 {
     Component c("./comp/subcomp/", true);
 
-    BOOST_TEST(c.cmake_subdir_name == "comp/subcomp");
+    BOOST_TEST(c.GetHierarchicalName() == "comp/subcomp");
 }

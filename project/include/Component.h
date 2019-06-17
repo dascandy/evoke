@@ -19,7 +19,7 @@ struct Component
 public:
     Component(const filesystem::path &path, bool isBinary = false);
     std::string GetName() const;
-    std::string GetCMakeSubdirectoryName() const;
+    std::string GetHierarchicalName() const;
     bool isHeaderOnly() const;
     filesystem::path root;
     std::unordered_set<File *> files;
@@ -31,7 +31,7 @@ public:
     bool isBinary;
     std::string accumulatedErrors;
     std::string name;
-    std::string cmake_subdir_name;
+    std::string hierarchical_name;
 };
 
 std::ostream &operator<<(std::ostream &os, const Component &component);
