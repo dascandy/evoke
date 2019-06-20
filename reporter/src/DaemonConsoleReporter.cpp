@@ -82,12 +82,12 @@ void DaemonConsoleReporter::Redraw()
     std::cout << blue << s << reset << std::flush;
     if (commands) {
         for (auto& command : *commands) {
-            if (command->errorcode) {
+            if (command->errorcode && !command->output.empty()) {
                 std::cout << command->output << "\n" << std::flush;
             }
         }
         for (auto& command : *commands) {
-            if (!command->errorcode) {
+            if (!command->errorcode && !command->output.empty()) {
                 std::cout << command->output << "\n" << std::flush;
             }
         }
