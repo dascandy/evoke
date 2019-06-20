@@ -21,7 +21,7 @@ public:
     std::future<void> Mode(bool isDaemon);
 
     bool AllSuccess();
-    void WipeCommands();
+    void NewGeneration();
     void RunMoreCommands();
     std::mutex m;
     std::vector<std::shared_ptr<PendingCommand>> commands;
@@ -29,4 +29,5 @@ private:
     std::vector<std::unique_ptr<Process>> activeProcesses;
     Reporter &reporter;
     bool daemonMode = false;
+    size_t generation = 0;
 };

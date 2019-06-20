@@ -44,7 +44,7 @@ private:
             imports[importName] = exported;
         }
     }
-
+    void FileUpdated();
 public:
     static bool isTranslationUnit(const filesystem::path &);
     static bool isHeader(const filesystem::path &);
