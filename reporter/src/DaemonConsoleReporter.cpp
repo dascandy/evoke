@@ -17,6 +17,7 @@ static size_t screenWidth = 80;
 bool hasFailure = false;
 std::vector<std::shared_ptr<PendingCommand>> *commands = nullptr;
 
+DaemonConsoleReporter* reporter = nullptr;
 static void fetchDisplaySize()
 {
 #    ifdef TIOCGSIZE
@@ -39,9 +40,10 @@ static void fetchDisplaySize()
 
 DaemonConsoleReporter::DaemonConsoleReporter()
 {
+    reporter = this;
     fetchDisplaySize();
 #ifndef _WIN32
-    signal(SIGWINCH, [](int) { fetchDisplaySize(); });
+    signal(SIGWINCH, [](int) { fetchDisplaySize(); if (reporter) reporter->Redraw(); });
 #endif
 }
 
