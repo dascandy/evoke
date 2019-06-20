@@ -26,6 +26,29 @@ Project::~Project()
 {
 }
 
+bool Project::FileUpdate(filesystem::path changedFile, Change change) {
+    // If this is a file that we won't care about, just ignore.
+    if (!File::isHeader(changedFile) && !File::isTranslationUnit(changedFile)) {
+        return false;
+    }
+
+    auto it = files.find(changedFile.string());
+    // We might be interested in this. Let's see what happened to it.
+    switch (change) {
+        case Change::Changed:
+            if (it != files.end()) {
+                it->second.FileUpdated();
+            }
+            return false;
+        // Default handling. Because file move, add or delete can change commands & component dependencies in ways our incremental model can't handle yet, just reload.
+        default:
+        case Change::Deleted:
+        case Change::Created:
+            Reload();
+            return true;
+    }
+}
+
 void Project::Reload()
 {
     unknownHeaders.clear();

@@ -53,10 +53,13 @@ static const char purple[] = "\033[1;35m";
 static const char cyan[] = "\033[1;36m";
 static const char white[] = "\033[1;37m";
 static const char grey[] = "\033[0;37m";
+static const char topleft[] = "\033[1;1H";
+static const char clearscreen[] = "\033[2J";
+static const char reset[] = "\033[m";
 
 void DaemonConsoleReporter::Redraw()
 {
-    std::cout << "\033[2J" << std::flush;
+    std::cout << clearscreen << topleft << std::flush;
 
     size_t active = 0;
     for(auto &t : activeProcesses)
@@ -75,11 +78,18 @@ void DaemonConsoleReporter::Redraw()
     std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
     std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
     std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsDepfail << " not built ][ " << commandCount << " total ]\n";
-    std::string s('-', screenWidth);
-    std::cout << blue << s << "\033[1A" << std::flush;
-    if (commands) for (auto& command : *commands) {
-        if (command->errorcode) {
-            std::cout << command->output << "\n" << std::flush;
+    std::string s(screenWidth, '-');
+    std::cout << blue << s << reset << std::flush;
+    if (commands) {
+        for (auto& command : *commands) {
+            if (command->errorcode) {
+                std::cout << command->output << "\n" << std::flush;
+            }
+        }
+        for (auto& command : *commands) {
+            if (!command->errorcode) {
+                std::cout << command->output << "\n" << std::flush;
+            }
         }
     }
 }

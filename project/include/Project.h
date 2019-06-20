@@ -4,6 +4,7 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "globaloptions.h"
+#include "FsWatcher.hpp"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
@@ -26,6 +27,7 @@ public:
 
     bool IsSystemComponent(const std::string &name) const;
 
+    bool FileUpdate(filesystem::path changedFile, Change change);
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);

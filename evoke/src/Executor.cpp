@@ -55,8 +55,8 @@ void Process::run()
     x(this);
 }
 
-Executor::Executor(size_t jobcount, Reporter &reporter) :
-    reporter(reporter)
+Executor::Executor(size_t jobcount, Reporter &reporter) 
+: reporter(reporter)
 {
     activeProcesses.resize(jobcount);
     reporter.SetConcurrencyCount(jobcount);
@@ -85,7 +85,7 @@ std::future<void> Executor::Mode(bool isDaemon)
     if (isDaemon) {
 #ifndef _WIN32
     // TODO: Add the Windows side of signal handling
-        void (*signalHandler)(int) = [](int){ done.set_value(); };
+        void (*signalHandler)(int) = [](int signo){ done.set_value(); std::cout << " SIGNAL " << signo << "\n";};
         signal(SIGTERM, signalHandler);
         signal(SIGHUP, signalHandler);
         signal(SIGINT, signalHandler);
@@ -96,7 +96,8 @@ std::future<void> Executor::Mode(bool isDaemon)
     return done.get_future();
 }
 
-void Executor::WipeCommands() {
+void Executor::NewGeneration() {
+    generation++;
     commands.clear();
     reporter.ReportCommandQueue(commands);
 }
@@ -120,11 +121,15 @@ void Executor::RunMoreCommands()
                 filesystem::create_directories(o->path.parent_path());
             }
             reporter.SetRunningCommand(n, c);
-            activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
+            activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c, generationWhenStarted = generation](Process *t) {
                 std::lock_guard<std::mutex> l(m);
-                t->outbuffer.push_back(0);
-                c->SetResult(t->errorcode, t->outbuffer.data());
-                reporter.ReportCommand(n, c);
+                if (generation == generationWhenStarted) {   // If the generation counter changed, then all our target pointers are stale. Don't talk to our command any more.
+                  t->outbuffer.push_back(0);
+                  c->SetResult(t->errorcode, t->outbuffer.data());
+                  reporter.ReportCommand(n, c);
+                } else {
+                  reporter.ReportCommand(n, nullptr);
+                }
                 activeProcesses[n].reset();
                 RunMoreCommands();
             });

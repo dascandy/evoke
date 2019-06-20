@@ -90,7 +90,7 @@ int main(int argc, const char **argv)
         }
     });
     if (targetsToBuild.empty()) targetsToBuild[toolsetname];
-    if (daemon) {
+    if (daemon && reporterName == "guess") {
         reporterName = "daemon";
     }
     std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
@@ -112,10 +112,7 @@ int main(int argc, const char **argv)
     {
         std::cerr << "Unknown header: " << u << "\n";
     }
-    auto UpdateAndRunJobs = [&](filesystem::path, Change){
-        std::lock_guard<std::mutex> l(ex.m);
-        ex.WipeCommands();
-        op.Reload();
+    auto GenerateCommands = [&]() {
         for (auto& p : targetsToBuild) {
             std::unique_ptr<Toolset> toolset = GetToolsetByName(p.first);
             if(unitybuild)
@@ -135,6 +132,15 @@ int main(int argc, const char **argv)
                 ex.Run(c);
             }
         }
+    };
+    auto UpdateAndRunJobs = [&](filesystem::path changedFile, Change change){
+        std::lock_guard<std::mutex> l(ex.m);
+        std::cout << "CHANGE: " << changedFile.string() << " change " << (int)change << "\n";
+        bool reloaded = op.FileUpdate(changedFile, change);
+        if (reloaded) {
+            ex.NewGeneration();
+            GenerateCommands();
+        }
         ex.RunMoreCommands();
     };
     if (daemon) {
@@ -143,7 +149,8 @@ int main(int argc, const char **argv)
     }
     // If this is in daemon mode, the future returns when the user sends a SIGTERM, SIGINT or such. 
     // If not, it blocks until there are no jobs left to run.
-    UpdateAndRunJobs("", Change::Changed);
+    GenerateCommands();
+    ex.RunMoreCommands();
     ex.Mode(daemon).get();
     if(compilation_database)
     {
