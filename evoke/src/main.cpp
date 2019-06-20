@@ -11,7 +11,7 @@
 #include <map>
 #include <memory>
 #include <thread>
-#include "FsWatcher.hpp"
+#include "fw/FsWatcher.hpp"
 
 using namespace std::literals::chrono_literals;
 

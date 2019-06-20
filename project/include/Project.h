@@ -4,7 +4,7 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "globaloptions.h"
-#include "FsWatcher.hpp"
+#include "fw/FsWatcher.hpp"
 
 #include <fw/filesystem.hpp>
 #include <ostream>

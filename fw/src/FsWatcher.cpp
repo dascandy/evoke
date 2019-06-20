@@ -1,4 +1,4 @@
-#include "FsWatcher.hpp"
+#include "fw/FsWatcher.hpp"
 #include <inotify-cpp/NotifierBuilder.h>
 
 
