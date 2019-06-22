@@ -32,6 +32,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/Configuration.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FileParser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FsWatcher.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/File.cpp
@@ -43,6 +44,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/ConsoleReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/DaemonConsoleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/android.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/gcc.cpp
