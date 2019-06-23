@@ -131,18 +131,6 @@ bool Project::IsItemBlacklisted(const filesystem::path &path)
     return false;
 }
 
-bool Project::IsSystemComponent(const Component &comp) const
-{
-    const auto name = comp.GetHierarchicalName();
-    auto result = (components.find(name) == components.cend());
-    if(result)
-    {
-        auto altName = "./" + name;
-        result = (components.find(altName) == components.cend());
-    }
-    return result;
-}
-
 static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, filesystem::path path)
 {
     Component *rv = nullptr;

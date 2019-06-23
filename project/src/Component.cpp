@@ -3,41 +3,15 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "dotted.h"
+#include "Utilities.hpp"
 
 #include <iterator>
-
-static std::string toName(const filesystem::path &path, char separator)
-{
-    using namespace std;
-
-    auto start = find_if_not(begin(path), end(path), [](auto &part) {
-        return part.filename_is_dot();
-    });
-
-    if(start == end(path))
-    {
-        return "#anonymous#";
-    }
-
-    string out = start->string();
-
-    while(++start != end(path))
-    {
-        if(!start->filename_is_dot())
-        {
-            out.append(1, separator).append(start->string());
-        }
-    }
-
-    return out;
-}
 
 Component::Component(const filesystem::path &path, bool isBinary) :
     root(removeDot(path)),
     type("library"),
     isBinary(isBinary),
-    name(toName(path, '_')),
-    hierarchical_name(toName(path, '/'))
+    name(GetNameFromPath(path))
 {
 }
 
@@ -56,11 +30,6 @@ bool Component::isHeaderOnly() const
 std::string Component::GetName() const
 {
     return name;
-}
-
-std::string Component::GetHierarchicalName() const
-{
-    return hierarchical_name;
 }
 
 std::ostream &operator<<(std::ostream &os, const Component &component)

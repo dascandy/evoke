@@ -24,8 +24,6 @@ public:
     std::vector<PendingCommand *> buildPipeline;
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
-    bool IsSystemComponent(const Component &comp) const;
-
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);
