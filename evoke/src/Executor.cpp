@@ -17,7 +17,6 @@ public:
 
 private:
     void run();
-
 public:
     std::function<void(Process *)> onComplete;
     std::string filename;
@@ -39,16 +38,21 @@ Process::Process(const std::string &filename, const std::string &cmd, std::funct
     child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
 {
     std::thread([this] { run(); }).detach();
-}
 
+}
 void Process::run()
 {
     std::string line;
     while(std::getline(pipe_stream, line))
         outbuffer += line + "\n";
 
-    child.wait();
-    errorcode = child.exit_code();
+    try {
+        child.wait();
+        errorcode = child.exit_code();
+    } catch (const std::exception& e) {
+        outbuffer = e.what();
+        errorcode = -1;
+    }
     state = Done;
     // The callback will cause this object to be destructed, so move out the callback before invoking it
     auto x = std::move(onComplete);
@@ -80,7 +84,6 @@ void Executor::Run(std::shared_ptr<PendingCommand> cmd)
 
 std::future<void> Executor::Mode(bool isDaemon)
 {
-    std::lock_guard<std::mutex> l(m);
     daemonMode = isDaemon;
     if (isDaemon) {
 #ifndef _WIN32

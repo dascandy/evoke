@@ -150,8 +150,13 @@ int main(int argc, const char **argv)
     // If this is in daemon mode, the future returns when the user sends a SIGTERM, SIGINT or such. 
     // If not, it blocks until there are no jobs left to run.
     GenerateCommands();
-    ex.RunMoreCommands();
-    ex.Mode(daemon).get();
+    std::future<void> finished;
+    {
+        std::lock_guard<std::mutex> l(ex.m);
+        ex.RunMoreCommands();
+        finished = ex.Mode(daemon);
+    }
+    finished.get();
     if(compilation_database)
     {
         std::ofstream os("compile_commands.json");
