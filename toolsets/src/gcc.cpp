@@ -15,7 +15,7 @@
 
 GccToolset::GccToolset()
 {
-    parameters["compiler"] = "g++";
+    parameters["compiler"] = "g++ -fdiagnostics-color";
     parameters["linker"] = "g++";
     parameters["archiver"] = "ar";
 }
