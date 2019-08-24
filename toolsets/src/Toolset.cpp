@@ -16,30 +16,34 @@ std::unique_ptr<Toolset> ParseToolset(const std::string &name);
 
 std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
 {
+    std::unique_ptr<Toolset> toolset;
     if(filesystem::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
     {
-        return ParseToolset("toolsets/" + name + ".toolset");
+        toolset = ParseToolset("toolsets/" + name + ".toolset");
     }
     else if(name == "android" || name == "__builtin_android")
     {
-        return std::make_unique<AndroidToolset>();
+        toolset = std::make_unique<AndroidToolset>();
     }
     else if(name == "windows" || name == "msvc" || name == "__builtin_msvc")
     {
-        return std::make_unique<MsvcToolset>();
+        toolset = std::make_unique<MsvcToolset>();
     }
     else if(name == "apple" || name == "osx" || name == "clang" || name == "__builtin_clang")
     {
-        return std::make_unique<ClangToolset>();
+        toolset = std::make_unique<ClangToolset>();
     }
     else if(name == "linux" || name == "gcc" || name == "__builtin_gcc")
     {
-        return std::make_unique<GccToolset>();
+        toolset = std::make_unique<GccToolset>();
     }
     else
     {
         throw std::runtime_error("Cannot find toolset " + name);
     }
+
+    toolset->SetParameter("name", name);
+    return toolset;
 }
 
 std::unique_ptr<Toolset> ParseToolset(const std::string &name)

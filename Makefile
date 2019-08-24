@@ -5,11 +5,11 @@ CXX ?= g++
 
 o/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -std=c++17 -g2 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Iutils/include -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include -Ireporter/include
+	$(CXX) -std=c++17 -g2 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Iutils/include -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include -Ireporter/include -Inetwork/include
 
-bin/evoke: bin/evoke_make
+build/gcc/bin/evoke: bin/evoke_make
 	bin/evoke_make
-	@echo Build complete. Please copy bin/evoke to wherever you want to install it.
+	@echo Build complete. Please copy build/gcc/bin/evoke to wherever you want to install it.
 
 bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find . -name *.cpp -not -regex ".*/test/.*"))
 	@mkdir -p $(dir $@)

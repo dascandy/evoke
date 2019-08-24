@@ -38,5 +38,5 @@ BOOST_AUTO_TEST_CASE(clang_link)
     File *input2 = p.CreateFile(c, "obj/hello/src/main.cpp.obj");
     ClangToolset clang;
     auto cmd = clang.getLinkerCommand("clang++", "bin/hello.exe", {input1, input2}, {{&c}});
-    BOOST_TEST(cmd == "clang++ -pthread -o bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj -Llib -lmylib");
+    BOOST_TEST(cmd == "clang++ -o bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj -Lbuild/clang/lib -lmylib");
 }

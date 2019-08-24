@@ -12,6 +12,7 @@
 #include <memory>
 #include <thread>
 #include "fw/FsWatcher.hpp"
+#include "Finder.h"
 
 using namespace std::literals::chrono_literals;
 

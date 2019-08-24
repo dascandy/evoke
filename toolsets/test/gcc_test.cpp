@@ -38,5 +38,5 @@ BOOST_AUTO_TEST_CASE(gcc_link)
     File *input2 = p.CreateFile(c, "obj/hello/src/main.cpp.obj");
     GccToolset gcc;
     auto cmd = gcc.getLinkerCommand("g++", "bin/hello.exe", {input1, input2}, {{&c}});
-    BOOST_TEST(cmd == "g++ -pthread -o bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj -Llib -lmylib");
+    BOOST_TEST(cmd == "g++ -pthread -o bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj -Lbuild/gcc/lib -lmylib");
 }

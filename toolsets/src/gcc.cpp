@@ -15,9 +15,11 @@
 
 GccToolset::GccToolset()
 {
+    parameters["name"] = "gcc";
     parameters["compiler"] = "g++";
     parameters["linker"] = "g++";
     parameters["archiver"] = "ar";
+    parameters["cross"] = "false";
 }
 
 std::string GccToolset::getBmiNameFor(const File &file)
@@ -108,7 +110,7 @@ std::string GccToolset::getLinkerCommand(const std::string &program, const std::
     {
         command += " " + file->path.string();
     }
-    command += " -Llib";
+    command += " -Lbuild/" + parameters["name"] + "/lib";
     for(auto d : linkDeps)
     {
         if(d.size() == 1)
@@ -130,7 +132,7 @@ std::string GccToolset::getLinkerCommand(const std::string &program, const std::
 
 std::string GccToolset::getUnittestCommand(const std::string &program)
 {
-    return "./" + program;
+    return program;
 }
 
 GlobalOptions GccToolset::ParseGeneralOptions(const std::string &options)
