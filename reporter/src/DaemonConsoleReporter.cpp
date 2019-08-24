@@ -59,6 +59,75 @@ static const char topleft[] = "\033[1;1H";
 static const char clearscreen[] = "\033[2J";
 static const char reset[] = "\033[m";
 
+void printLines(size_t width, size_t& maxLines, const std::string& str) {
+  std::string outline;
+  size_t posWidth = 0;
+  size_t maxWidth = maxLines * width - 1;
+  // Pretend to add another newline at the end so the buffer flushes
+  for (size_t n = 0; n < str.size() + 1; n++) {
+    if (maxLines == 0) return;
+    switch(n == str.size() ? '\n' : str[n]) {
+    default: 
+      if (str[n] == '\t') {
+        outline += ' ';
+      } else {
+        outline += str[n]; 
+      }
+      posWidth++; 
+      if (posWidth >= maxWidth) n = str.size() - 1;  // flush buffer, stop.
+      break;
+    case '\n': 
+    case '\r': 
+    {
+      size_t linecount = (posWidth + width - 1) / width;
+      if (linecount == 0) linecount++;
+      maxLines -= linecount;
+      maxWidth = maxLines * width - 1;
+      std::cout << outline;
+      if (maxLines == 0) 
+        std::cout << std::flush;
+      else 
+        std::cout << '\n';
+      outline.clear();
+      posWidth = 0;
+      break;
+    }
+    case '\b': break;
+    case '\033':
+      if (str.size() == n+1) break;
+      // handle ansi sequence
+      switch(str[n+1]) {
+        case 'P': case 'X': case '^': case '_':
+          // Ignore commands that take a string argument (and skip until end of string)
+          while (str.size() > n+1 && (str[n] != 0x1b || str[n+1] != '\\')) n++;
+          n++;
+          break;
+        case '[': // CSI
+        {
+          std::string csi;
+          csi += str[n++];
+          csi += str[n++];
+          while (str.size() > n+1 && (str[n] < 0x40 || str[n] > 0x7E)) csi += str[n++];
+          csi += str[n];
+          switch(str[n]) {
+            // Remove all cursor movement and stateful commands
+            case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G': case 'H': 
+            case 'S': case 'T': case 'f': case 'n': case 's': case 'u':
+            break;
+            default: outline += csi;
+          }
+          break;
+        }
+        case 'c': case 'N': case 'O':
+          // Skip commands that switch character sets or reset the screen
+          n++;
+          break;
+      }
+      break;
+    }
+  }
+}
+
 void DaemonConsoleReporter::Redraw()
 {
     std::cout << clearscreen << topleft << std::flush;
@@ -75,23 +144,19 @@ void DaemonConsoleReporter::Redraw()
         if (command->state == PendingCommand::Depfail) commandsDepfail++;
         commandCount++;
     }
-    std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
-    std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
-    std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
-    std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
+    for (size_t n = 0; n < 4; n++) {
+        std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
+    }
     std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsDepfail << " not built ][ " << commandCount << " total ]\n";
     std::string s(screenWidth, '-');
     std::cout << blue << s << reset << std::flush;
+    size_t linesLeft = screenHeight - 2;
     if (commands) {
         for (auto& command : *commands) {
-            if (command->errorcode && !command->output.empty()) {
-                std::cout << command->output << "\n" << std::flush;
-            }
+            if (command->errorcode && !command->output.empty()) printLines(screenWidth, linesLeft, command->output);
         }
         for (auto& command : *commands) {
-            if (!command->errorcode && !command->output.empty()) {
-                std::cout << command->output << "\n" << std::flush;
-            }
+            if (!command->errorcode && !command->output.empty()) printLines(screenWidth, linesLeft, command->output);
         }
     }
 }
@@ -108,7 +173,7 @@ void DaemonConsoleReporter::SetRunningCommand(size_t channel, std::shared_ptr<Pe
     Redraw();
 }
 
-void DaemonConsoleReporter::ReportCommand(size_t channel, std::shared_ptr<PendingCommand> cmd)
+void DaemonConsoleReporter::ReportCommand(size_t channel, std::shared_ptr<PendingCommand>)
 {
     activeProcesses[channel] = nullptr;
     Redraw();
