@@ -11,7 +11,7 @@ static std::string toName(const filesystem::path &path)
     using namespace std;
 
     auto start = find_if_not(begin(path), end(path), [](auto &part) {
-        return part.filename_is_dot();
+        return part.filename() == ".";
     });
 
     if(start == end(path))
@@ -23,7 +23,7 @@ static std::string toName(const filesystem::path &path)
 
     while(++start != end(path))
     {
-        if(!start->filename_is_dot())
+        if(start->filename() != ".")
         {
             out.append("_").append(start->string());
         }
