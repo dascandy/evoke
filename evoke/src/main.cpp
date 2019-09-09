@@ -135,14 +135,21 @@ int main(int argc, const char **argv)
         }
     };
     auto UpdateAndRunJobs = [&](filesystem::path changedFile, Change change){
-        std::lock_guard<std::mutex> l(ex.m);
-        std::cout << "CHANGE: " << changedFile.string() << " change " << (int)change << "\n";
-        bool reloaded = op.FileUpdate(changedFile, change);
-        if (reloaded) {
-            ex.NewGeneration();
-            GenerateCommands();
+      while (1) {
+        try {
+          std::lock_guard<std::mutex> l(ex.m);
+          std::cout << "CHANGE: " << changedFile.string() << " change " << (int)change << "\n";
+          bool reloaded = op.FileUpdate(changedFile, change);
+          if (reloaded) {
+              ex.NewGeneration();
+              GenerateCommands();
+          }
+          ex.RunMoreCommands();
+          return;
+        } catch (...) {
+          // Any exception is from more filesystem changes while the iterator was moving. Just retry.
         }
-        ex.RunMoreCommands();
+      }
     };
     if (daemon) {
         reporterName = "daemon";

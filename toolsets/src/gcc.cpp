@@ -15,6 +15,7 @@
 
 GccToolset::GccToolset()
 {
+    parameters["compiler"] = "g++";
     parameters["name"] = "gcc";
     parameters["linker"] = "g++";
     parameters["archiver"] = "ar";
