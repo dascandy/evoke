@@ -1,17 +1,11 @@
 script:
-  - wget -O boost_1_64_0.tar.gz http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.gz/download
-  - tar xzf boost_1_64_0.tar.gz 
-  - cd boost_1_64_0/
-  - ./bootstrap.sh --with-libraries=program_options,filesystem,system >/dev/null 2>&1
-  - ./b2 link=static threading=multi variant=release >/dev/null 2>&1
-  - sudo ./b2 install >/dev/null 2>&1 
-  - cd ..
-  - mkdir bin && cd bin
+  - git clone https://github.com/erikzenker/inotify-cpp && cd inotify-cpp && mkdir build && cd build && cmake .. && make -j && sudo make install && cd .. && rm -rf inotify-cpp
+  - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Release
-  - make -j4
+  - make -j
 
 sudo: required
-dist: trusty
+dist: bionic
 
 matrix:
   include:
@@ -24,6 +18,7 @@ matrix:
           packages:
             - g++-7
             - g++-7-multilib
+            - libboost-all-dev
       env: CXX=g++-7
 
 
