@@ -126,6 +126,7 @@ void Executor::RunMoreCommands()
             reporter.SetRunningCommand(n, c);
             activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c, generationWhenStarted = generation](Process *t) {
                 std::lock_guard<std::mutex> l(m);
+                auto self = std::move(activeProcesses[n]);
                 if (generation == generationWhenStarted) {   // If the generation counter changed, then all our target pointers are stale. Don't talk to our command any more.
                   t->outbuffer.push_back(0);
                   c->SetResult(t->errorcode, t->outbuffer.data());
@@ -133,7 +134,7 @@ void Executor::RunMoreCommands()
                 } else {
                   reporter.ReportCommand(n, nullptr);
                 }
-                activeProcesses[n].reset();
+                reporter.SetRunningCommand(n, nullptr);
                 RunMoreCommands();
             });
         }

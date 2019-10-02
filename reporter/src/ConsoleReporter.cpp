@@ -103,13 +103,14 @@ void ConsoleReporter::SetRunningCommand(size_t channel, std::shared_ptr<PendingC
 
 void ConsoleReporter::ReportCommand(size_t channel, std::shared_ptr<PendingCommand> cmd)
 {
-    // Display error
-    if(cmd->errorcode)
-    {
-        std::cout << "\n\n"
-                  << "Error while running: " << cmd->commandToRun;
-        std::cout << "\n\n"
-                  << cmd->output << "\n\n";
-        Redraw();
+    if (cmd) {
+        // Display error
+        if(cmd->errorcode)
+        {
+            std::cout << "\n\n"
+                      << "Error while running: " << cmd->commandToRun;
+            std::cout << "\n\n"
+                      << cmd->output << "\n\n";
+        }
     }
 }
