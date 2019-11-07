@@ -161,8 +161,8 @@ int main(int argc, const char **argv)
     std::future<void> finished;
     {
         std::lock_guard<std::mutex> l(ex.m);
-        ex.RunMoreCommands();
         finished = ex.Mode(daemon);
+        ex.RunMoreCommands();
     }
     finished.get();
     if(compilation_database)
