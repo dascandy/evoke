@@ -144,6 +144,11 @@ int main(int argc, const char **argv)
               ex.NewGeneration();
               GenerateCommands();
           }
+          if(compilation_database)
+          {
+              std::ofstream os("compile_commands.json");
+              dumpJsonCompileDb(os, op);
+          }
           ex.RunMoreCommands();
           return;
         } catch (...) {
@@ -152,8 +157,13 @@ int main(int argc, const char **argv)
       }
     };
     if (daemon) {
+#ifdef DAEMON_SUPPORT
         reporterName = "daemon";
         FsWatch(rootpath, UpdateAndRunJobs);
+#else
+        std::cout << "Experimental daemon support not compiled in. Please rebuild with -DEVOKE_WITH_DAEMON_SUPPORT";
+        exit(-1);
+#endif
     }
     // If this is in daemon mode, the future returns when the user sends a SIGTERM, SIGINT or such. 
     // If not, it blocks until there are no jobs left to run.
@@ -165,11 +175,6 @@ int main(int argc, const char **argv)
         ex.RunMoreCommands();
     }
     finished.get();
-    if(compilation_database)
-    {
-        std::ofstream os("compile_commands.json");
-        dumpJsonCompileDb(os, op);
-    }
     if(cmakelists)
     {
         std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);

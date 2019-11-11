@@ -18,6 +18,7 @@ std::unique_ptr<Reporter> Reporter::Get(const std::string &name)
     {
         return std::make_unique<ConsoleReporter>();
     }
+#ifdef DAEMON_SUPPORT
     else if(name == "daemon")
     {
         if(isatty(0) && isatty(1))
@@ -29,6 +30,7 @@ std::unique_ptr<Reporter> Reporter::Get(const std::string &name)
             return std::make_unique<IDEReporter>();
         }
     }
+#endif
     else if(name == "guess")
     {
         if(isatty(0) && isatty(1))
