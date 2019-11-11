@@ -6,10 +6,19 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
-
-steps:
-- script: |
-    mkdir build; cd build; cmake ..; make
-  displayName: 'ubuntu basic'
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: mkdir build; cd build; cmake ..; make; cpack
+- job: macOS
+  pool:
+    vmImage: 'macOS-latest'
+  steps:
+  - script: mkdir build; cd build; cmake ..; make; cpack
+- job: Windows
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - script: mkdir build; cd build; cmake ..; make; cpack
