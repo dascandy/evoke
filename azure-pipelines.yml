@@ -11,5 +11,5 @@ pool:
 
 steps:
 - script: |
-    mkdir build; cd build; cmake -G Ninja ..; ninja
+    mkdir build; cd build; cmake ..; make
   displayName: 'ubuntu basic'
