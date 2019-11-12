@@ -13,10 +13,12 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
+      vcpkgTriplet: 'x64-linux'
       vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
   - task: run-cmake@0
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+      vcpkgTriplet: 'x64-linux'
       useVcpkgToolchainFile: true
       cmakeGenerator: 'Ninja'
       buildDirectory: '$(Build.ArtifactStagingDirectory)'
@@ -26,7 +28,6 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
-      vcpkgTriplet: 'x64-windows'
       vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
   - task: run-cmake@0
     inputs:
