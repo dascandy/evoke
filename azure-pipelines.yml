@@ -31,9 +31,11 @@ jobs:
       sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target / -allowUntrusted
   - task: run-vcpkg@0
     inputs:
+      vcpkgTriplet: 'x64-osx'
       vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
   - task: run-cmake@0
     inputs:
+      vcpkgTriplet: 'x64-osx'
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
       cmakeGenerator: 'Ninja'
       buildDirectory: '$(Build.ArtifactStagingDirectory)'
