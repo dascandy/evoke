@@ -13,7 +13,7 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
-      vcpkgArguments: 'boost-filesystem boost-system boost-process'
+      vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
   - task: run-cmake@0
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
@@ -27,7 +27,7 @@ jobs:
   - task: run-vcpkg@0
     inputs:
       vcpkgTriplet: 'x64-windows'
-      vcpkgArguments: 'boost-filesystem boost-system boost-process'
+      vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
   - task: run-cmake@0
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
@@ -40,7 +40,7 @@ jobs:
   - task: run-vcpkg@0
     inputs:
       vcpkgTriplet: 'x64-windows'
-      vcpkgArguments: 'boost-filesystem boost-system boost-process'
+      vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
   - task: run-cmake@0
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
