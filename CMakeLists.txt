@@ -69,6 +69,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 if (MINGW)
   set(Boost_ARCHITECTURE -x64)
+  target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
