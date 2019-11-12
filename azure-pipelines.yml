@@ -11,14 +11,23 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
+  - task: run-vcpkg@0
+    inputs:
+      vcpkgArguments: 'boost_filesystem boost_system'
   - script: mkdir build; cd build; cmake ..; make; cpack
 - job: macOS
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - task: run-vcpkg@0
+    inputs:
+      vcpkgArguments: 'boost_filesystem boost_system'
   - script: mkdir build; cd build; cmake ..; make; cpack
 - job: Windows
   pool:
     vmImage: 'windows-latest'
   steps:
+  - task: run-vcpkg@0
+    inputs:
+      vcpkgArguments: 'boost_filesystem boost_system'
   - script: mkdir build; cd build; cmake ..; make; cpack
