@@ -144,8 +144,18 @@ void DaemonConsoleReporter::Redraw()
         if (command->state == PendingCommand::Depfail) commandsDepfail++;
         commandCount++;
     }
-    for (size_t n = 0; n < 4; n++) {
-        std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
+    if (true) {
+        if (active) {
+            std::cout << yellow << " ¯\\_(ツ)_/¯ ";
+        } else if (commandsFailed) {
+            std::cout << red <<    "(╯°□°)╯︵┻━┻";
+        } else {
+            std::cout << green <<  " ᕕ ( ᐛ ) ᕗ  ";
+        }
+    } else {
+        for (size_t n = 0; n < 4; n++) {
+            std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
+        }
     }
     std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsDepfail << " not built ][ " << commandCount << " total ]\n";
     std::string s(screenWidth, '-');
