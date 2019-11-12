@@ -26,6 +26,9 @@ jobs:
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - script: |
+      brew install gcc
+      sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target / -allowUntrusted
   - task: run-vcpkg@0
     inputs:
       vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
