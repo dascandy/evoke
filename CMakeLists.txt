@@ -52,6 +52,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/gcc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/generic.cpp

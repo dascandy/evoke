@@ -48,8 +48,6 @@ Next few milestones (in any order):
 - Get to 30% test coverage. Not to aim for a number, but to have at least some target.
 - Full integration with at least one package manager - export of needed file list, and import of package inputs. 
 
-- 
-
 v1.0 will be hit when:
 
 - All of the above
