@@ -14,7 +14,12 @@ jobs:
   - task: run-vcpkg@0
     inputs:
       vcpkgArguments: 'boost-filesystem boost-system'
-  - script: mkdir build; cd build; cmake ..; make; cpack
+  - task: run-cmake@0
+    inputs:
+      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+      useVcpkgToolchainFile: true
+      cmakeGenerator: 'Ninja'
+      buildDirectory: '$(Build.ArtifactStagingDirectory)'
 - job: macOS
   pool:
     vmImage: 'macOS-latest'
@@ -22,7 +27,12 @@ jobs:
   - task: run-vcpkg@0
     inputs:
       vcpkgArguments: 'boost-filesystem boost-system'
-  - script: mkdir build; cd build; cmake ..; make; cpack
+  - task: run-cmake@0
+    inputs:
+      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+      useVcpkgToolchainFile: true
+      cmakeGenerator: 'Ninja'
+      buildDirectory: '$(Build.ArtifactStagingDirectory)'
 - job: Windows
   pool:
     vmImage: 'windows-latest'
@@ -30,4 +40,9 @@ jobs:
   - task: run-vcpkg@0
     inputs:
       vcpkgArguments: 'boost-filesystem boost-system'
-  - script: mkdir build; cd build; cmake ..; make; cpack
+  - task: run-cmake@0
+    inputs:
+      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+      useVcpkgToolchainFile: true
+      cmakeGenerator: 'Ninja'
+      buildDirectory: '$(Build.ArtifactStagingDirectory)'
