@@ -24,13 +24,9 @@ jobs:
   pool:
     vmImage: 'macOS-latest'
   steps:
-  - task: run-vcpkg@0
-    inputs:
-      vcpkgArguments: 'boost-filesystem boost-system'
   - task: run-cmake@0
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      useVcpkgToolchainFile: true
       cmakeGenerator: 'Ninja'
       buildDirectory: '$(Build.ArtifactStagingDirectory)'
 - job: Windows
