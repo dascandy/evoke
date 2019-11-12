@@ -35,10 +35,12 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
+      vcpkgTriplet: 'x64-windows'
       vcpkgArguments: 'boost-filesystem boost-system'
   - task: run-cmake@0
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+      vcpkgTriplet: 'x64-windows'
       useVcpkgToolchainFile: true
       cmakeGenerator: 'Ninja'
       buildDirectory: '$(Build.ArtifactStagingDirectory)'
