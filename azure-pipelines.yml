@@ -37,6 +37,7 @@ jobs:
     inputs:
       vcpkgTriplet: 'x64-osx'
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+      useVcpkgToolchainFile: true
       cmakeGenerator: 'Ninja'
       buildDirectory: '$(Build.ArtifactStagingDirectory)'
 - job: Windows
