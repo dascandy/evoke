@@ -22,7 +22,6 @@ jobs:
       vcpkgTriplet: 'x64-linux'
       cmakeGenerator: 'Ninja'
       buildDirectory: '$(Build.ArtifactStagingDirectory)'
-      buildWithCMakeArgs: '-DEVOKE_BUILD_WITH_UNITTEST=1'
 - job: macOS
   pool:
     vmImage: 'macOS-latest'
