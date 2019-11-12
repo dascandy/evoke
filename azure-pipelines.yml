@@ -13,7 +13,7 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
-      vcpkgArguments: 'boost_filesystem boost_system'
+      vcpkgArguments: 'boost-filesystem boost-system'
   - script: mkdir build; cd build; cmake ..; make; cpack
 - job: macOS
   pool:
@@ -21,7 +21,7 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
-      vcpkgArguments: 'boost_filesystem boost_system'
+      vcpkgArguments: 'boost-filesystem boost-system'
   - script: mkdir build; cd build; cmake ..; make; cpack
 - job: Windows
   pool:
@@ -29,5 +29,5 @@ jobs:
   steps:
   - task: run-vcpkg@0
     inputs:
-      vcpkgArguments: 'boost_filesystem boost_system'
+      vcpkgArguments: 'boost-filesystem boost-system'
   - script: mkdir build; cd build; cmake ..; make; cpack
