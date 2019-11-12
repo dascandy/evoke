@@ -46,17 +46,6 @@ protected:
     std::map<std::string, std::string> parameters;
 };
 
-struct AndroidToolset : public Toolset
-{
-    void SetParameter(const std::string &key, const std::string &value) override;
-    void CreateCommandsFor(Project &project, const std::vector<std::string> &targets) override;
-    void CreateCommandsForUnity(Project &project, const std::vector<std::string> &targets) override;
-    std::string getBmiNameFor(const File &file) override;
-    std::string getObjNameFor(const File &file) override;
-    std::string getLibNameFor(const Component &component) override;
-    std::string getExeNameFor(const Component &component) override;
-};
-
 struct ClangToolset : public GenericToolset
 {
     ClangToolset();

@@ -21,10 +21,6 @@ std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
     {
         toolset = ParseToolset("toolsets/" + name + ".toolset");
     }
-    else if(name == "android" || name == "__builtin_android")
-    {
-        toolset = std::make_unique<AndroidToolset>();
-    }
     else if(name == "windows" || name == "msvc" || name == "__builtin_msvc")
     {
         toolset = std::make_unique<MsvcToolset>();
