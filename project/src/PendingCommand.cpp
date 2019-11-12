@@ -1,5 +1,4 @@
 #include "PendingCommand.h"
-
 #include "File.h"
 
 PendingCommand::PendingCommand(const std::string &command) :
@@ -46,6 +45,14 @@ void PendingCommand::Check()
     }
     for(auto &in : inputs)
     {
+        if (in->state == File::Error) {
+            state = PendingCommand::Depfail;
+            for(auto &o : outputs)
+            {
+                o->state = File::Error;
+            }
+            return;
+        }
         if(in->lastwrite() > oldestOutput)
         {
             //printf("older source\n");
@@ -94,15 +101,18 @@ void PendingCommand::Check()
     state = PendingCommand::Done;
 }
 
-void PendingCommand::SetResult(bool success)
+void PendingCommand::SetResult(int errorcode, std::string messages)
 {
+    this->errorcode = errorcode;
+    output = std::move(messages);
+
     state = PendingCommand::Done;
     for(auto &o : outputs)
     {
-        o->state = (success ? File::Done : File::Error);
+        o->state = (errorcode ? File::Error : File::Done);
     }
 }
-
+// may become runnable, precondition-fail, already running, already finished
 bool PendingCommand::CanRun()
 {
     if(state != PendingCommand::ToBeRun)
@@ -128,6 +138,9 @@ std::ostream &operator<<(std::ostream &os, const PendingCommand &pc)
         break;
     case PendingCommand::ToBeRun:
         os << "to be run";
+        break;
+    case PendingCommand::Depfail:
+        os << "Depfail";
         break;
     case PendingCommand::Running:
         os << "running";

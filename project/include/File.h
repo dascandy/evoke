@@ -44,7 +44,7 @@ private:
             imports[importName] = exported;
         }
     }
-
+    void FileUpdated();
 public:
     static bool isTranslationUnit(const filesystem::path &);
     static bool isHeader(const filesystem::path &);
@@ -55,7 +55,7 @@ public:
         if(lastwrite_ == 0)
         {
             filesystem::error_code ec;
-#if defined(_MSC_VER) || (__GNUC__ < 8)
+#if defined(_MSC_VER) || (__GNUC__ < 8) || 1
             lastwrite_ = filesystem::last_write_time(path, ec);
 #else
             auto ftime = filesystem::last_write_time(path, ec);

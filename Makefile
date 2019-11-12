@@ -5,15 +5,15 @@ CXX ?= g++
 
 o/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -std=c++17 -g2 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Iutils/include -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include -Ireporter/include
+	$(CXX) -std=c++17 -g2 -c -o $@ $< -Wall -Wextra -Wpedantic -I$(BOOST_INCLUDE_DIR) -Iutils/include -Ifw/include -Iproject/include -Itoolsets/include -I. -Iview/include -Ievoke/include -Ireporter/include -Inetwork/include
 
-bin/evoke: bin/evoke_make
+build/gcc/bin/evoke: bin/evoke_make
 	bin/evoke_make
-	@echo Build complete. Please copy bin/evoke to wherever you want to install it.
+	@echo Build complete. Please copy build/gcc/bin/evoke to wherever you want to install it.
 
 bin/evoke_make: $(patsubst %.cpp,o/%.o,$(shell find . -name *.cpp -not -regex ".*/test/.*"))
 	@mkdir -p $(dir $@)
-	$(CXX) -g2 -std=c++17 -pthread -o $@ $^ -L$(BOOST_LIB_DIR) -lboost_filesystem -lboost_system -Wl,-rpath -Wl,$(BOOST_LIB_DIR)
+	$(CXX) -g2 -std=c++17 -pthread -o $@ $^ -L$(BOOST_LIB_DIR) -lboost_filesystem -lboost_system -linotify-cpp -Wl,-rpath -Wl,$(BOOST_LIB_DIR)
 
 clean:
 	@mkdir -p $(dir $@)

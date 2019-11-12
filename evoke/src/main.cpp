@@ -11,6 +11,8 @@
 #include <map>
 #include <memory>
 #include <thread>
+#include "fw/FsWatcher.hpp"
+#include "Finder.h"
 
 using namespace std::literals::chrono_literals;
 
@@ -31,7 +33,7 @@ std::ostream &operator<<(std::ostream &os, std::vector<T> v)
     return os;
 }
 
-void parseArgs(std::vector<std::string> args, std::map<std::string, std::string &> argmap, std::map<std::string, bool &> toggles)
+void parseArgs(std::vector<std::string> args, std::map<std::string, std::string &> argmap, std::map<std::string, bool &> toggles, std::function<void(std::string)> onUnknown)
 {
     for(size_t index = 0; index < args.size();)
     {
@@ -51,7 +53,7 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
             }
             else
             {
-                std::cout << "Invalid argument: " << args[index] << "\n";
+                onUnknown(args[index]);
                 ++index;
             }
         }
@@ -61,9 +63,6 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 int main(int argc, const char **argv)
 {
     std::string toolsetname = Configuration::Get().toolchain;
-
-    std::cout << "Building for " << toolsetname << std::endl;
-
     std::string rootpath = filesystem::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
@@ -71,7 +70,32 @@ int main(int argc, const char **argv)
     bool cmakelists = false;
     bool verbose = false;
     bool unitybuild = false;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"-t", toolsetname}, {"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}});
+    bool daemon = false;
+    std::map<std::string, std::vector<std::string>> targetsToBuild;
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}},
+        [&](std::string arg) {
+        // This feels really icky, but it's the way to make this work. TODO: extract this into a class.
+        static bool insideTarget = false;
+        if (arg.empty()) {
+            std::cout << "Invalid argument: " << arg << "\n";
+        } else if (insideTarget) {
+            toolsetname = arg;
+            targetsToBuild[toolsetname];
+            insideTarget = false;
+        } else if (arg == "-t") {
+            insideTarget = true;
+        } else if (arg.empty() || arg[0] == '-') {
+            std::cout << "Invalid argument: " << arg << "\n";
+        } else {
+            targetsToBuild[toolsetname].push_back(arg);
+        }
+    });
+    if (targetsToBuild.empty()) targetsToBuild[toolsetname];
+    if (daemon && reporterName == "guess") {
+        reporterName = "daemon";
+    }
+    std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
+    Executor ex(std::stoul(jobcount), *reporter);
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
@@ -89,22 +113,71 @@ int main(int argc, const char **argv)
     {
         std::cerr << "Unknown header: " << u << "\n";
     }
-    std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
-    if(unitybuild)
-    {
-        toolset->CreateCommandsForUnity(op);
+    auto GenerateCommands = [&]() {
+        for (auto& p : targetsToBuild) {
+            std::unique_ptr<Toolset> toolset = GetToolsetByName(p.first);
+            if(unitybuild)
+            {
+                toolset->CreateCommandsForUnity(op, p.second);
+            }
+            else
+            {
+                toolset->CreateCommandsFor(op, p.second);
+            }
+        }
+        // TODO: filter this on actually useful commands
+        for(auto &comp : op.components)
+        {
+            for(auto &c : comp.second.commands)
+            {
+                ex.Run(c);
+            }
+        }
+    };
+    auto UpdateAndRunJobs = [&](filesystem::path changedFile, Change change){
+      while (1) {
+        try {
+          std::lock_guard<std::mutex> l(ex.m);
+          std::cout << "CHANGE: " << changedFile.string() << " change " << (int)change << "\n";
+          bool reloaded = op.FileUpdate(changedFile, change);
+          if (reloaded) {
+              ex.NewGeneration();
+              GenerateCommands();
+          }
+          if(compilation_database)
+          {
+              std::ofstream os("compile_commands.json");
+              dumpJsonCompileDb(os, op);
+          }
+          ex.RunMoreCommands();
+          return;
+        } catch (...) {
+          // Any exception is from more filesystem changes while the iterator was moving. Just retry.
+        }
+      }
+    };
+    if (daemon) {
+#ifdef DAEMON_SUPPORT
+        reporterName = "daemon";
+        FsWatch(rootpath, UpdateAndRunJobs);
+#else
+        std::cout << "Experimental daemon support not compiled in. Please rebuild with -DEVOKE_WITH_DAEMON_SUPPORT";
+        exit(-1);
+#endif
     }
-    else
+    // If this is in daemon mode, the future returns when the user sends a SIGTERM, SIGINT or such. 
+    // If not, it blocks until there are no jobs left to run.
+    GenerateCommands();
+    std::future<void> finished;
     {
-        toolset->CreateCommandsFor(op);
+        std::lock_guard<std::mutex> l(ex.m);
+        finished = ex.Mode(daemon);
+        ex.RunMoreCommands();
     }
-    if(compilation_database)
-    {
-        std::ofstream os("compile_commands.json");
-        dumpJsonCompileDb(os, op);
-    }
+    finished.get();
     if(cmakelists)
     {
+        std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
         auto opts = toolset->ParseGeneralOptions(Configuration::Get().compileFlags);
         CMakeProjectExporter exporter{op};
         exporter.createCMakeListsFiles(opts);
@@ -113,16 +186,6 @@ int main(int argc, const char **argv)
     {
         std::cout << op;
     }
-    std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
-    Executor ex(std::stoul(jobcount), *reporter);
-    for(auto &comp : op.components)
-    {
-        for(auto &c : comp.second.commands)
-        {
-            if(c->state == PendingCommand::ToBeRun)
-                ex.Run(c);
-        }
-    }
-    ex.Start().get();
     printf("\n\n");
+    return ex.AllSuccess() ? EXIT_SUCCESS : EXIT_FAILURE;
 }

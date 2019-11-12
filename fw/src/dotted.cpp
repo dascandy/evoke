@@ -11,7 +11,7 @@ std::string as_dotted(std::string str)
 
 filesystem::path removeDot(filesystem::path const &p)
 {
-    if (p.begin()->filename_is_dot())
+    if (p.begin()->filename() == ".")
     {
         return relative(p, ".");
     }

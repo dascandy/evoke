@@ -1,6 +1,7 @@
 #pragma once
 
-#if defined(_MSC_VER) || (__GNUC__ < 8)
+// Temporarily switch to Boost FS everywhere, as inotify-cpp relies on it on all non-Windows platforms.
+#if defined(_MSC_VER) || (__GNUC__ < 8) || 1
 
 #    include <boost/filesystem.hpp>
 

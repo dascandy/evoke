@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 project(evoke)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -15,6 +16,7 @@ if(EVOKE_BUILD_WITH_UNITTEST)
     add_subdirectory("toolsets/test")
 endif()
 
+
 set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/include
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/include
@@ -23,6 +25,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/include
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/include
     ${CMAKE_CURRENT_SOURCE_DIR}/view/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/network/include
 )
 
 set(SOURCES
@@ -43,6 +46,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/ConsoleReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/android.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/gcc.cpp
@@ -51,6 +55,15 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/msvc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp
 )
+
+if (EVOKE_BUILD_WITH_DAEMON)
+  set(SOURCES ${SOURCES} 
+    ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FsWatcher.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/DaemonConsoleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/network/src/Finder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/network/src/Retriever.cpp
+  )
+endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
@@ -62,17 +75,19 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
-   OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0")
-   OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  find_package(Boost REQUIRED COMPONENTS filesystem system)
-  target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
-else()
-  find_package(Boost REQUIRED COMPONENTS system)
-  target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
-endif()
+find_package(Boost REQUIRED COMPONENTS filesystem system)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
 
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE Threads::Threads ${Boost_LIBRARIES})
+if (EVOKE_BUILD_WITH_DAEMON)
+  target_compile_definitions(${PROJECT_NAME} DAEMON_SUPPORT)
+  target_link_libraries(${PROJECT_NAME}
+                        PRIVATE inotify-cpp)
+endif()
+
+INSTALL(TARGETS evoke RUNTIME DESTINATION bin)
+
+include(cpack.cmake)
