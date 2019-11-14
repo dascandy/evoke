@@ -6,7 +6,7 @@
 
 #include <iterator>
 
-static std::string toName(const filesystem::path &path)
+static std::string toName(const fs::path &path)
 {
     using namespace std;
 
@@ -16,7 +16,7 @@ static std::string toName(const filesystem::path &path)
 
     if(start == end(path))
     {
-        return filesystem::canonical(path).filename().string();
+        return fs::canonical(path).filename().string();
     }
 
     string out = start->string();
@@ -32,7 +32,7 @@ static std::string toName(const filesystem::path &path)
     return out;
 }
 
-Component::Component(const filesystem::path &path, bool isBinary) :
+Component::Component(const fs::path &path, bool isBinary) :
     root(removeDot(path)),
     type("library"),
     isBinary(isBinary),

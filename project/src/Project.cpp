@@ -18,7 +18,7 @@
 Project::Project(const std::string &rootpath)
 {
     projectRoot = rootpath;
-    filesystem::current_path(projectRoot);
+    fs::current_path(projectRoot);
     Reload();
 }
 
@@ -26,7 +26,7 @@ Project::~Project()
 {
 }
 
-bool Project::FileUpdate(filesystem::path changedFile, Change change) {
+bool Project::FileUpdate(fs::path changedFile, Change change) {
     // If this is a file that we won't care about, just ignore.
     if (!File::isHeader(changedFile) && !File::isTranslationUnit(changedFile)) {
         return false;
@@ -99,7 +99,7 @@ void Project::Reload()
     }
 }
 
-File *Project::CreateFile(Component &c, filesystem::path p)
+File *Project::CreateFile(Component &c, fs::path p)
 {
     std::string subpath = p.string();
     if(subpath[0] == '.' && (subpath[1] == '/' || subpath[1] == '\\'))
@@ -123,12 +123,12 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
     return os;
 }
 
-void Project::ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp)
+void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::path &path, Component &comp)
 {
     File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
     comp.files.insert(&f);
 
-    size_t fileSize = filesystem::file_size(path.string());
+    size_t fileSize = fs::file_size(path.string());
     if (fileSize == 0) return; // Boost::interprocess fails (and throws) on mapping a 0-byte file
 
     using namespace boost::interprocess;
@@ -138,7 +138,7 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const files
     ReadCodeFrom(f, static_cast<const char *>(region.get_address()), region.get_size());
 }
 
-bool Project::IsItemBlacklisted(const filesystem::path &path)
+bool Project::IsItemBlacklisted(const fs::path &path)
 {
     std::string pathS = path.generic_string();
     std::string fileName = path.filename().generic_string();
@@ -165,7 +165,7 @@ bool Project::IsSystemComponent(const std::string &name) const
     return result;
 }
 
-static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, filesystem::path path)
+static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, fs::path path)
 {
     Component *rv = nullptr;
     size_t matchLength = 0;
@@ -183,7 +183,7 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 void Project::LoadFileList()
 {
     components.emplace(".", ".");
-    for(filesystem::recursive_directory_iterator it("."), end;
+    for(fs::recursive_directory_iterator it("."), end;
         it != end;
         ++it)
     {
@@ -195,18 +195,18 @@ void Project::LoadFileList()
             continue;
         }
 
-        if(filesystem::is_directory(it->status()))
+        if(fs::is_directory(it->status()))
         {
-            if(filesystem::is_directory(it->path() / "include") || filesystem::is_directory(it->path() / "src"))
+            if(fs::is_directory(it->path() / "include") || fs::is_directory(it->path() / "src"))
             {
                 components.emplace(it->path().string(), it->path());
-                if(filesystem::is_directory(it->path() / "test"))
+                if(fs::is_directory(it->path() / "test"))
                 {
                     components.emplace((it->path() / "test").string(), it->path() / "test").first->second.type = "unittest";
                 }
             }
         }
-        else if(filesystem::is_regular_file(it->status()) && (File::isHeader(it->path()) || File::isTranslationUnit(it->path())))
+        else if(fs::is_regular_file(it->status()) && (File::isHeader(it->path()) || File::isTranslationUnit(it->path())))
         {
             Component *component = GetComponentFor(components, it->path());
             if(component)
@@ -286,7 +286,7 @@ void Project::MoveIncludeToImport()
     }
 }
 
-static Component *GetPredefComponent(const filesystem::path &path)
+static Component *GetPredefComponent(const fs::path &path)
 {
     static auto list = PredefComponentList();
     if(list.find(path.string()) != list.end())
@@ -312,7 +312,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
         {
             // If this is a non-pointy bracket include, see if there's a local match first.
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
-            std::string fullFilePath = (filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            std::string fullFilePath = (fs::path(fp.first).parent_path() / p.first).generic_string();
             if(!p.second && files.count(fullFilePath))
             {
                 // This file exists as a local include.
@@ -377,7 +377,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
         {
             // If this is a non-pointy bracket include, see if there's a local match first.
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
-            std::string fullFilePath = (filesystem::path(fp.first).parent_path() / p.first).generic_string();
+            std::string fullFilePath = (fs::path(fp.first).parent_path() / p.first).generic_string();
             if(!p.second && files.count(fullFilePath))
             {
                 // This file exists as a local include.

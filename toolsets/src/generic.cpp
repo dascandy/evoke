@@ -71,8 +71,8 @@ void GenericToolset::CreateCommandsForUnity(Project &project, const std::vector<
         std::vector<File *> files;
         std::string linkline;
         std::set<std::string> includes;
-        filesystem::create_directories("unity");
-        filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
+        fs::create_directories("unity");
+        fs::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
         File *of = project.CreateFile(component, outputFile);
         std::ofstream out(outputFile.generic_string());
         for(auto &v : allDeps)
@@ -122,7 +122,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project, const std::vector<
                 linkDeps.push_back(std::move(in));
         }
 
-        filesystem::path exeFile = "build/" + parameters["name"] + "/bin/" + getExeNameFor(component);
+        fs::path exeFile = "build/" + parameters["name"] + "/bin/" + getExeNameFor(component);
         std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor(".cpp"), Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
 
         File *executable = project.CreateFile(component, exeFile);
@@ -202,7 +202,7 @@ void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::
         {
             if(!File::isTranslationUnit(f->path))
                 continue;
-            filesystem::path outputFile = "build/" + parameters["name"] + "/obj/" + getObjNameFor(*f);
+            fs::path outputFile = "build/" + parameters["name"] + "/obj/" + getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
             std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
@@ -221,7 +221,7 @@ void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::
         if(!objects.empty())
         {
             std::string command;
-            filesystem::path outputFile;
+            fs::path outputFile;
             std::shared_ptr<PendingCommand> pc;
             if(component.type == "library")
             {

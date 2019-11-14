@@ -3,20 +3,20 @@
 #include <fstream>
 #include <boost/process.hpp>
 
-bool file_exists(const boost::filesystem::path& path) {
+bool file_exists(const fs::path& path) {
   boost::system::error_code ec;
-  return boost::filesystem::is_regular_file(path, ec);
+  return fs::is_regular_file(path, ec);
 }
 
-void create(const boost::filesystem::path& path, const char* data) {
-  boost::filesystem::create_directories(path.parent_path());
-  boost::filesystem::ofstream(path) << data;
+void create(const fs::path& path, const char* data) {
+  fs::create_directories(path.parent_path());
+  fs::ofstream(path) << data;
 }
 
-uint64_t hash(const boost::filesystem::path& path) {
-  boost::filesystem::ifstream is(path);
+uint64_t hash(const fs::path& path) {
+  fs::ifstream is(path);
   std::string data;
-  data.resize(boost::filesystem::file_size(path));
+  data.resize(fs::file_size(path));
   is.read(data.data(), data.size());
   return std::hash<std::string>()(data);
 }

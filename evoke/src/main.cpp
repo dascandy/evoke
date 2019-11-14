@@ -63,7 +63,7 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 int main(int argc, const char **argv)
 {
     std::string toolsetname = Configuration::Get().toolchain;
-    std::string rootpath = filesystem::current_path().generic_string();
+    std::string rootpath = fs::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
     bool compilation_database = false;
@@ -134,7 +134,7 @@ int main(int argc, const char **argv)
             }
         }
     };
-    auto UpdateAndRunJobs = [&](filesystem::path changedFile, Change change){
+    auto UpdateAndRunJobs = [&](fs::path changedFile, Change change){
       while (1) {
         try {
           std::lock_guard<std::mutex> l(ex.m);

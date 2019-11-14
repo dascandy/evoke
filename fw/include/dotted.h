@@ -6,5 +6,5 @@
 
 std::string as_dotted(std::string);
 
-filesystem::path removeDot(filesystem::path const &p);
+fs::path removeDot(fs::path const &p);
 

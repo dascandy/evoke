@@ -17,7 +17,7 @@ std::unique_ptr<Toolset> ParseToolset(const std::string &name);
 std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
 {
     std::unique_ptr<Toolset> toolset;
-    if(filesystem::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
+    if(fs::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
     {
         toolset = ParseToolset("toolsets/" + name + ".toolset");
     }

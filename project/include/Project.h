@@ -17,8 +17,8 @@ public:
     Project(const std::string &root);
     ~Project();
     void Reload();
-    File *CreateFile(Component &c, filesystem::path p);
-    filesystem::path projectRoot;
+    File *CreateFile(Component &c, fs::path p);
+    fs::path projectRoot;
     std::unordered_map<std::string, Component> components;
     std::unordered_set<std::string> unknownHeaders;
     std::unordered_map<std::string, File> files;
@@ -27,7 +27,7 @@ public:
 
     bool IsSystemComponent(const std::string &name) const;
 
-    bool FileUpdate(filesystem::path changedFile, Change change);
+    bool FileUpdate(fs::path changedFile, Change change);
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);
@@ -41,8 +41,8 @@ private:
     void ExtractPublicDependencies();
     void ExtractIncludePaths();
     void ReadCodeFrom(File &f, const char *buffer, size_t buffersize);
-    void ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp);
-    bool IsItemBlacklisted(const filesystem::path &path);
+    void ReadCode(std::unordered_map<std::string, File> &files, const fs::path &path, Component &comp);
+    bool IsItemBlacklisted(const fs::path &path);
     friend std::ostream &operator<<(std::ostream &os, const Project &p);
 };
 

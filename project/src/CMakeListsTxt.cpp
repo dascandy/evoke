@@ -31,10 +31,10 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
 
     for(const auto &comp : project_.components)
     {
-        filesystem::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
-        filesystem::error_code ec;
-        filesystem::remove(filePath, ec);
-        filesystem::ofstream os{filePath};
+        fs::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
+        fs::error_code ec;
+        fs::remove(filePath, ec);
+        fs::ofstream os{filePath};
 
         std::string target = comp.second.GetName();
 
@@ -68,7 +68,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
         {
             for(const auto &file_entry : comp.second.files)
             {
-                auto relpath = filesystem::relative(project_.projectRoot / file_entry->path,
+                auto relpath = fs::relative(project_.projectRoot / file_entry->path,
                                                     comp.second.root);
                 os << "    " << relpath.string() << "\n";
             }
@@ -86,10 +86,10 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
     {
         std::vector<const Component *> systemComponents = extractSystemComponents();
 
-        filesystem::path filePath = project_.projectRoot / cmakelists_txt;
-        filesystem::error_code ec;
-        filesystem::remove(filePath, ec);
-        filesystem::ofstream os{filePath};
+        fs::path filePath = project_.projectRoot / cmakelists_txt;
+        fs::error_code ec;
+        fs::remove(filePath, ec);
+        fs::ofstream os{filePath};
         os << "cmake_minimum_required(VERSION 3.12)\n";
         os << "project(" << project_.projectRoot.filename().string() << ")\n\n";
 

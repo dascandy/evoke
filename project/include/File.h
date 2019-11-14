@@ -12,7 +12,7 @@ struct Component;
 struct File
 {
 private:
-    File(const filesystem::path &path, Component &component) :
+    File(const fs::path &path, Component &component) :
         path(path),
         component(component),
         hasExternalInclude(false),
@@ -46,28 +46,23 @@ private:
     }
     void FileUpdated();
 public:
-    static bool isTranslationUnit(const filesystem::path &);
-    static bool isHeader(const filesystem::path &);
+    static bool isTranslationUnit(const fs::path &);
+    static bool isHeader(const fs::path &);
     bool isTranslationUnit() const;
     bool isHeader() const;
     std::time_t lastwrite()
     {
         if(lastwrite_ == 0)
         {
-            filesystem::error_code ec;
-#if defined(_MSC_VER) || (__GNUC__ < 8) || 1
-            lastwrite_ = filesystem::last_write_time(path, ec);
-#else
-            auto ftime = filesystem::last_write_time(path, ec);
-            lastwrite_ = decltype(ftime)::clock::to_time_t(ftime);
-#endif
+            fs::error_code ec;
+            lastwrite_ = fs::last_write_time(path, ec);
         }
         return lastwrite_;
     }
     // Cache for the last write time of this file.
     std::time_t lastwrite_ = 0;
     // Full path from the root of the project to this file. Always starts with "./".
-    filesystem::path path;
+    fs::path path;
     // Module name, if any.
     std::string moduleName;
     // Whether the module (given above) is marked for export.

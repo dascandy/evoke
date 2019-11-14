@@ -6,7 +6,7 @@
 
 using namespace inotify;
 
-void FsWatch(filesystem::path path, std::function<void(filesystem::path, Change)> onEvent) {
+void FsWatch(fs::path path, std::function<void(fs::path, Change)> onEvent) {
   std::thread([=](){ 
     auto events = { Event::create,
                     Event::modify,

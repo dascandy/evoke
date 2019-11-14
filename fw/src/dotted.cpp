@@ -9,7 +9,7 @@ std::string as_dotted(std::string str)
     return str;
 }
 
-filesystem::path removeDot(filesystem::path const &p)
+fs::path removeDot(fs::path const &p)
 {
     if (p.begin()->filename() == ".")
     {

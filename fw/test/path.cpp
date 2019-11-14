@@ -6,7 +6,7 @@ namespace btt = boost::test_tools;
 
 BOOST_AUTO_TEST_CASE(path_prefix)
 {
-    using filesystem::path;
+    using fs::path;
 
     path base{"./some_component/"};
 
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(path_prefix)
 
 BOOST_AUTO_TEST_CASE(path_manipulate)
 {
-    using filesystem::path;
+    using fs::path;
 
     path base{"obj/"};
 
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(path_manipulate)
 
 BOOST_AUTO_TEST_CASE(path_base)
 {
-    using filesystem::path;
+    using fs::path;
     {
         path base{"."};
         path file{"./file"};
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(path_base)
 
 BOOST_AUTO_TEST_CASE(path_append)
 {
-    using filesystem::path;
+    using fs::path;
 
     path base{"obj/"};
     path file{base};
