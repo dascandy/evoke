@@ -1,6 +1,6 @@
 #include "test.h"
 #include <iostream>
-/*
+
 TEST_CASE("Compile a single file library with test", "[simple]") 
 {
   testenvironment env;
@@ -37,11 +37,11 @@ int func() {
 }
 )");
     uint64_t hashBefore = hash("build/gcc/bin/hello_test");
-    run_evoke("");
+    std::cout << run_evoke("-v").first;
     uint64_t hashAfter = hash("build/gcc/bin/hello_test");
     REQUIRE(hashBefore != hashAfter);
     REQUIRE(run("build/gcc/bin/hello_test").second == 0);
   }
 }
-*/
+
 
