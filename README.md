@@ -39,6 +39,8 @@ v0.2: Builds on Windows, MacOS and Linux.
 
 v0.3: Toolsets fully separate, chainable and overrideable. Android is still a weird one out; need to make up my mind on how it should work. Package import config also fully separate. Modules support on Clang.
 
+v0.3.1: Easy imports exist for VS Code and CLion. Need to find a mac to try XCode, and need to find a Windows to try MSVC. Should be very doable. Code is in a way better state now. Android is removed for now; making an APK is a packaging task, not a building task.
+
 Next few milestones (in any order):
 - Have easy imports for evoke-built projects in XCode, MSVC, VS Code and CLion.
 - Get to 30% test coverage. Not to aim for a number, but to have at least some target.
