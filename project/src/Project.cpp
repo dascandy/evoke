@@ -182,12 +182,11 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 
 void Project::LoadFileList()
 {
-    std::string root = ".";
+    components.emplace(".", ".");
     for(filesystem::recursive_directory_iterator it("."), end;
         it != end;
         ++it)
     {
-        filesystem::path parent = it->path().parent_path();
         // skip hidden files and dirs
         std::string fileName = it->path().filename().generic_string();
         if((fileName.size() >= 2 && fileName[0] == '.') || IsItemBlacklisted(it->path()))

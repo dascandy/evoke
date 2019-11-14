@@ -34,4 +34,8 @@ std::pair<std::string, int> run(const std::string& cmdline) {
     return { outbuffer, errorcode };
 }
 
+std::pair<std::string, int> run_evoke(const std::string& args) {
+    return run("../build/gcc/bin/evoke " + args);
+}
+
 

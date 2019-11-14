@@ -25,5 +25,6 @@ void create(const boost::filesystem::path& path, const char* data);
 bool file_exists(const boost::filesystem::path& path);
 uint64_t hash(const boost::filesystem::path& path);
 std::pair<std::string, int> run(const std::string& cmdline);
+std::pair<std::string, int> run_evoke(const std::string& args);
 
 

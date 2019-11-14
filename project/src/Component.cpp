@@ -16,7 +16,7 @@ static std::string toName(const filesystem::path &path)
 
     if(start == end(path))
     {
-        return "#anonymous#";
+        return filesystem::canonical(path).filename().string();
     }
 
     string out = start->string();
