@@ -23,10 +23,13 @@ public:
         Unknown,
         ToBeRun,
         Running,
-        Done
+        Done,
+        Depfail
     } state = Unknown;
-    void SetResult(bool success);
+    void SetResult(int errorcode, std::string messages);
     bool CanRun();
+    std::string output;
+    int errorcode = 0;
 };
 
 std::ostream &operator<<(std::ostream &os, const PendingCommand &);

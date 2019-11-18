@@ -58,7 +58,7 @@ std::string GenericToolset::GetCompilerFor(std::string extension) {
   return parameters["compiler"];
 }
 
-void GenericToolset::CreateCommandsForUnity(Project &project)
+void GenericToolset::CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets)
 {
     for(auto &p : project.components)
     {
@@ -71,8 +71,8 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         std::vector<File *> files;
         std::string linkline;
         std::set<std::string> includes;
-        filesystem::create_directories("unity");
-        filesystem::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
+        fs::create_directories("unity");
+        fs::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
         File *of = project.CreateFile(component, outputFile);
         std::ofstream out(outputFile.generic_string());
         for(auto &v : allDeps)
@@ -122,7 +122,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
                 linkDeps.push_back(std::move(in));
         }
 
-        filesystem::path exeFile = "bin/" + getExeNameFor(component);
+        fs::path exeFile = "build/" + parameters["name"] + "/bin/" + getExeNameFor(component);
         std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor(".cpp"), Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
 
         File *executable = project.CreateFile(component, exeFile);
@@ -144,7 +144,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
     }
 }
 
-void GenericToolset::CreateCommandsFor(Project &project)
+void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::string>& targets)
 {
     std::unordered_map<std::string, File *> moduleMap;
     std::set<File *> toPrecompile;
@@ -156,13 +156,13 @@ void GenericToolset::CreateCommandsFor(Project &project)
             if(!f->moduleExported)
                 continue;
 
-            File *ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*f));
+            File *ofile = project.CreateFile(component, "build/" + parameters["name"] + "/modules/" + getBmiNameFor(*f));
             moduleMap.insert(std::make_pair(f->moduleName, ofile));
             toPrecompile.insert(f);
             precompileds.insert(std::make_pair(f, ofile));
             for(auto &import : f->modImports)
             {
-                File *ofile = project.CreateFile(component, "modules/" + getBmiNameFor(*import.second));
+                File *ofile = project.CreateFile(component, "build/" + parameters["name"] + "/modules/" + getBmiNameFor(*import.second));
                 moduleMap.insert(std::make_pair(import.first, ofile));
                 toPrecompile.insert(f);
             }
@@ -170,7 +170,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
     }
     if(!moduleMap.empty())
     {
-        std::ofstream os("module.map");
+        std::ofstream os("build/" + parameters["name"] + "/module.map");
         for(auto &p : moduleMap)
         {
             os << p.first << "=" << p.second->path.generic_string() << "\n";
@@ -179,7 +179,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
     for(auto &f : toPrecompile)
     {
         auto includes = getIncludePathsFor(f->component);
-        File *ofile = project.CreateFile(f->component, "modules/" + getBmiNameFor(*f));
+        File *ofile = project.CreateFile(f->component, "build/" + parameters["name"] + "/modules/" + getBmiNameFor(*f));
         std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, true));
         pc->AddOutput(ofile);
         pc->AddInput(f);
@@ -202,7 +202,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
         {
             if(!File::isTranslationUnit(f->path))
                 continue;
-            filesystem::path outputFile = "obj/" + getObjNameFor(*f);
+            fs::path outputFile = "build/" + parameters["name"] + "/obj/" + getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
             std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
@@ -221,17 +221,17 @@ void GenericToolset::CreateCommandsFor(Project &project)
         if(!objects.empty())
         {
             std::string command;
-            filesystem::path outputFile;
+            fs::path outputFile;
             std::shared_ptr<PendingCommand> pc;
             if(component.type == "library")
             {
-                outputFile = "lib/" + getLibNameFor(component);
+                outputFile = "build/" + parameters["name"] + "/lib/" + getLibNameFor(component);
                 command = getArchiverCommand(parameters["archiver"], outputFile.generic_string(), objects);
                 pc = std::make_shared<PendingCommand>(command);
             }
             else
             {
-                outputFile = "bin/" + getExeNameFor(component);
+                outputFile = "build/" + parameters["name"] + "/bin/" + getExeNameFor(component);
                 std::vector<std::vector<Component *>> inputLinkDeps = GetTransitiveAllDeps(component);
                 std::reverse(inputLinkDeps.begin(), inputLinkDeps.end());
                 std::vector<std::vector<Component *>> linkDeps;
@@ -261,7 +261,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                     {
                         if(c != &component && !c->isHeaderOnly())
                         {
-                            pc->AddInput(project.CreateFile(*c, "lib/" + getLibNameFor(*c)));
+                            pc->AddInput(project.CreateFile(*c, "build/" + parameters["name"] + "/lib/" + getLibNameFor(*c)));
                         }
                     }
                 }
@@ -274,7 +274,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
             }
             pc->Check();
             component.commands.push_back(pc);
-            if(component.type == "unittest")
+            if(component.type == "unittest" && parameters["cross"] == "false")
             {
                 command = outputFile.string();
                 pc = std::make_shared<PendingCommand>(getUnittestCommand(command));

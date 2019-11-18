@@ -4,6 +4,7 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "globaloptions.h"
+#include "fw/FsWatcher.hpp"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
@@ -24,6 +25,7 @@ public:
     std::vector<PendingCommand *> buildPipeline;
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
+    bool FileUpdate(fs::path changedFile, Change change);
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);
@@ -37,9 +39,8 @@ private:
     void ExtractPublicDependencies();
     void ExtractIncludePaths();
     void ReadCodeFrom(File &f, const char *buffer, size_t buffersize);
-    void ReadCode(std::unordered_map<std::string, File> &files, const filesystem::path &path, Component &comp);
-    bool IsItemBlacklisted(const filesystem::path &path);
-
+    void ReadCode(std::unordered_map<std::string, File> &files, const fs::path &path, Component &comp);
+    bool IsItemBlacklisted(const fs::path &path);
     friend std::ostream &operator<<(std::ostream &os, const Project &p);
 };
 

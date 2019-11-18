@@ -14,9 +14,11 @@
 
 ClangToolset::ClangToolset()
 {
+    parameters["name"] = "clang";
     parameters["compiler"] = "clang++";
     parameters["linker"] = "clang++";
     parameters["archiver"] = "ar";
+    parameters["cross"] = "false";
 }
 
 std::string ClangToolset::getBmiNameFor(const File &file)
@@ -87,12 +89,12 @@ std::string ClangToolset::getArchiverCommand(const std::string &program, const s
 
 std::string ClangToolset::getLinkerCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> objects, std::vector<std::vector<Component *>> linkDeps)
 {
-    std::string command = program + " -pthread -o " + outputFile;
+    std::string command = program + " -o " + outputFile;
     for(auto &file : objects)
     {
         command += " " + file->path.string();
     }
-    command += " -Llib";
+    command += " -Lbuild/" + parameters["name"] + "/lib";
     for(auto d : linkDeps)
     {
         for(auto &c : d)
@@ -105,7 +107,7 @@ std::string ClangToolset::getLinkerCommand(const std::string &program, const std
 
 std::string ClangToolset::getUnittestCommand(const std::string &program)
 {
-    return "./" + program;
+    return program;
 }
 
 GlobalOptions ClangToolset::ParseGeneralOptions(const std::string &options)

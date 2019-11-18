@@ -38,7 +38,6 @@ set(LINKED_SOURCES
     ../src/generic.cpp
     ../src/clang.cpp
     ../src/gcc.cpp
-    ../src/android.cpp
  )
 
 set(SOURCES

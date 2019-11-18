@@ -14,7 +14,7 @@
 static size_t screenWidth = 80;
 
 #ifndef _WIN32
-void fetchDisplaySize()
+static void fetchDisplaySize()
 {
 #    ifdef TIOCGSIZE
     struct ttysize ts;
@@ -101,15 +101,16 @@ void ConsoleReporter::SetRunningCommand(size_t channel, std::shared_ptr<PendingC
     Redraw();
 }
 
-void ConsoleReporter::ReportFailure(std::shared_ptr<PendingCommand> cmd, int err, const std::string &errors)
+void ConsoleReporter::ReportCommand(size_t channel, std::shared_ptr<PendingCommand> cmd)
 {
-    // Display error
-    if(err)
-    {
-        std::cout << "\n\n"
-                  << "Error while running: " << cmd->commandToRun;
-        std::cout << "\n\n"
-                  << errors << "\n\n";
-        Redraw();
+    if (cmd) {
+        // Display error
+        if(cmd->errorcode)
+        {
+            std::cout << "\n\n"
+                      << "Error while running: " << cmd->commandToRun;
+            std::cout << "\n\n"
+                      << cmd->output << "\n\n";
+        }
     }
 }

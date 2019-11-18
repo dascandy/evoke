@@ -17,8 +17,8 @@ struct Toolset
     virtual ~Toolset()
     {
     }
-    virtual void CreateCommandsFor(Project &project) = 0;
-    virtual void CreateCommandsForUnity(Project &project) = 0;
+    virtual void CreateCommandsFor(Project &project, const std::vector<std::string> &targets) = 0;
+    virtual void CreateCommandsForUnity(Project &project, const std::vector<std::string> &targets) = 0;
     virtual void SetParameter(const std::string &key, const std::string &value) = 0;
     virtual GlobalOptions ParseGeneralOptions(const std::string &options);
     virtual std::string getBmiNameFor(const File &file) = 0;
@@ -31,8 +31,8 @@ struct Toolset
 class GenericToolset : public Toolset
 {
 public:
-    void CreateCommandsForUnity(Project &project) override;
-    void CreateCommandsFor(Project &project) override;
+    void CreateCommandsForUnity(Project &project, const std::vector<std::string> &targets) override;
+    void CreateCommandsFor(Project &project, const std::vector<std::string> &targets) override;
     void SetParameter(const std::string &key, const std::string &value) override;
 
 protected:
@@ -44,17 +44,6 @@ protected:
     virtual std::string getLinkerCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> objects, std::vector<std::vector<Component *>> linkDeps) = 0;
     virtual std::string getUnittestCommand(const std::string &program) = 0;
     std::map<std::string, std::string> parameters;
-};
-
-struct AndroidToolset : public Toolset
-{
-    void SetParameter(const std::string &key, const std::string &value) override;
-    void CreateCommandsFor(Project &project) override;
-    void CreateCommandsForUnity(Project &project) override;
-    std::string getBmiNameFor(const File &file) override;
-    std::string getObjNameFor(const File &file) override;
-    std::string getLibNameFor(const Component &component) override;
-    std::string getExeNameFor(const Component &component) override;
 };
 
 struct ClangToolset : public GenericToolset

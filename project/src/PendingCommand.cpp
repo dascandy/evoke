@@ -1,5 +1,4 @@
 #include "PendingCommand.h"
-
 #include "File.h"
 
 PendingCommand::PendingCommand(const std::string &command) :
@@ -26,83 +25,88 @@ void PendingCommand::AddOutput(File *output)
     outputs.push_back(output);
 }
 
+static size_t indent = 0;
+
 void PendingCommand::Check()
 {
-    if(outputs.empty())
-    {
-        // Assume always out of date
-        state = PendingCommand::ToBeRun;
-    }
-    if(state == PendingCommand::ToBeRun)
+    if(state == PendingCommand::ToBeRun) 
         return;
-    bool missingOutput = false;
-    std::time_t oldestOutput = outputs[0]->lastwrite();
-    for(auto &out : outputs)
-    {
-        if(out->lastwrite() == 0)
-            missingOutput = true;
-        else if(out->lastwrite() < oldestOutput)
-            oldestOutput = out->lastwrite();
-    }
-    for(auto &in : inputs)
-    {
-        if(in->lastwrite() > oldestOutput)
+
+    enum ShouldRebuildResult {
+      RebuildNeeded,
+      RebuildNotNeeded,
+      ErrorState,
+    };
+    auto result = [&]{
+        if(outputs.empty() || state == PendingCommand::ToBeRun) 
+            return RebuildNeeded;
+
+        bool missingOutput = false;
+        std::time_t oldestOutput = outputs[0]->lastwrite();
+        for(auto &out : outputs)
         {
-            //printf("older source\n");
+            if(out->lastwrite() == 0)
+                missingOutput = true;
+            else if(out->lastwrite() < oldestOutput)
+                oldestOutput = out->lastwrite();
+        }
+
+        for(auto &in : inputs)
+        {
+            if (in->state == File::Error)
+                return ErrorState;
+            if(in->lastwrite() > oldestOutput)
+                return RebuildNeeded;
+            if(in->generator)
+            {
+                in->generator->Check();
+                if(in->generator->state == PendingCommand::ToBeRun)
+                    return RebuildNeeded;
+            }
+        }
+        if(missingOutput)
+            return RebuildNeeded;
+        return RebuildNotNeeded;
+    }();
+
+    switch (result) {
+        case ErrorState:
+            state = PendingCommand::Depfail;
+            for(auto &o : outputs)
+            {
+                o->state = File::Error;
+            }
+            break;
+        case RebuildNeeded:
             state = PendingCommand::ToBeRun;
             for(auto &o : outputs)
             {
                 o->state = File::ToRebuild;
-                for(auto &d : o->dependencies)
-                    d.second->generator->Check();
+                for(auto &d : o->listeners)
+                    d->Check();
             }
-            return;
-        }
-        if(in->generator)
-        {
-            in->generator->Check();
-            if(in->generator->state == PendingCommand::ToBeRun)
+            break;
+        case RebuildNotNeeded:
+            for(auto &o : outputs)
             {
-                //printf("input has generator that needs to be run\n");
-                state = PendingCommand::ToBeRun;
-                for(auto &o : outputs)
-                {
-                    o->state = File::ToRebuild;
-                    for(auto &d : o->dependencies)
-                        d.second->generator->Check();
-                }
-                return;
+                o->state = File::Done;
             }
-        }
+            break;
     }
-    if(missingOutput)
-    {
-        //printf("missing output\n");
-        state = PendingCommand::ToBeRun;
-        for(auto &o : outputs)
-        {
-            o->state = File::ToRebuild;
-            for(auto &d : o->dependencies)
-                d.second->generator->Check();
-        }
-        return;
-    }
-    for(auto &o : outputs)
-    {
-        o->state = File::Done;
-    }
-    state = PendingCommand::Done;
 }
 
-void PendingCommand::SetResult(bool success)
+void PendingCommand::SetResult(int errorcode, std::string messages)
 {
+    this->errorcode = errorcode;
+    output = std::move(messages);
+
     state = PendingCommand::Done;
     for(auto &o : outputs)
     {
-        o->state = (success ? File::Done : File::Error);
+        o->state = (errorcode ? File::Error : File::Done);
     }
 }
-
+// may become runnable, precondition-fail, already running, already finished
 bool PendingCommand::CanRun()
 {
     if(state != PendingCommand::ToBeRun)
@@ -111,7 +115,6 @@ bool PendingCommand::CanRun()
     {
         if(in->state != File::Unknown && in->state != File::Source && in->state != File::Done)
         {
-            //      printf("Cannot build %s because %s is in %d\n", outputs[0]->path.filename().c_str(), in->path.filename().c_str(), in->state);
             return false;
         }
     }
@@ -129,6 +132,9 @@ std::ostream &operator<<(std::ostream &os, const PendingCommand &pc)
     case PendingCommand::ToBeRun:
         os << "to be run";
         break;
+    case PendingCommand::Depfail:
+        os << "Depfail";
+        break;
     case PendingCommand::Running:
         os << "running";
         break;
@@ -139,7 +145,7 @@ std::ostream &operator<<(std::ostream &os, const PendingCommand &pc)
     os << "\n  depends on [ ";
     for(auto &in : pc.inputs)
     {
-        os << in->path.filename() << " ";
+        os << in->path.string() << " ";
     }
     os << "]";
     return os;

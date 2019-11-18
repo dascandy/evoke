@@ -7,7 +7,7 @@
 
 #include <iterator>
 
-Component::Component(const filesystem::path &path, bool isBinary) :
+Component::Component(const fs::path &path, bool isBinary) :
     root(removeDot(path)),
     type("library"),
     isBinary(isBinary),

@@ -2,8 +2,10 @@
 
 #include <iostream>
 #include <string>
-#ifndef _WIN32
-#    include <unistd.h>
+#ifdef _WIN32
+int isatty(int) { return 0; }
+#else
+#include <unistd.h>
 #endif
 
 std::unique_ptr<Reporter> Reporter::Get(const std::string &name)
@@ -16,20 +18,29 @@ std::unique_ptr<Reporter> Reporter::Get(const std::string &name)
     {
         return std::make_unique<ConsoleReporter>();
     }
+#ifdef DAEMON_SUPPORT
+    else if(name == "daemon")
+    {
+        if(isatty(0) && isatty(1))
+        {
+            return std::make_unique<DaemonConsoleReporter>();
+        }
+        else
+        {
+            return std::make_unique<IDEReporter>();
+        }
+    }
+#endif
     else if(name == "guess")
     {
-#ifndef _WIN32
         if(isatty(0) && isatty(1))
         {
             return std::make_unique<ConsoleReporter>();
         }
         else
         {
-#endif
             return std::make_unique<SimpleReporter>();
-#ifndef _WIN32
         }
-#endif
     }
     else
     {
