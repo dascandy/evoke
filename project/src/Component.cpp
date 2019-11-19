@@ -2,8 +2,8 @@
 
 #include "File.h"
 #include "PendingCommand.h"
-#include "dotted.h"
 #include "Utilities.hpp"
+#include "dotted.h"
 
 #include <iterator>
 

@@ -3,8 +3,8 @@
 #include "Component.h"
 #include "File.h"
 #include "PendingCommand.h"
-#include "globaloptions.h"
 #include "fw/FsWatcher.hpp"
+#include "globaloptions.h"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
@@ -17,8 +17,8 @@ public:
     Project(const std::string &root);
     ~Project();
     void Reload();
-    File *CreateFile(Component &c, filesystem::path p);
-    filesystem::path projectRoot;
+    File *CreateFile(Component &c, fs::path p);
+    fs::path projectRoot;
     std::unordered_map<std::string, Component> components;
     std::unordered_set<std::string> unknownHeaders;
     std::unordered_map<std::string, File> files;
@@ -26,6 +26,7 @@ public:
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
     bool FileUpdate(fs::path changedFile, Change change);
+
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);

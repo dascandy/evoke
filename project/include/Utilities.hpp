@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
 #include <fw/filesystem.hpp>
+#include <string>
 
-std::string GetNameFromPath(const filesystem::path &path, char separator = '_');
+std::string GetNameFromPath(const fs::path &path, char separator = '_');
