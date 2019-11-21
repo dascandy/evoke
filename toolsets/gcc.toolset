@@ -1,0 +1,3 @@
+
+template: __builtin_gcc
+compiler: g++ -fdiagnostics-color=always -std=c++2a -Wall -Wextra -Wpedantic -DDAEMON_SUPPORT
