@@ -1,4 +1,3 @@
-#include "Configuration.h"
 #include "Executor.h"
 #include "Project.h"
 #include "Reporter.h"
@@ -62,7 +61,7 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
 
 int main(int argc, const char **argv)
 {
-    std::string toolsetname = Configuration::Get().toolchain;
+    std::string toolsetname = "platform_default";
     std::string rootpath = fs::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
@@ -79,11 +78,16 @@ int main(int argc, const char **argv)
         if (arg.empty()) {
             std::cout << "Invalid argument: " << arg << "\n";
         } else if (insideTarget) {
-            toolsetname = arg;
-            targetsToBuild[toolsetname];
-            insideTarget = false;
+	    if (toolsetname.empty()) {
+                toolsetname = arg;
+                targetsToBuild[toolsetname];
+                insideTarget = false;
+            } else {
+                targetsToBuild[toolsetname].push_back(arg);
+            }
         } else if (arg == "-t") {
             insideTarget = true;
+	    toolsetname.clear();
         } else if (arg.empty() || arg[0] == '-') {
             std::cout << "Invalid argument: " << arg << "\n";
         } else {
@@ -178,9 +182,8 @@ int main(int argc, const char **argv)
     if(cmakelists)
     {
         std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
-        auto opts = toolset->ParseGeneralOptions(Configuration::Get().compileFlags);
         CMakeProjectExporter exporter{op};
-        exporter.createCMakeListsFiles(opts);
+        exporter.createCMakeListsFiles(*toolset);
     }
     if(verbose)
     {

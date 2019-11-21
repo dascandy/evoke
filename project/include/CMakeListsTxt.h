@@ -1,15 +1,15 @@
-#include "Configuration.h"
 #include "Project.h"
-#include "globaloptions.h"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
+
+class Toolset;
 
 struct CMakeProjectExporter
 {
     explicit CMakeProjectExporter(const Project &project);
     std::string LookupLibraryName(const std::string &componentName);
-    void createCMakeListsFiles(const GlobalOptions &opts);
+    void createCMakeListsFiles(const Toolset &toolset);
 private:
     void dumpDoNotModifyWarning(std::ostream &os);
     void extractSystemComponents(const Component &comp, std::unordered_set<std::string> &visited, std::vector<const Component *> &results) const;

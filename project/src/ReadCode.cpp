@@ -1,5 +1,4 @@
 #include "Component.h"
-#include "Configuration.h"
 #include "File.h"
 #include "Project.h"
 #include "known.h"

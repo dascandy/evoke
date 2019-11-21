@@ -1,0 +1,6 @@
+
+template: __builtin_gcc
+compiler: g++ -fdiagnostics-color=always -O0 -std=c++2a -Wall -Wextra -Wpedantic -DDAEMON_SUPPORT -ffunction-sections -fdata-sections --coverage
+linker: g++ --coverage
+
+

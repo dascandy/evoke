@@ -1,7 +1,7 @@
 #include "Toolset.h"
 
 #include "Component.h"
-#include "dotted.h"
+#include "fw/dotted.h"
 
 #include <fstream>
 #include <fw/filesystem.hpp>
@@ -21,15 +21,27 @@ std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
     {
         toolset = ParseToolset("toolsets/" + name + ".toolset");
     }
-    else if(name == "windows" || name == "msvc" || name == "__builtin_msvc")
+    else if(name == "windows" || name == "msvc" || name == "__builtin_msvc"
+#ifdef _WIN32
+		    || name == "platform_default"
+#endif
+	    )
     {
         toolset = std::make_unique<MsvcToolset>();
     }
-    else if(name == "apple" || name == "osx" || name == "clang" || name == "__builtin_clang")
+    else if(name == "apple" || name == "osx" || name == "clang" || name == "__builtin_clang"
+#ifdef APPLE
+		    || name == "platform_default"
+#endif
+	    )
     {
         toolset = std::make_unique<ClangToolset>();
     }
-    else if(name == "linux" || name == "gcc" || name == "__builtin_gcc")
+    else if(name == "linux" || name == "gcc" || name == "__builtin_gcc" 
+#if !defined(_WIN32) && !defined(APPLE)
+		    || name == "platform_default"
+#endif
+	    )
     {
         toolset = std::make_unique<GccToolset>();
     }
@@ -74,9 +86,3 @@ std::unique_ptr<Toolset> ParseToolset(const std::string &name)
     return toolset;
 }
 
-GlobalOptions Toolset::ParseGeneralOptions(const std::string &options)
-{
-    GlobalOptions opts;
-    opts.compile.push_back(options);
-    return opts;
-}

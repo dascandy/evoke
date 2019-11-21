@@ -3,7 +3,6 @@
 #include "Component.h"
 #include "File.h"
 #include "PendingCommand.h"
-#include "globaloptions.h"
 #include "fw/FsWatcher.hpp"
 
 #include <fw/filesystem.hpp>
