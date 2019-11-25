@@ -2,41 +2,16 @@
 
 #include "File.h"
 #include "PendingCommand.h"
+#include "Utilities.hpp"
 #include "fw/dotted.h"
 
 #include <iterator>
-
-static std::string toName(const fs::path &path)
-{
-    using namespace std;
-
-    auto start = find_if_not(begin(path), end(path), [](auto &part) {
-        return part.filename() == ".";
-    });
-
-    if(start == end(path))
-    {
-        return fs::canonical(path).filename().string();
-    }
-
-    string out = start->string();
-
-    while(++start != end(path))
-    {
-        if(start->filename() != ".")
-        {
-            out.append("_").append(start->string());
-        }
-    }
-
-    return out;
-}
 
 Component::Component(const fs::path &path, bool isBinary) :
     root(removeDot(path)),
     type("library"),
     isBinary(isBinary),
-    name(toName(path))
+    name(GetNameFromPath(path))
 {
 }
 

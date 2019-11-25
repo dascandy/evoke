@@ -42,6 +42,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Project.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/ReadCode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/tarjan.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Utilities.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/ConsoleReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp

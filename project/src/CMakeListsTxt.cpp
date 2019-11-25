@@ -1,5 +1,6 @@
 #include "Project.h"
 #include "CMakeListsTxt.h"
+#include "Utilities.hpp"
 #include <fw/filesystem.hpp>
 #include <ostream>
 
@@ -10,7 +11,7 @@ CMakeProjectExporter::CMakeProjectExporter(const Project &project) :
 
 std::string CMakeProjectExporter::LookupLibraryName(const std::string &componentName)
 {
-    return (project_.IsSystemComponent(componentName) ? cmakeSystemProjectPrefix + componentName : componentName);
+    return (IsSystemComponent(componentName) ? cmakeSystemProjectPrefix + componentName : componentName);
 }
 
 void CMakeProjectExporter::createCMakeListsFiles(const Toolset &toolset)
@@ -26,6 +27,8 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &toolset)
             os << ")\n";
         }
     };
+
+    extractHierarchicalNames();
 
     for(const auto &comp : project_.components)
     {
@@ -126,14 +129,14 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &toolset)
         {
             if(comp.second.type == "library")
             {
-                os << "add_subdirectory(" << comp.second.GetName() << ")\n";
+                os << "add_subdirectory(" << hierarchical_names[comp.second.GetName()] << ")\n";
             }
         }
         for(const auto &comp : project_.components)
         {
             if(comp.second.type == "executable")
             {
-                os << "add_subdirectory(" << comp.second.GetName() << ")\n";
+                os << "add_subdirectory(" << hierarchical_names[comp.second.GetName()] << ")\n";
             }
         }
     }
@@ -169,7 +172,7 @@ void CMakeProjectExporter::extractSystemComponents(const Component &comp, std::u
         }
         extractSystemComponents(*subComp, visited, results);
     }
-    if(project_.IsSystemComponent(comp.GetName()))
+    if(IsSystemComponent(comp.GetName()))
     {
         results.push_back(&comp);
     }
@@ -212,3 +215,24 @@ void CMakeProjectExporter::dumpTargetLibraries(std::ostream &os, const std::stri
     }
 }
 
+void CMakeProjectExporter::extractHierarchicalNames()
+{
+    for(const auto &comp : project_.components)
+    {
+        hierarchical_names.emplace(comp.second.GetName(), GetNameFromPath(comp.second.root, '/'));
+    }
+}
+
+bool CMakeProjectExporter::IsSystemComponent(const std::string &name) const
+{
+    if (hierarchical_names.find(name) != hierarchical_names.cend())
+    {
+        return false;
+    }
+    auto altName = "./" + name;
+    if (hierarchical_names.find(altName) != hierarchical_names.cend())
+    {
+        return false;
+    }
+    return true;
+}

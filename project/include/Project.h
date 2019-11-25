@@ -4,6 +4,7 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "fw/FsWatcher.hpp"
+#include "globaloptions.h"
 
 #include <fw/filesystem.hpp>
 #include <ostream>
@@ -24,9 +25,8 @@ public:
     std::vector<PendingCommand *> buildPipeline;
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
-    bool IsSystemComponent(const std::string &name) const;
-
     bool FileUpdate(fs::path changedFile, Change change);
+
 private:
     void LoadFileList();
     bool CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap);

@@ -6,13 +6,12 @@
 #include "known.h"
 
 #include <algorithm>
+#include <boost/interprocess/file_mapping.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 #include <fstream>
 #include <fw/filesystem.hpp>
 #include <iostream>
 #include <map>
-
-#include <boost/interprocess/file_mapping.hpp>
-#include <boost/interprocess/mapped_region.hpp>
 
 Project::Project(const std::string &rootpath)
 {
@@ -25,26 +24,30 @@ Project::~Project()
 {
 }
 
-bool Project::FileUpdate(fs::path changedFile, Change change) {
+bool Project::FileUpdate(fs::path changedFile, Change change)
+{
     // If this is a file that we won't care about, just ignore.
-    if (!File::isHeader(changedFile) && !File::isTranslationUnit(changedFile)) {
+    if(!File::isHeader(changedFile) && !File::isTranslationUnit(changedFile))
+    {
         return false;
     }
 
     auto it = files.find(changedFile.string());
     // We might be interested in this. Let's see what happened to it.
-    switch (change) {
-        case Change::Changed:
-            if (it != files.end()) {
-                it->second.FileUpdated();
-            }
-            return false;
-        // Default handling. Because file move, add or delete can change commands & component dependencies in ways our incremental model can't handle yet, just reload.
-        default:
-        case Change::Deleted:
-        case Change::Created:
-            Reload();
-            return true;
+    switch(change)
+    {
+    case Change::Changed:
+        if(it != files.end())
+        {
+            it->second.FileUpdated();
+        }
+        return false;
+    // Default handling. Because file move, add or delete can change commands & component dependencies in ways our incremental model can't handle yet, just reload.
+    default:
+    case Change::Deleted:
+    case Change::Created:
+        Reload();
+        return true;
     }
 }
 
@@ -128,7 +131,8 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::p
     comp.files.insert(&f);
 
     size_t fileSize = fs::file_size(path.string());
-    if (fileSize == 0) return; // Boost::interprocess fails (and throws) on mapping a 0-byte file
+    if(fileSize == 0)
+        return; // Boost::interprocess fails (and throws) on mapping a 0-byte file
 
     using namespace boost::interprocess;
     file_mapping file(path.string().c_str(), read_only);
@@ -153,17 +157,6 @@ bool Project::IsItemBlacklisted(const fs::path &path)
     }
     */
     return false;
-}
-
-bool Project::IsSystemComponent(const std::string &name) const
-{
-    auto result = (components.find(name) == components.cend());
-    if(result)
-    {
-        auto altName = "./" + name;
-        result = (components.find(altName) == components.cend());
-    }
-    return result;
 }
 
 static Component *GetComponentFor(std::unordered_map<std::string, Component> &components, fs::path path)
@@ -300,7 +293,8 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
 {
     for(auto &fp : files)
     {
-        for (auto& p : fp.second.modImports) {
+        for(auto &p : fp.second.modImports)
+        {
             if(&fp.second.component != &p.second->component)
             {
                 fp.second.component.privDeps.insert(&p.second->component);
