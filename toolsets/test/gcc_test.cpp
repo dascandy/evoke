@@ -1,4 +1,4 @@
-#include "dotted.h"
+#include "fw/dotted.h"
 #include "Component.h"
 #include "File.h"
 #include "Toolset.h"
@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_CASE(gcc_compile)
     File *input = p.CreateFile(c, "hello/src/gretting.cpp");
     const std::set<std::string> includes {"hello/include"};
     GccToolset gcc;
-    auto cmd = gcc.getCompileCommand("g++", "-std=c++17", "obj/hello/src/gretting.cpp.obj", input, includes, false);
-    BOOST_TEST(cmd == "g++ -c -std=c++17 -o obj/hello/src/gretting.cpp.obj hello/src/gretting.cpp -Ihello/include");
+    auto cmd = gcc.getCompileCommand("g++", "obj/hello/src/gretting.cpp.obj", input, includes, false);
+    BOOST_TEST(cmd == "g++ -c -o obj/hello/src/gretting.cpp.obj hello/src/gretting.cpp -Ihello/include");
 }
 
 BOOST_AUTO_TEST_CASE(gcc_archive)

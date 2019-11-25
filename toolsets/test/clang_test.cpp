@@ -1,4 +1,4 @@
-#include "dotted.h"
+#include "fw/dotted.h"
 #include "Component.h"
 #include "File.h"
 #include "Toolset.h"
@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_CASE(clang_compile)
     File *input = p.CreateFile(c, "hello/src/gretting.cpp");
     const std::set<std::string> includes {"hello/include"};
     ClangToolset clang;
-    auto cmd = clang.getCompileCommand("clang++", "-std=c++17", "obj/hello/src/gretting.cpp.obj", input, includes, false);
-    BOOST_TEST(cmd == "clang++ -c -std=c++17 -o obj/hello/src/gretting.cpp.obj hello/src/gretting.cpp -Ihello/include");
+    auto cmd = clang.getCompileCommand("clang++", "obj/hello/src/gretting.cpp.obj", input, includes, false);
+    BOOST_TEST(cmd == "clang++ -c -o obj/hello/src/gretting.cpp.obj hello/src/gretting.cpp -Ihello/include");
 }
 
 BOOST_AUTO_TEST_CASE(clang_archive)

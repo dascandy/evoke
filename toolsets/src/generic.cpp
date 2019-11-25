@@ -1,11 +1,9 @@
 #include "Component.h"
-#include "Configuration.h"
 #include "File.h"
 #include "PendingCommand.h"
 #include "Project.h"
 #include "Toolset.h"
-#include "dotted.h"
-#include "globaloptions.h"
+#include "fw/dotted.h"
 
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
@@ -123,7 +121,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project, const std::vector<
         }
 
         fs::path exeFile = "build/" + parameters["name"] + "/bin/" + getExeNameFor(component);
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor(".cpp"), Configuration::Get().compileFlags, outputFile.generic_string(), of, includes, linkDeps));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor(".cpp"), outputFile.generic_string(), of, includes, linkDeps));
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
@@ -180,7 +178,7 @@ void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::
     {
         auto includes = getIncludePathsFor(f->component);
         File *ofile = project.CreateFile(f->component, "build/" + parameters["name"] + "/modules/" + getBmiNameFor(*f));
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, ofile->path.generic_string(), f, includes, true));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(GetCompilerFor(f->path.extension().string()), ofile->path.generic_string(), f, includes, true));
         pc->AddOutput(ofile);
         pc->AddInput(f);
         for(auto &d : GetDependencies(f, moduleMap))
@@ -204,7 +202,7 @@ void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::
                 continue;
             fs::path outputFile = "build/" + parameters["name"] + "/obj/" + getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(GetCompilerFor(f->path.extension().string()), Configuration::Get().compileFlags, outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(GetCompilerFor(f->path.extension().string()), outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
             pc->AddOutput(of);
             pc->AddInput(f);

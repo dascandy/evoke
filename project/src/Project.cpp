@@ -1,7 +1,6 @@
 #include "Project.h"
 
 #include "Component.h"
-#include "Configuration.h"
 #include "File.h"
 #include "PredefComponents.h"
 #include "known.h"
@@ -144,6 +143,7 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::p
 
 bool Project::IsItemBlacklisted(const fs::path &path)
 {
+	/*
     std::string pathS = path.generic_string();
     std::string fileName = path.filename().generic_string();
     for(auto &s : Configuration::Get().blacklist)
@@ -155,6 +155,7 @@ bool Project::IsItemBlacklisted(const fs::path &path)
         if(s == fileName)
             return true;
     }
+    */
     return false;
 }
 

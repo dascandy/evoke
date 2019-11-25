@@ -1,4 +1,4 @@
-#include "dotted.h"
+#include "fw/dotted.h"
 
 #include <algorithm>
 #include <boost/test/unit_test.hpp>

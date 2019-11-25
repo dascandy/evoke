@@ -1,6 +1,4 @@
-#include "Configuration.h"
 #include "Project.h"
-#include "globaloptions.h"
 #include "CMakeListsTxt.h"
 #include "Utilities.hpp"
 #include <fw/filesystem.hpp>
@@ -16,7 +14,7 @@ std::string CMakeProjectExporter::LookupLibraryName(const std::string &component
     return (IsSystemComponent(componentName) ? cmakeSystemProjectPrefix + componentName : componentName);
 }
 
-void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
+void CMakeProjectExporter::createCMakeListsFiles(const Toolset &toolset)
 {
     auto injectOptions = [](std::ostream &os, const std::string &target_option, const std::string &target, const std::string &access, const std::vector<std::string> &opts) {
         if(!opts.empty())
@@ -77,11 +75,11 @@ void CMakeProjectExporter::createCMakeListsFiles(const GlobalOptions &opts)
             }
         }
         os << ")\n\n";
-        injectOptions(os, "target_compile_options", target, privateAccess, opts.compile);
-        injectOptions(os, "target_include_directories", target, privateAccess, opts.include);
+//        injectOptions(os, "target_compile_options", target, privateAccess, opts.compile);
+//        injectOptions(os, "target_include_directories", target, privateAccess, opts.include);
         dumpTargetIncludes(os, target, publicAccess, comp.second.pubIncl);
         dumpTargetIncludes(os, target, privateAccess, comp.second.privIncl);
-        injectOptions(os, "target_link_libraries", target, privateAccess, opts.link);
+//        injectOptions(os, "target_link_libraries", target, privateAccess, opts.link);
         dumpTargetLibraries(os, target, publicAccess, comp.second.pubDeps);
         dumpTargetLibraries(os, target, privateAccess, comp.second.privDeps);
     }

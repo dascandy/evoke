@@ -17,7 +17,7 @@ uint64_t hash(const fs::path& path) {
   fs::ifstream is(path);
   std::string data;
   data.resize(fs::file_size(path));
-  is.read(data.data(), data.size());
+  is.read(reinterpret_cast<char*>(const_cast<char*>(data.data())), data.size());
   return std::hash<std::string>()(data);
 }
 

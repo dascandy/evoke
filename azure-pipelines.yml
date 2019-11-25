@@ -4,54 +4,66 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
 
 trigger:
-- master
+  - master
+
+variables:
+  system.debug: true
 
 jobs:
-- job: Linux
-  pool:
-    vmImage: 'ubuntu-18.04'
-  steps:
-  - task: run-vcpkg@0
-    inputs:
-      vcpkgTriplet: 'x64-linux'
-      vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
-  - task: run-cmake@0
-    inputs:
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      useVcpkgToolchainFile: true
-      vcpkgTriplet: 'x64-linux'
-      cmakeGenerator: 'Ninja'
-      buildDirectory: '$(Build.ArtifactStagingDirectory)'
-- job: macOS
-  pool:
-    vmImage: 'macOS-latest'
-  steps:
-  - script: |
-      brew install gcc
-      sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target / -allowUntrusted
-  - task: run-vcpkg@0
-    inputs:
-      vcpkgTriplet: 'x64-osx'
-      vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
-  - task: run-cmake@0
-    inputs:
-      vcpkgTriplet: 'x64-osx'
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      useVcpkgToolchainFile: true
-      cmakeGenerator: 'Ninja'
-      buildDirectory: '$(Build.ArtifactStagingDirectory)'
-- job: Windows
-  pool:
-    vmImage: 'windows-latest'
-  steps:
-  - task: run-vcpkg@0
-    inputs:
-      vcpkgTriplet: 'x64-windows'
-      vcpkgArguments: 'boost-filesystem boost-system boost-process boost-interprocess'
-  - task: run-cmake@0
-    inputs:
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      vcpkgTriplet: 'x64-windows'
-      useVcpkgToolchainFile: true
-      cmakeGenerator: 'Ninja'
-      buildDirectory: '$(Build.ArtifactStagingDirectory)'
+  - job: Linux
+    pool:
+      vmImage: "ubuntu-18.04"
+    steps:
+      - checkout: self
+        submodules: recursive
+      - task: Cache@2
+        displayName: Cache vcpkg
+        inputs:
+          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
+          path: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
+        inputs:
+          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-linux"
+          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
+        inputs:
+          useVcpkgToolchainFile: true
+  - job: macOS
+    pool:
+      vmImage: "macOS-latest"
+    steps:
+      - checkout: self
+        submodules: recursive
+      - task: Cache@2
+        displayName: Cache vcpkg
+        inputs:
+          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
+          path: "$(Build.SourcesDirectory)/vcpkg"
+      - script: |
+          brew install gcc
+          sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target / -allowUntrusted
+      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
+        inputs:
+          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-osx"
+          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
+        inputs:
+          useVcpkgToolchainFile: true
+  - job: Windows
+    pool:
+      vmImage: "windows-latest"
+    steps:
+      - checkout: self
+        submodules: recursive
+      - task: Cache@2
+        displayName: Cache vcpkg
+        inputs:
+          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
+          path: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
+        inputs:
+          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-windows"
+          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
+        inputs:
+          useVcpkgToolchainFile: true

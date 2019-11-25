@@ -3,7 +3,7 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "Utilities.hpp"
-#include "dotted.h"
+#include "fw/dotted.h"
 
 #include <iterator>
 

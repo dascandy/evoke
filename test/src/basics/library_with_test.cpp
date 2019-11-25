@@ -37,7 +37,7 @@ int func() {
 }
 )");
     uint64_t hashBefore = hash("build/gcc/bin/hello_test");
-    std::cout << run_evoke("-v").first;
+    std::cout << run_evoke("").first;
     uint64_t hashAfter = hash("build/gcc/bin/hello_test");
     REQUIRE(hashBefore != hashAfter);
     REQUIRE(run("build/gcc/bin/hello_test").second == 0);
