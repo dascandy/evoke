@@ -11,7 +11,7 @@ struct File;
 struct Component;
 class Project;
 
-struct Toolset
+class Toolset
 {
     virtual ~Toolset()
     {
@@ -44,7 +44,7 @@ protected:
     std::map<std::string, std::string> parameters;
 };
 
-struct ClangToolset : public GenericToolset
+class ClangToolset : public GenericToolset
 {
     ClangToolset();
     std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
@@ -59,7 +59,7 @@ struct ClangToolset : public GenericToolset
     std::string getExeNameFor(const Component &component) override;
 };
 
-struct GccToolset : public GenericToolset
+class GccToolset : public GenericToolset
 {
     GccToolset();
     std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
@@ -74,7 +74,7 @@ struct GccToolset : public GenericToolset
     std::string getExeNameFor(const Component &component) override;
 };
 
-struct MsvcToolset : public GenericToolset
+class MsvcToolset : public GenericToolset
 {
     MsvcToolset();
     std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
