@@ -13,6 +13,7 @@ class Project;
 
 class Toolset
 {
+public:
     virtual ~Toolset()
     {
     }
@@ -46,6 +47,7 @@ protected:
 
 class ClangToolset : public GenericToolset
 {
+public:
     ClangToolset();
     std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
@@ -61,6 +63,7 @@ class ClangToolset : public GenericToolset
 
 class GccToolset : public GenericToolset
 {
+public:
     GccToolset();
     std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
@@ -76,6 +79,7 @@ class GccToolset : public GenericToolset
 
 class MsvcToolset : public GenericToolset
 {
+public:
     MsvcToolset();
     std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
