@@ -157,6 +157,10 @@ int main(int argc, const char **argv)
           bool isPackageOrToolsetChange = changedFile.extension() == ".toolset" ||
                                           changedFile.filename() == "packages.conf";
           if (reloaded || isPackageOrToolsetChange) {
+              // Need to check why this is needed. 
+              if (isPackageOrToolsetChange) {
+                  op.Reload();
+              }
               ex.NewGeneration();
               GenerateCommands();
           }
