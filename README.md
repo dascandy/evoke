@@ -1,5 +1,7 @@
 # Evoke  <!-- omit in toc -->
 
+[![Build Status](https://dev.azure.com/dascandy/Evoke/_apis/build/status/dascandy.evoke?branchName=master)](https://dev.azure.com/dascandy/Evoke/_build/latest?definitionId=1&branchName=master)
+
 Evoke is the simple solution to the complicated problem of build software for C++ and related languages.
 
 ## Table of Contents  <!-- omit in toc -->
