@@ -154,7 +154,9 @@ int main(int argc, const char **argv)
           std::lock_guard<std::mutex> l(ex.m);
           std::cout << "CHANGE: " << changedFile.string() << " change " << (int)change << "\n";
           bool reloaded = op.FileUpdate(changedFile, change);
-          if (reloaded) {
+          bool isPackageOrToolsetChange = changedFile.extension() == ".toolset" ||
+                                          changedFile.filename() == "packages.conf";
+          if (reloaded || isPackageOrToolsetChange) {
               ex.NewGeneration();
               GenerateCommands();
           }
