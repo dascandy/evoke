@@ -10,9 +10,9 @@ int main() {
 }
 )");
   run_evoke("");
-  REQUIRE(file_exists("build/gcc/bin/test_temp"));
-  REQUIRE(file_exists("build/gcc/obj/src/hello.cpp.o"));
-  REQUIRE(run("build/gcc/bin/test_temp").first == "Hello World!\n");
+  REQUIRE(file_exists("build/linux/bin/test_temp"));
+  REQUIRE(file_exists("build/linux/obj/src/hello.cpp.o"));
+  REQUIRE(run("build/linux/bin/test_temp").first == "Hello World!\n");
 
   // Executable name is test_temp, because these unit tests run in a folder with that name.
 }

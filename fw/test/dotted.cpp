@@ -11,3 +11,10 @@ BOOST_AUTO_TEST_CASE(remove_dot)
 
     BOOST_TEST(removeDot("folder/filename").generic_string() == "folder/filename");
 }
+
+BOOST_AUTO_TEST_CASE(as_dotted_works_for_paths)
+{
+    BOOST_TEST(as_dotted("root/component") == "root.component");
+}
+
+

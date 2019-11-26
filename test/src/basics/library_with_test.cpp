@@ -24,10 +24,10 @@ TEST_CASE("Hello returns 4", "[hello]") {
 )");
 
   run_evoke("");
-  REQUIRE(file_exists("build/gcc/obj/hello/src/hello.cpp.o"));
-  REQUIRE(file_exists("build/gcc/lib/libhello.a"));
-  REQUIRE(file_exists("build/gcc/bin/hello_test"));
-  REQUIRE(run("build/gcc/bin/hello_test").second != 0);
+  REQUIRE(file_exists("build/linux/obj/hello/src/hello.cpp.o"));
+  REQUIRE(file_exists("build/linux/lib/libhello.a"));
+  REQUIRE(file_exists("build/linux/bin/hello_test"));
+  REQUIRE(run("build/linux/bin/hello_test").second != 0);
 
   SECTION("And then fix the code") {
     create("hello/src/hello.cpp", R"(
@@ -36,11 +36,11 @@ int func() {
   return 4;
 }
 )");
-    uint64_t hashBefore = hash("build/gcc/bin/hello_test");
+    uint64_t hashBefore = hash("build/linux/bin/hello_test");
     std::cout << run_evoke("").first;
-    uint64_t hashAfter = hash("build/gcc/bin/hello_test");
+    uint64_t hashAfter = hash("build/linux/bin/hello_test");
     REQUIRE(hashBefore != hashAfter);
-    REQUIRE(run("build/gcc/bin/hello_test").second == 0);
+    REQUIRE(run("build/linux/bin/hello_test").second == 0);
   }
 }
 

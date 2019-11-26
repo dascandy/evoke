@@ -14,22 +14,8 @@ std::string CMakeProjectExporter::LookupLibraryName(const std::string &component
     return (IsSystemComponent(componentName) ? cmakeSystemProjectPrefix + componentName : componentName);
 }
 
-void CMakeProjectExporter::createCMakeListsFiles(const Toolset &toolset)
+void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
 {
-    auto injectOptions = [](std::ostream &os, const std::string &target_option, const std::string &target, const std::string &access, const std::vector<std::string> &opts) {
-        if(!opts.empty())
-        {
-            os << target_option << "(" << target << " " << access;
-            for(const auto &opt : opts)
-            {
-                os << " " << opt;
-            }
-            os << ")\n";
-        }
-    };
-
-    extractHierarchicalNames();
-
     for(const auto &comp : project_.components)
     {
         fs::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
@@ -75,6 +61,18 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &toolset)
             }
         }
         os << ")\n\n";
+//    auto injectOptions = [](std::ostream &os, const std::string &target_option, const std::string &target, const std::string &access, const std::vector<std::string> &opts) {
+//        if(!opts.empty())
+//        {
+//            os << target_option << "(" << target << " " << access;
+//            for(const auto &opt : opts)
+//            {
+//                os << " " << opt;
+//            }
+//            os << ")\n";
+//        }
+//    };
+
 //        injectOptions(os, "target_compile_options", target, privateAccess, opts.compile);
 //        injectOptions(os, "target_include_directories", target, privateAccess, opts.include);
         dumpTargetIncludes(os, target, publicAccess, comp.second.pubIncl);

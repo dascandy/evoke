@@ -10,8 +10,8 @@ int main() {
 }
 )");
   run_evoke("");
-  REQUIRE(file_exists("build/gcc/bin/hello"));
-  REQUIRE(file_exists("build/gcc/obj/hello/src/hello.cpp.o"));
-  REQUIRE(run("build/gcc/bin/hello").first == "Hello World!\n");
+  REQUIRE(file_exists("build/linux/bin/hello"));
+  REQUIRE(file_exists("build/linux/obj/hello/src/hello.cpp.o"));
+  REQUIRE(run("build/linux/bin/hello").first == "Hello World!\n");
 }
 

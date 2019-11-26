@@ -59,9 +59,19 @@ void parseArgs(std::vector<std::string> args, std::map<std::string, std::string 
     }
 }
 
+static std::string default_toolset() {
+#ifdef _WIN32
+  return "windows";
+#elif defined(APPLE)
+  return "apple";
+#else
+  return "linux";
+#endif
+}
+
 int main(int argc, const char **argv)
 {
-    std::string toolsetname = "platform_default";
+    std::string toolsetname = default_toolset();
     std::string rootpath = fs::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
@@ -122,11 +132,11 @@ int main(int argc, const char **argv)
             std::unique_ptr<Toolset> toolset = GetToolsetByName(p.first);
             if(unitybuild)
             {
-                toolset->CreateCommandsForUnity(op, p.second);
+                toolset->CreateCommandsForUnity(op);
             }
             else
             {
-                toolset->CreateCommandsFor(op, p.second);
+                toolset->CreateCommandsFor(op);
             }
         }
         // TODO: filter this on actually useful commands

@@ -13,11 +13,11 @@
 
 GccToolset::GccToolset()
 {
-    parameters["name"] = "gcc";
-    parameters["compiler"] = "g++ -fdiagnostics-color=always";
-    parameters["linker"] = "g++";
-    parameters["archiver"] = "ar";
-    parameters["cross"] = "false";
+    SetParameter("name", "gcc");
+    SetParameter("compiler", "g++ -fdiagnostics-color=always");
+    SetParameter("linker", "g++");
+    SetParameter("archiver", "ar");
+    SetParameter("cross", "false");
 }
 
 std::string GccToolset::getBmiNameFor(const File &file)
@@ -108,7 +108,7 @@ std::string GccToolset::getLinkerCommand(const std::string &program, const std::
     {
         command += " " + file->path.string();
     }
-    command += " -Lbuild/" + parameters["name"] + "/lib";
+    command += " -Lbuild/" + GetParameter("name") + "/lib";
     for(auto d : linkDeps)
     {
         if(d.size() == 1)

@@ -14,7 +14,7 @@ void SimpleReporter::SetRunningCommand(size_t, std::shared_ptr<PendingCommand> c
                   << std::flush;
 }
 
-void SimpleReporter::ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command)
+void SimpleReporter::ReportCommand(size_t , std::shared_ptr<PendingCommand> command)
 {
     if(command->errorcode)
     {

@@ -14,11 +14,11 @@
 
 MsvcToolset::MsvcToolset()
 {
-    parameters["name"] = "msvc";
-    parameters["compiler"] = "cl.exe";
-    parameters["linker"] = "link.exe";
-    parameters["archiver"] = "lib.exe";
-    parameters["cross"] = "false";
+    SetParameter("name", "msvc");
+    SetParameter("compiler", "cl.exe");
+    SetParameter("linker", "link.exe");
+    SetParameter("archiver", "lib.exe");
+    SetParameter("cross", "false");
 }
 
 std::string MsvcToolset::getBmiNameFor(const File &file)

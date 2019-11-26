@@ -101,7 +101,7 @@ void ConsoleReporter::SetRunningCommand(size_t channel, std::shared_ptr<PendingC
     Redraw();
 }
 
-void ConsoleReporter::ReportCommand(size_t channel, std::shared_ptr<PendingCommand> cmd)
+void ConsoleReporter::ReportCommand(size_t , std::shared_ptr<PendingCommand> cmd)
 {
     if (cmd) {
         // Display error

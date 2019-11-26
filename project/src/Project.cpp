@@ -141,7 +141,7 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::p
     ReadCodeFrom(f, static_cast<const char *>(region.get_address()), region.get_size());
 }
 
-bool Project::IsItemBlacklisted(const fs::path &path)
+bool Project::IsItemBlacklisted(const fs::path &)
 {
 	/*
     std::string pathS = path.generic_string();

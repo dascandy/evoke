@@ -25,8 +25,6 @@ void PendingCommand::AddOutput(File *output)
     outputs.push_back(output);
 }
 
-static size_t indent = 0;
-
 void PendingCommand::Check()
 {
     if(state == PendingCommand::ToBeRun) 

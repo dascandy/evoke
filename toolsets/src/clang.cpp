@@ -12,11 +12,11 @@
 
 ClangToolset::ClangToolset()
 {
-    parameters["name"] = "clang";
-    parameters["compiler"] = "clang++";
-    parameters["linker"] = "clang++";
-    parameters["archiver"] = "ar";
-    parameters["cross"] = "false";
+    SetParameter("name", "clang");
+    SetParameter("compiler", "clang++");
+    SetParameter("linker", "clang++");
+    SetParameter("archiver", "ar");
+    SetParameter("cross", "false");
 }
 
 std::string ClangToolset::getBmiNameFor(const File &file)
@@ -92,7 +92,7 @@ std::string ClangToolset::getLinkerCommand(const std::string &program, const std
     {
         command += " " + file->path.string();
     }
-    command += " -Lbuild/" + parameters["name"] + "/lib";
+    command += " -Lbuild/" + GetParameter("name") + "/lib";
     for(auto d : linkDeps)
     {
         for(auto &c : d)
