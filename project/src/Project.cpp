@@ -144,7 +144,7 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::p
 bool Project::IsItemBlacklisted(const fs::path & path)
 {
     std::string fileName = path.filename().generic_string();
-    if (fs::is_directory(path) && (fileName == "examples" || fileName == "doc" || fileName == "build")) {
+    if (fs::is_directory(path) && (fileName == "examples" || fileName == "doc" || fileName == "docs" || fileName == "build")) {
         return true;
     }
     return false;
