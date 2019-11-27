@@ -51,8 +51,10 @@ bool Project::FileUpdate(fs::path changedFile, Change change)
     }
 }
 
+bool reloadPredef = false;
 void Project::Reload()
 {
+    reloadPredef = true;
     unknownHeaders.clear();
     components.clear();
     files.clear();
@@ -273,9 +275,10 @@ void Project::MoveIncludeToImport()
 
 static Component *GetPredefComponent(const fs::path &path)
 {
-    static auto list = PredefComponentList();
-    if(list.find(path.string()) != list.end())
-        return list.find(path.string())->second;
+    static auto predefComponentList = PredefComponentList();
+    if (reloadPredef) predefComponentList = PredefComponentList();
+    if(predefComponentList.find(path.string()) != predefComponentList.end())
+        return predefComponentList.find(path.string())->second;
     return nullptr;
 }
 
