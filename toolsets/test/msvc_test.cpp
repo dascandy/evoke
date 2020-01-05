@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(msvc_link)
     File *input2 = p.CreateFile(c, "obj/hello/src/main.cpp.obj");
     MsvcToolset msvc;
     auto cmd = msvc.getLinkerCommand("link.exe", "bin/hello.exe", {input1, input2}, {{}});
-    BOOST_TEST(cmd == "link.exe /OUT:bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj /LIBPATH:lib");
+    BOOST_TEST(cmd == "link.exe /OUT:bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj /LIBPATH:build/msvc/lib");
 
     cmd = msvc.getLinkerCommand("link.exe", "bin/hello.exe", {input1, input2}, {{&c}});
-    BOOST_TEST(cmd == "link.exe /OUT:bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj /LIBPATH:lib libmylib.lib");
+    BOOST_TEST(cmd == "link.exe /OUT:bin/hello.exe obj/hello/src/gretting.cpp.obj obj/hello/src/main.cpp.obj /LIBPATH:build/msvc/lib libmylib.lib");
 }
