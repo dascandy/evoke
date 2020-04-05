@@ -9,6 +9,7 @@
 
 struct Component;
 
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
 struct File
 {
 private:
@@ -20,6 +21,7 @@ private:
     {
     }
     friend class Project;
+    friend int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
     void AddImportStmt(bool withPointyBrackets, const std::string &filename)
     {
         rawImports.insert(std::make_pair(filename, withPointyBrackets));

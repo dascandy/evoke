@@ -38,7 +38,9 @@ private:
     void PropagateExternalIncludes();
     void ExtractPublicDependencies();
     void ExtractIncludePaths();
-    void ReadCodeFrom(File &f, const char *buffer, size_t buffersize);
+public:
+    static void ReadCodeFrom(File &f, const char *buffer, size_t buffersize);
+private:
     void ReadCode(std::unordered_map<std::string, File> &files, const fs::path &path, Component &comp);
     bool IsItemBlacklisted(const fs::path &path);
     friend std::ostream &operator<<(std::ostream &os, const Project &p);

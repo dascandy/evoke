@@ -88,7 +88,7 @@ int main(int argc, const char **argv)
         if (arg.empty()) {
             std::cout << "Invalid argument: " << arg << "\n";
         } else if (insideTarget) {
-	    if (toolsetname.empty()) {
+            if (toolsetname.empty()) {
                 toolsetname = arg;
                 targetsToBuild[toolsetname];
                 insideTarget = false;
@@ -97,7 +97,7 @@ int main(int argc, const char **argv)
             }
         } else if (arg == "-t") {
             insideTarget = true;
-	    toolsetname.clear();
+            toolsetname.clear();
         } else if (arg.empty() || arg[0] == '-') {
             std::cout << "Invalid argument: " << arg << "\n";
         } else {

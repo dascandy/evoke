@@ -8,6 +8,10 @@
 #include <functional>
 #include <thread>
 
+#ifdef LINUX
+#include <unistd.h>
+#endif
+
 static std::promise<void> done;
 
 class Process
@@ -46,6 +50,28 @@ void Process::run()
     while(std::getline(pipe_stream, line))
         outbuffer += line + "\n";
 
+#ifdef LINUX
+    static long ticks = sysconf(_SC_CLK_TCK);
+
+    // this fails if the process closes its stdout before finishing
+    int fd = open(std::string("/proc/" + std::to_string(child.pid) + "/stat"), O_RDONLY);
+    char buffer[4096];
+    read(fd, buffer, 4096);
+    close(fd);
+    char* p = buffer;
+    for (size_t n = 0; n < 15; n++) p = strchr(p, ' '); // skip 15
+    long cutime, cstime;
+    unsigned long vsize;
+    // dummies
+    long a, b, c, d;
+    unsigned long long e;
+    sscanf("%ld %ld %ld %ld %ld %ld %llu %lu", &cutime, &cstime, &a, &b, &c, &d, &e, &vsize);   
+    double ctime = (cutime + cstime) / (double)ticks;
+#else
+    double ctime = 0;
+    unsigned long vsize = 0;
+#endif
+
     try {
         child.wait();
         errorcode = child.exit_code();
@@ -56,7 +82,7 @@ void Process::run()
     state = Done;
     // The callback will cause this object to be destructed, so move out the callback before invoking it
     auto x = std::move(onComplete);
-    x(this);
+    x(this, ctime, vsize);
 }
 
 Executor::Executor(size_t jobcount, Reporter &reporter) 
