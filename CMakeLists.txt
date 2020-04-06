@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
+
 project(evoke)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -82,11 +83,11 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE Threads::Threads ${Boost_LIBRARIES})
 if (EVOKE_BUILD_WITH_DAEMON)
-  target_compile_definitions(${PROJECT_NAME} DAEMON_SUPPORT)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC DAEMON_SUPPORT)
   target_link_libraries(${PROJECT_NAME}
                         PRIVATE inotify-cpp)
 endif()
 
-INSTALL(TARGETS evoke RUNTIME DESTINATION bin)
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
 include(cpack.cmake)
