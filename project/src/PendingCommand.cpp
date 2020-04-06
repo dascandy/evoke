@@ -93,10 +93,24 @@ void PendingCommand::Check()
     }
 }
 
-void PendingCommand::SetResult(int errorcode, std::string messages)
+void PendingCommand::SetResult(int errorcode, std::string messages, double timeTaken, uint64_t spaceUsed)
 {
     this->errorcode = errorcode;
     output = std::move(messages);
+
+    if (errorcode == 0 && timeTaken > 0 && spaceUsed > 0) {
+        printf("%s %f %zu\n", commandToRun.c_str(), timeEstimate, spaceNeeded);
+        // Update measurements
+        if (measurementCount == 10) {
+          timeEstimate *= 0.9;
+          spaceNeeded *= 0.9;
+          measurementCount--;
+        }
+        timeEstimate = timeEstimate * measurementCount + timeTaken;
+        spaceNeeded = spaceNeeded * measurementCount + spaceUsed;
+        measurementCount++;
+        printf("%s %f %zu\n", commandToRun.c_str(), timeEstimate, spaceNeeded);
+    }
 
     state = PendingCommand::Done;
     for(auto &o : outputs)
