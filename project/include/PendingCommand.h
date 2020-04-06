@@ -28,11 +28,14 @@ public:
     } state = Unknown;
     void SetResult(int errorcode, std::string messages, double timeTaken, uint64_t spaceUsed);
     bool CanRun();
-    std::string output;
-    int errorcode = 0;
-    int measurementCount = 0;
-    double timeEstimate = 1; // assumption: 1 second.
-    uint64_t spaceNeeded = 1 << 30; // assumption: 1 GB of memory use
+    struct Result {
+        std::string output;
+        int errorcode = 0;
+        int measurementCount = 0;
+        double timeEstimate = 1; // assumption: 1 second.
+        uint64_t spaceNeeded = 1 << 30; // assumption: 1 GB of memory use
+    };
+    Result* result = nullptr;
 };
 
 std::ostream &operator<<(std::ostream &os, const PendingCommand &);

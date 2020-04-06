@@ -139,7 +139,7 @@ void DaemonConsoleReporter::Redraw()
 
     size_t commandsFailed = 0, commandCount = 0, commandsToBeRun = 0, commandsDepfail = 0;
     if (commands) for (auto& command : *commands) {
-        if (command->errorcode) commandsFailed++;
+        if (command->result->errorcode) commandsFailed++;
         if (command->state == PendingCommand::ToBeRun) commandsToBeRun++;
         if (command->state == PendingCommand::Depfail) commandsDepfail++;
         commandCount++;
@@ -163,10 +163,10 @@ void DaemonConsoleReporter::Redraw()
     size_t linesLeft = screenHeight - 2;
     if (commands) {
         for (auto& command : *commands) {
-            if (command->errorcode && !command->output.empty()) printLines(screenWidth, linesLeft, command->output);
+            if (command->result->errorcode && !command->result->output.empty()) printLines(screenWidth, linesLeft, command->result->output);
         }
         for (auto& command : *commands) {
-            if (!command->errorcode && !command->output.empty()) printLines(screenWidth, linesLeft, command->output);
+            if (!command->result->errorcode && !command->result->output.empty()) printLines(screenWidth, linesLeft, command->result->output);
         }
     }
 }

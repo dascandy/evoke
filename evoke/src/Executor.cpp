@@ -88,7 +88,7 @@ Executor::~Executor()
 
 bool Executor::AllSuccess() {
     for (auto& command : commands) {
-        if (command->errorcode) return false;
+        if (command->result->errorcode) return false;
     }
     return true;
 }

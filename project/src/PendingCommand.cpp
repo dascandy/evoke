@@ -1,9 +1,51 @@
 #include "PendingCommand.h"
 #include "File.h"
 
+struct CommandResultDb {
+  struct result_on_disk {
+    uint32_t errorcode, measurementCount;
+    double timeEstimate;
+    uint64_t spaceNeeded;
+    uint32_t commandSize, outputSize;
+  };
+  CommandResultDb() {
+    std::ifstream in(".evoke.db");
+    while (in.good()) {
+      result_on_disk r;
+      in.read((char*)&r, sizeof(r));
+      std::string command, output;
+      command.resize(r.commandSize);
+      output.resize(r.outputSize);
+      in.read(command.data(), command.size());
+      in.read(output.data(), output.size());
+      results[command] = PendingCommand::Result{output, r.errorcode, r.measurementCount, r.timeEstimate, r.spaceNeeded};
+    }
+  }
+  void Read(PendingCommand& command) {
+    command.result = &results[command.commandToRun];
+  }
+  ~CommandResultDb() {
+    std::ofstream out(".evoke.db");
+    for (auto& [command, r] : results) {
+      if (r.output.empty() && r.measurementCount == 0) continue;
+      result_on_disk res{ (uint32_t)r.errorcode, (uint32_t)r.measurementCount, r.timeEstimate, r.spaceNeeded, (uint32_t)command.size(), (uint32_t)r.output.size() };
+      out.write((const char*)&res, sizeof(res));
+      out.write(command.data(), command.size());
+      out.write(r.output.data(), r.output.size());
+    }
+  }
+  std::unordered_map<std::string, PendingCommand::Result> results;
+};
+
+static CommandResultDb& ResultDb() {
+  static CommandResultDb db;
+  return db;
+}
+
 PendingCommand::PendingCommand(const std::string &command) :
     commandToRun(command)
 {
+  ResultDb().Read(*this);
 }
 
 void PendingCommand::AddInput(File *input)
@@ -95,21 +137,18 @@ void PendingCommand::Check()
 
 void PendingCommand::SetResult(int errorcode, std::string messages, double timeTaken, uint64_t spaceUsed)
 {
-    this->errorcode = errorcode;
-    output = std::move(messages);
+    result->errorcode = errorcode;
+    result->output = std::move(messages);
 
     if (errorcode == 0 && timeTaken > 0 && spaceUsed > 0) {
-        printf("%s %f %zu\n", commandToRun.c_str(), timeEstimate, spaceNeeded);
-        // Update measurements
-        if (measurementCount == 10) {
-          timeEstimate *= 0.9;
-          spaceNeeded *= 0.9;
-          measurementCount--;
+        if (result->measurementCount == 10) {
+          result->timeEstimate *= 0.9;
+          result->spaceNeeded *= 0.9;
+          result->measurementCount--;
         }
-        timeEstimate = timeEstimate * measurementCount + timeTaken;
-        spaceNeeded = spaceNeeded * measurementCount + spaceUsed;
-        measurementCount++;
-        printf("%s %f %zu\n", commandToRun.c_str(), timeEstimate, spaceNeeded);
+        result->timeEstimate = result->timeEstimate * result->measurementCount + timeTaken;
+        result->spaceNeeded = result->spaceNeeded * result->measurementCount + spaceUsed;
+        result->measurementCount++;
     }
 
     state = PendingCommand::Done;
@@ -118,6 +157,7 @@ void PendingCommand::SetResult(int errorcode, std::string messages, double timeT
         o->state = (errorcode ? File::Error : File::Done);
     }
 }
+
 // may become runnable, precondition-fail, already running, already finished
 bool PendingCommand::CanRun()
 {

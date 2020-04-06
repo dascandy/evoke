@@ -16,10 +16,10 @@ void SimpleReporter::SetRunningCommand(size_t, std::shared_ptr<PendingCommand> c
 
 void SimpleReporter::ReportCommand(size_t , std::shared_ptr<PendingCommand> command)
 {
-    if(command->errorcode)
+    if(command->result->errorcode)
     {
         std::cout << "Error while running " << command->commandToRun << "\n";
     }
-    std::cout << command->output << "\n"
+    std::cout << command->result->output << "\n"
               << std::flush;
 }
