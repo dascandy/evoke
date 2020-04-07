@@ -5,29 +5,6 @@ variables:
   system.debug: true
 
 jobs:
-  - job: Linux
-    pool:
-      vmImage: "ubuntu-18.04"
-    steps:
-      - checkout: self
-        submodules: recursive
-      - task: Cache@2
-        displayName: Cache vcpkg
-        inputs:
-          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
-          path: "$(Build.SourcesDirectory)/vcpkg"
-      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
-        inputs:
-          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-linux"
-          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
-      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
-        inputs:
-          useVcpkgToolchainFile: true
-      - bash: |
-        cd build && cpack
-      - bash: |
-        VERSION=`ls build/ | grep evoke_.*.deb | sed -e 's/.*evoke_//' -e 's/\.deb//'` curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=$VERSION\&key=$APIKEY build/evoke_$VERSION.deb
-
   - job: macOS
     pool:
       vmImage: "macOS-latest"
@@ -70,3 +47,25 @@ jobs:
           useVcpkgToolchainFile: true
       - bash: |
         curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=x\&key=$APIKEY
+
+  - job: Linux
+    pool:
+      vmImage: "ubuntu-18.04"
+    steps:
+      - checkout: self
+        submodules: recursive
+      - task: Cache@2
+        displayName: Cache vcpkg
+        inputs:
+          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
+          path: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
+        inputs:
+          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-linux"
+          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
+        inputs:
+          useVcpkgToolchainFile: true
+      - bash: |
+        cd build && cpack && VERSION=`ls build/ | grep evoke_.*.deb | sed -e 's/.*evoke_//' -e 's/\.deb//'` curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=$VERSION\&key=$APIKEY build/evoke_$VERSION.deb
+
