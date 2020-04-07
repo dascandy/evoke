@@ -34,7 +34,7 @@ struct CommandResultDb {
       out.write(r.output.data(), r.output.size());
     }
   }
-  std::unordered_map<std::string, PendingCommand::Result> results;
+  std::map<std::string, PendingCommand::Result> results;
 };
 
 static CommandResultDb& ResultDb() {
