@@ -16,9 +16,6 @@ jobs:
         inputs:
           key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
           path: "$(Build.SourcesDirectory)/vcpkg"
-      - script: |
-          brew install gcc
-          sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target / -allowUntrusted
       - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
         inputs:
           vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-osx"
