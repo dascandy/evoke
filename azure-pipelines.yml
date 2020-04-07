@@ -62,4 +62,4 @@ jobs:
         inputs:
           useVcpkgToolchainFile: true
       - bash: |
-          cpack && VERSION=`ls build/ | grep evoke_.*.deb | sed -e 's/.*evoke_//' -e 's/\.deb//'` curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=$VERSION\&key=$(APIKEY) build/evoke_$VERSION.deb
+          cd "$(Build.SourcesDirectory)/build" && cpack && VERSION=`ls | grep evoke_.*.deb | sed -e 's/.*evoke_//' -e 's/\.deb//'` curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=$VERSION\&key=$(APIKEY) evoke_$VERSION.deb
