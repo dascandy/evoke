@@ -45,8 +45,6 @@ jobs:
       - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
         inputs:
           useVcpkgToolchainFile: true
-      - bash: |
-        curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=x\&key=$APIKEY
 
   - job: Linux
     pool:
@@ -68,4 +66,3 @@ jobs:
           useVcpkgToolchainFile: true
       - bash: |
         cd build && cpack && VERSION=`ls build/ | grep evoke_.*.deb | sed -e 's/.*evoke_//' -e 's/\.deb//'` curl -X PUT https://apt.dascandy.com/upload?name=evoke-linux\&version=$VERSION\&key=$APIKEY build/evoke_$VERSION.deb
-
