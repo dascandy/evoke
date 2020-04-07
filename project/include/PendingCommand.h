@@ -30,8 +30,8 @@ public:
     bool CanRun();
     struct Result {
         std::string output;
-        int errorcode = 0;
-        int measurementCount = 0;
+        uint32_t errorcode = 0;
+        uint32_t measurementCount = 0;
         double timeEstimate = 1; // assumption: 1 second.
         uint64_t spaceNeeded = 1 << 30; // assumption: 1 GB of memory use
     };
