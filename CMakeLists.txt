@@ -37,6 +37,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/File.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/project/src/known.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PendingCommand.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PredefComponents.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Project.cpp
@@ -50,7 +51,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/gcc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/generic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/msvc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp
 )

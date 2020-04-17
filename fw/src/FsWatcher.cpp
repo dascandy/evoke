@@ -34,8 +34,7 @@ struct FsWatcher {
   }
   ~FsWatcher() {
     close(fd);
-    quit = true;
-    thread.join();
+    thread.detach();
   }
   void run() {
     while (!quit) {
