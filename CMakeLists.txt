@@ -83,8 +83,6 @@ target_link_libraries(${PROJECT_NAME}
                       PRIVATE Threads::Threads ${Boost_LIBRARIES})
 if (EVOKE_BUILD_WITH_DAEMON)
   target_compile_definitions(${PROJECT_NAME} DAEMON_SUPPORT)
-  target_link_libraries(${PROJECT_NAME}
-                        PRIVATE inotify-cpp)
 endif()
 
 INSTALL(TARGETS evoke RUNTIME DESTINATION bin)
