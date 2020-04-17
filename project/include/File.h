@@ -11,7 +11,7 @@ struct Component;
 
 struct File
 {
-private:
+public:
     File(const fs::path &path, Component &component) :
         path(path),
         component(component),

@@ -2,7 +2,6 @@
 #include "File.h"
 #include "PendingCommand.h"
 #include "Project.h"
-#include "Toolset.h"
 
 template<bool usePrivDepsFromOthers = false>
 struct Tarjan
