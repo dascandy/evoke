@@ -38,6 +38,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/File.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/project/src/known.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PendingCommand.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/PredefComponents.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Project.cpp
@@ -51,7 +52,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/gcc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/generic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/known.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/msvc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp
 )
@@ -84,8 +84,6 @@ target_link_libraries(${PROJECT_NAME}
                       PRIVATE Threads::Threads ${Boost_LIBRARIES})
 if (EVOKE_BUILD_WITH_DAEMON)
   target_compile_definitions(${PROJECT_NAME} PUBLIC DAEMON_SUPPORT)
-  target_link_libraries(${PROJECT_NAME}
-                        PRIVATE inotify-cpp)
 endif()
 
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

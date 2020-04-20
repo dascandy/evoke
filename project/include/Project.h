@@ -20,7 +20,7 @@ public:
     fs::path projectRoot;
     std::unordered_map<std::string, Component> components;
     std::unordered_set<std::string> unknownHeaders;
-    std::unordered_map<std::string, File> files;
+    std::unordered_map<std::string, std::unique_ptr<File>> files;
     std::vector<PendingCommand *> buildPipeline;
     std::unordered_map<std::string, std::vector<std::string>> ambiguous;
 
@@ -41,7 +41,7 @@ private:
 public:
     static void ReadCodeFrom(File &f, const char *buffer, size_t buffersize);
 private:
-    void ReadCode(std::unordered_map<std::string, File> &files, const fs::path &path, Component &comp);
+    void ReadCode(std::unordered_map<std::string, std::unique_ptr<File>> &files, const fs::path &path, Component &comp);
     bool IsItemBlacklisted(const fs::path &path);
     friend std::ostream &operator<<(std::ostream &os, const Project &p);
 };

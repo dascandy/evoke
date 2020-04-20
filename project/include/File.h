@@ -12,7 +12,7 @@ struct Component;
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
 struct File
 {
-private:
+public:
     File(const fs::path &path, Component &component) :
         path(path),
         component(component),

@@ -39,7 +39,7 @@ bool Project::FileUpdate(fs::path changedFile, Change change)
     case Change::Changed:
         if(it != files.end())
         {
-            it->second.FileUpdated();
+            it->second->FileUpdated();
         }
         return false;
     // Default handling. Because file move, add or delete can change commands & component dependencies in ways our incremental model can't handle yet, just reload.
@@ -109,8 +109,8 @@ File *Project::CreateFile(Component &c, fs::path p)
     if(subpath[0] == '.' && (subpath[1] == '/' || subpath[1] == '\\'))
         subpath = subpath.substr(2);
     File f(p, c);
-    auto f2 = files.emplace(p.string(), std::move(f));
-    return &f2.first->second;
+    auto f2 = files.emplace(p.string(), std::make_unique<File>(std::move(f)));
+    return f2.first->second.get();
 }
 
 std::ostream &operator<<(std::ostream &os, const Project &p)
@@ -127,10 +127,10 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
     return os;
 }
 
-void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::path &path, Component &comp)
+void Project::ReadCode(std::unordered_map<std::string, std::unique_ptr<File>> &files, const fs::path &path, Component &comp)
 {
-    File &f = files.emplace(path.generic_string().substr(2), File(path.generic_string().substr(2), comp)).first->second;
-    comp.files.insert(&f);
+    File *f = files.emplace(path.generic_string().substr(2), std::make_unique<File>(path.generic_string().substr(2), comp)).first->second.get();
+    comp.files.insert(f);
 
     size_t fileSize = fs::file_size(path.string());
     if(fileSize == 0)
@@ -140,7 +140,7 @@ void Project::ReadCode(std::unordered_map<std::string, File> &files, const fs::p
     file_mapping file(path.string().c_str(), read_only);
     mapped_region region(file, read_only);
 
-    ReadCodeFrom(f, static_cast<const char *>(region.get_address()), region.get_size());
+    ReadCodeFrom(*f, static_cast<const char *>(region.get_address()), region.get_size());
 }
 
 bool Project::IsItemBlacklisted(const fs::path & path)
@@ -213,17 +213,17 @@ bool Project::CreateModuleMap(std::unordered_map<std::string, File *> &moduleMap
     bool error = false;
     for(auto &f : files)
     {
-        if(!f.second.moduleName.empty() && f.second.moduleExported)
+        if(!f.second->moduleName.empty() && f.second->moduleExported)
         {
-            auto &entry = moduleMap[f.second.moduleName];
+            auto &entry = moduleMap[f.second->moduleName];
             if(entry)
             {
-                std::cerr << "Found second definition for module " << f.second.path.c_str() << " found first in " << entry->path.c_str() << '\n';
+                std::cerr << "Found second definition for module " << f.second->path.c_str() << " found first in " << entry->path.c_str() << '\n';
                 error = true;
             }
             else
             {
-                entry = &f.second;
+                entry = f.second.get();
             }
         }
     }
@@ -234,16 +234,16 @@ void Project::MapImportsToModules(std::unordered_map<std::string, File *> &modul
 {
     for(auto &f : files)
     {
-        for(auto &import : f.second.imports)
+        for(auto &import : f.second->imports)
         {
             File *target = moduleMap[import.first];
             if(target)
             {
-                f.second.modImports.insert(std::make_pair(import.first, target));
+                f.second->modImports.insert(std::make_pair(import.first, target));
             }
             else
             {
-                std::cerr << "Could not find module " << import.first.c_str() << " imported by " << f.second.path.c_str() << '\n';
+                std::cerr << "Could not find module " << import.first.c_str() << " imported by " << f.second->path.c_str() << '\n';
             }
         }
     }
@@ -254,18 +254,18 @@ void Project::MoveIncludeToImport()
     std::unordered_set<File *> importedHeaders;
     // Find all headers imported anywhere anyhow as an import (ie, precompiled)
     for(auto &f : files)
-        for(auto &d : f.second.modImports)
+        for(auto &d : f.second->modImports)
             importedHeaders.insert(d.second);
 
     // Move those that map to an imported file to the imports section, so it will view it as an import
     for(auto &f : files)
     {
-        for(auto it = f.second.dependencies.begin(); it != f.second.dependencies.end();)
+        for(auto it = f.second->dependencies.begin(); it != f.second->dependencies.end();)
         {
             if(importedHeaders.find(it->second) != importedHeaders.end())
             {
-                f.second.modImports.insert(*it);
-                f.second.dependencies.erase(it);
+                f.second->modImports.insert(*it);
+                f.second->dependencies.erase(it);
             }
             else
                 ++it;
@@ -287,17 +287,17 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
 {
     for(auto &fp : files)
     {
-        for(auto &p : fp.second.modImports)
+        for(auto &p : fp.second->modImports)
         {
-            if(&fp.second.component != &p.second->component)
+            if(&fp.second->component != &p.second->component)
             {
-                fp.second.component.privDeps.insert(&p.second->component);
+                fp.second->component.privDeps.insert(&p.second->component);
                 p.second->hasExternalInclude = true;
             }
             p.second->hasInclude = true;
         }
         // TODO: add the by-name imports here too as a component level dependency
-        for(auto &p : fp.second.rawImports)
+        for(auto &p : fp.second->rawImports)
         {
             // If this is a non-pointy bracket include, see if there's a local match first.
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
@@ -305,9 +305,9 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
             if(!p.second && files.count(fullFilePath))
             {
                 // This file exists as a local include.
-                File *dep = &files.find(fullFilePath)->second;
+                File *dep = files.find(fullFilePath)->second.get();
                 dep->hasInclude = true;
-                fp.second.modImports.insert(std::make_pair(p.first, dep));
+                fp.second->modImports.insert(std::make_pair(p.first, dep));
             }
             else
             {
@@ -323,13 +323,13 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 else if(GetPredefComponent(lowercaseInclude))
                 {
                     Component *comp = GetPredefComponent(lowercaseInclude);
-                    fp.second.component.privDeps.insert(comp);
+                    fp.second->component.privDeps.insert(comp);
                     // TODO: we need to precompile this too now? No hook for it yet...
                 }
                 else if(files.count(fullPath))
                 {
-                    File *dep = &files.find(fullPath)->second;
-                    fp.second.modImports.insert(std::make_pair(p.first, dep));
+                    File *dep = files.find(fullPath)->second.get();
+                    fp.second->modImports.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
                     if(inclpath.size() == dep->component.root.generic_string().size())
@@ -349,9 +349,9 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                         dep->includePaths.insert(inclpath);
                     }
 
-                    if(&fp.second.component != &dep->component)
+                    if(&fp.second->component != &dep->component)
                     {
-                        fp.second.component.privDeps.insert(&dep->component);
+                        fp.second->component.privDeps.insert(&dep->component);
                         dep->hasExternalInclude = true;
                     }
                     dep->hasInclude = true;
@@ -362,7 +362,7 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 }
             }
         }
-        for(auto &p : fp.second.rawIncludes)
+        for(auto &p : fp.second->rawIncludes)
         {
             // If this is a non-pointy bracket include, see if there's a local match first.
             // If so, it always takes precedence, never needs an include path added, and never is ambiguous (at least, for the compiler).
@@ -370,9 +370,9 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
             if(!p.second && files.count(fullFilePath))
             {
                 // This file exists as a local include.
-                File *dep = &files.find(fullFilePath)->second;
+                File *dep = files.find(fullFilePath)->second.get();
                 dep->hasInclude = true;
-                fp.second.dependencies.insert(std::make_pair(p.first, dep));
+                fp.second->dependencies.insert(std::make_pair(p.first, dep));
             }
             else
             {
@@ -388,12 +388,12 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                 else if(GetPredefComponent(lowercaseInclude))
                 {
                     Component *comp = GetPredefComponent(lowercaseInclude);
-                    fp.second.component.privDeps.insert(comp);
+                    fp.second->component.privDeps.insert(comp);
                 }
                 else if(files.count(fullPath))
                 {
-                    File *dep = &files.find(fullPath)->second;
-                    fp.second.dependencies.insert(std::make_pair(p.first, dep));
+                    File *dep = files.find(fullPath)->second.get();
+                    fp.second->dependencies.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
                     if(inclpath.size() == dep->component.root.generic_string().size())
@@ -413,9 +413,9 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                         dep->includePaths.insert(inclpath);
                     }
 
-                    if(&fp.second.component != &dep->component)
+                    if(&fp.second->component != &dep->component)
                     {
-                        fp.second.component.privDeps.insert(&dep->component);
+                        fp.second->component.privDeps.insert(&dep->component);
                         dep->hasExternalInclude = true;
                     }
                     dep->hasInclude = true;
@@ -437,11 +437,11 @@ void Project::PropagateExternalIncludes()
         foundChange = false;
         for(auto &fp : files)
         {
-            if(fp.second.hasExternalInclude)
+            if(fp.second->hasExternalInclude)
             {
-                for(auto &dep : fp.second.dependencies)
+                for(auto &dep : fp.second->dependencies)
                 {
-                    if(!dep.second->hasExternalInclude && &dep.second->component == &fp.second.component)
+                    if(!dep.second->hasExternalInclude && &dep.second->component == &fp.second->component)
                     {
                         dep.second->hasExternalInclude = true;
                         foundChange = true;

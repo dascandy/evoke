@@ -1,8 +1,3 @@
-# C/C++ with GCC
-# Build your C/C++ project with GCC using make.
-# Add steps that publish test results, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
-
 trigger:
   - master
 
@@ -10,24 +5,6 @@ variables:
   system.debug: true
 
 jobs:
-  - job: Linux
-    pool:
-      vmImage: "ubuntu-18.04"
-    steps:
-      - checkout: self
-        submodules: recursive
-      - task: Cache@2
-        displayName: Cache vcpkg
-        inputs:
-          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
-          path: "$(Build.SourcesDirectory)/vcpkg"
-      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
-        inputs:
-          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-linux"
-          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
-      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
-        inputs:
-          useVcpkgToolchainFile: true
   - job: macOS
     pool:
       vmImage: "macOS-latest"
@@ -39,9 +16,6 @@ jobs:
         inputs:
           key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
           path: "$(Build.SourcesDirectory)/vcpkg"
-      - script: |
-          brew install gcc
-          sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target / -allowUntrusted
       - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
         inputs:
           vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-osx"
@@ -49,6 +23,7 @@ jobs:
       - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
         inputs:
           useVcpkgToolchainFile: true
+
   - job: Windows
     pool:
       vmImage: "windows-latest"
@@ -67,3 +42,24 @@ jobs:
       - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
         inputs:
           useVcpkgToolchainFile: true
+
+  - job: Linux
+    pool:
+      vmImage: "ubuntu-18.04"
+    steps:
+      - checkout: self
+        submodules: recursive
+      - task: Cache@2
+        displayName: Cache vcpkg
+        inputs:
+          key: $(Build.SourcesDirectory)/vcpkg-ports.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
+          path: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
+        inputs:
+          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-linux"
+          vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
+      - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
+        inputs:
+          useVcpkgToolchainFile: true
+      - bash: |
+          cd "$(Build.SourcesDirectory)/../a" && $(Build.SourcesDirectory)/package.sh
