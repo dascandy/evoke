@@ -69,19 +69,34 @@ static std::string default_toolset() {
 #endif
 }
 
+uint64_t parseMemoryLimit(std::string str) {
+  if (str == "none") return std::numeric_limits<uint64_t>::max();
+  uint64_t limit = 1;
+  switch(str.back()) {
+    case 'k': case 'K': limit = 1024; break;
+    case 'm': case 'M': limit = 1024 * 1024; break;
+    case 'g': case 'G': limit = 1024 * 1024 * 1024; break;
+    case 't': case 'T': limit = 1024 * 1024 * 1024 * 1024ULL; break;
+  }
+  if (limit != 1) str.pop_back();
+  limit *= std::stoul(str);
+  return limit;
+}
+
 int main(int argc, const char **argv)
 {
     std::string toolsetname = default_toolset();
     std::string rootpath = fs::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
+    std::string memoryLimit = "none";
     bool compilation_database = false;
     bool cmakelists = false;
     bool verbose = false;
     bool unitybuild = false;
     bool daemon = false;
     std::map<std::string, std::vector<std::string>> targetsToBuild;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}},
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}, {"-m", memoryLimit}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}},
         [&](std::string arg) {
         // This feels really icky, but it's the way to make this work. TODO: extract this into a class.
         static bool insideTarget = false;
@@ -109,7 +124,7 @@ int main(int argc, const char **argv)
         reporterName = "daemon";
     }
     std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
-    Executor ex(std::stoul(jobcount), *reporter);
+    Executor ex(std::stoul(jobcount), parseMemoryLimit(memoryLimit), *reporter);
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {

@@ -19,11 +19,12 @@ static std::promise<void> done;
 class Process
 {
 public:
-    Process(const std::string &filename, const std::string &cmd, std::function<void(Process *, double, uint64_t)> onComplete);
+    Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *, double, uint64_t)> onComplete);
 
 private:
     void run();
 public:
+    std::shared_ptr<PendingCommand> pc;
     std::function<void(Process *, double, uint64_t)> onComplete;
     std::string filename;
     boost::process::ipstream pipe_stream;
@@ -38,14 +39,15 @@ public:
     State state = Running;
 };
 
-Process::Process(const std::string &filename, const std::string &cmd, std::function<void(Process *, double, uint64_t)> onComplete) :
+Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *, double, uint64_t)> onComplete) :
+    pc(pc),
     onComplete(onComplete),
     filename(filename),
     child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
 {
     std::thread([this] { run(); }).detach();
-
 }
+
 void Process::run()
 {
     std::string line;
@@ -75,8 +77,9 @@ void Process::run()
     x(this, ctime, vsize);
 }
 
-Executor::Executor(size_t jobcount, Reporter &reporter) 
+Executor::Executor(size_t jobcount, uint64_t memoryLimit, Reporter &reporter) 
 : reporter(reporter)
+, memoryLimit(memoryLimit)
 {
     activeProcesses.resize(jobcount);
     reporter.SetConcurrencyCount(jobcount);
@@ -123,8 +126,15 @@ void Executor::NewGeneration() {
 
 void Executor::RunMoreCommands()
 {
+    std::sort(commands.begin(), commands.end(), [](std::shared_ptr<PendingCommand>& a, std::shared_ptr<PendingCommand>& b) {
+      return a->timeToComplete() < b->timeToComplete();
+    });
     reporter.ReportCommandQueue(commands);
     size_t n = 0;
+    uint64_t memoryLeft = memoryLimit;
+    for (auto& p : activeProcesses) {
+        if (p) memoryLeft -= p->pc->result->spaceNeeded;
+    }
     for(auto &c : commands)
     {
         while(n != activeProcesses.size() && activeProcesses[n])
@@ -132,15 +142,16 @@ void Executor::RunMoreCommands()
         if(n == activeProcesses.size())
             break;
         // TODO: take into account its relative load
-        if(c->CanRun())
+        if(c->CanRun() && c->result->spaceNeeded < memoryLeft)
         {
+            memoryLeft -= c->result->spaceNeeded;
             c->state = PendingCommand::Running;
             for(auto &o : c->outputs)
             {
                 fs::create_directories(o->path.parent_path());
             }
             reporter.SetRunningCommand(n, c);
-            activeProcesses[n] = std::make_unique<Process>(c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c, generationWhenStarted = generation](Process *t, double timeTaken, uint64_t spaceUsed) {
+            activeProcesses[n] = std::make_unique<Process>(c, c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c, generationWhenStarted = generation](Process *t, double timeTaken, uint64_t spaceUsed) {
                 std::lock_guard<std::mutex> l(m);
                 auto self = std::move(activeProcesses[n]);
                 if (generation == generationWhenStarted) {   // If the generation counter changed, then all our target pointers are stale. Don't talk to our command any more.

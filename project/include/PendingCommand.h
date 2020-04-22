@@ -15,8 +15,21 @@ public:
     std::vector<File *> inputs;
     std::vector<File *> outputs;
     void Check();
+    float timeToComplete() {
+        return result->timeEstimate / result->measurementCount + longestChildCommand;
+    }
+    void addChildCommand(float length) {
+        if (length <= longestChildCommand) 
+          return;
 
+        longestChildCommand = length;
+        for (auto& f : inputs) {
+            if (f->generator)
+                f->generator->addChildCommand(timeToComplete());
+        }
+    }
 public:
+    float longestChildCommand = 0;
     std::string commandToRun;
     enum State
     {
