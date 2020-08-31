@@ -31,4 +31,5 @@ private:
     bool daemonMode = false;
     size_t generation = 0;
     size_t memoryLimit;
+    size_t memoryFree, memoryTotal;
 };

@@ -18,6 +18,9 @@ public:
     float timeToComplete() {
         return result->timeEstimate / result->measurementCount + longestChildCommand;
     }
+    uint64_t memoryUse() {
+        return result->spaceNeeded / result->measurementCount;
+    }
     void addChildCommand(float length) {
         if (length <= longestChildCommand) 
           return;

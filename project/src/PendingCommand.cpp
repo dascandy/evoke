@@ -24,7 +24,7 @@ struct CommandResultDb {
   void Read(PendingCommand& command) {
     command.result = &results[command.commandToRun];
   }
-  ~CommandResultDb() {
+  void Save() {
     std::ofstream out(".evoke.db");
     for (auto& [command, r] : results) {
       if (r.output.empty() && r.measurementCount == 0) continue;
@@ -33,6 +33,9 @@ struct CommandResultDb {
       out.write(command.data(), command.size());
       out.write(r.output.data(), r.output.size());
     }
+  }
+  ~CommandResultDb() {
+    Save();
   }
   std::map<std::string, PendingCommand::Result> results;
 };

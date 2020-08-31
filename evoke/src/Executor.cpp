@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/sysinfo.h>
+
 #endif
 
 static std::promise<void> done;
@@ -59,7 +61,7 @@ void Process::run()
     try {
 #ifdef __linux__
         struct rusage r;
-        int rv = wait4(child.id(), &errorcode, 0, &r);
+        [[maybe_unused]] int rv = wait4(child.id(), &errorcode, 0, &r);
 
         ctime = (r.ru_utime.tv_sec + r.ru_stime.tv_sec) + (r.ru_utime.tv_usec + r.ru_stime.tv_usec) * 0.000001;
         vsize = r.ru_maxrss * 1024;
@@ -81,6 +83,16 @@ Executor::Executor(size_t jobcount, uint64_t memoryLimit, Reporter &reporter)
 : reporter(reporter)
 , memoryLimit(memoryLimit)
 {
+#ifdef __linux__
+    struct sysinfo info;
+    sysinfo(&info);
+    memoryFree = (info.freeram + info.bufferram + info.freeswap) * info.mem_unit;
+    memoryTotal = (info.totalram + info.totalswap) * info.mem_unit;
+
+    if (memoryLimit == 0) {
+        this->memoryLimit = memoryFree;
+    }
+#endif
     activeProcesses.resize(jobcount);
     reporter.SetConcurrencyCount(jobcount);
 }
@@ -98,6 +110,9 @@ bool Executor::AllSuccess() {
 
 void Executor::Run(std::shared_ptr<PendingCommand> cmd)
 {
+    if (cmd->result->spaceNeeded > memoryFree) {
+        fprintf(stderr, "PROBLEM: Memory (including swap) not enough to build %s.\nRequired: %zu MB, Available: %zu MB, Total: %zu MB\n", cmd->outputs[0]->path.c_str(), cmd->result->spaceNeeded / 1000000, memoryFree / 1000000, memoryTotal / 1000000);
+    }
     commands.push_back(cmd);
 }
 
