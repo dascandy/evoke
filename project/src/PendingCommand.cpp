@@ -45,6 +45,10 @@ static CommandResultDb& ResultDb() {
   return db;
 }
 
+void SaveCommandResultDb() {
+  ResultDb().Save();
+}
+
 PendingCommand::PendingCommand(const std::string &command) :
     commandToRun(command)
 {

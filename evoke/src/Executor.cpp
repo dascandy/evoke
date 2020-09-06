@@ -60,9 +60,9 @@ void Process::run()
     unsigned long vsize = 0;
     try {
 #ifdef __linux__
-        struct rusage r;
+        struct rusage r = {};
         [[maybe_unused]] int rv = wait4(child.id(), &errorcode, 0, &r);
-
+        
         ctime = (r.ru_utime.tv_sec + r.ru_stime.tv_sec) + (r.ru_utime.tv_usec + r.ru_stime.tv_usec) * 0.000001;
         vsize = r.ru_maxrss * 1024;
 #else
@@ -190,6 +190,8 @@ void Executor::RunMoreCommands()
         if(p)
             return;
 
-    if (!daemonMode)
+    if (daemonMode)
+        SaveCommandResultDb();
+    else
         done.set_value();
 }

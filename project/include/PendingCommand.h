@@ -55,3 +55,4 @@ public:
 };
 
 std::ostream &operator<<(std::ostream &os, const PendingCommand &);
+void SaveCommandResultDb();
