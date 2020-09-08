@@ -129,7 +129,9 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, std::unique_ptr<File>> &files, const fs::path &path, Component &comp)
 {
-    File *f = files.emplace(path.generic_string().substr(2), std::make_unique<File>(path.generic_string().substr(2), comp)).first->second.get();
+    std::string gpath = path.generic_string();
+    if (gpath[0] == '.' && (gpath[1] == '/' || gpath[1] == '\\')) gpath = gpath.substr(2);
+    File *f = files.emplace(gpath, std::make_unique<File>(gpath, comp)).first->second.get();
     comp.files.insert(f);
 
     size_t fileSize = fs::file_size(path.string());
@@ -332,7 +334,10 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                     fp.second->modImports.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
-                    if(inclpath.size() == dep->component.root.generic_string().size())
+                    if (dep->component.root.generic_string() == ".") {
+
+                    }
+                    else if(inclpath.size() == dep->component.root.generic_string().size())
                     {
                         inclpath = ".";
                     }
@@ -396,7 +401,10 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                     fp.second->dependencies.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
-                    if(inclpath.size() == dep->component.root.generic_string().size())
+                    if (dep->component.root.generic_string() == ".") {
+
+                    }
+                    else if(inclpath.size() == dep->component.root.generic_string().size())
                     {
                         inclpath = ".";
                     }
