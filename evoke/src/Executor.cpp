@@ -147,8 +147,12 @@ void Executor::RunMoreCommands()
     reporter.ReportCommandQueue(commands);
     size_t n = 0;
     uint64_t memoryLeft = memoryLimit;
+    bool somethingRunning = false;
     for (auto& p : activeProcesses) {
-        if (p) memoryLeft -= p->pc->result->spaceNeeded;
+        if (p) {
+            somethingRunning = true;
+            memoryLeft -= p->pc->result->spaceNeeded;
+        }
     }
     for(auto &c : commands)
     {
@@ -157,7 +161,7 @@ void Executor::RunMoreCommands()
         if(n == activeProcesses.size())
             break;
         // TODO: take into account its relative load
-        if(c->CanRun()/* && c->result->spaceNeeded < memoryLeft*/)
+        if(c->CanRun() && (c->result->spaceNeeded < memoryLeft || !somethingRunning))
         {
             memoryLeft -= c->result->spaceNeeded;
             c->state = PendingCommand::Running;
