@@ -172,6 +172,10 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 void Project::LoadFileList()
 {
     components.emplace(".", ".");
+    if(fs::is_directory("test"))
+    {
+        components.emplace("./test", "./test").first->second.type = "unittest";
+    }
     for(fs::recursive_directory_iterator it("."), end;
         it != end;
         ++it)
