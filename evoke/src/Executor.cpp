@@ -157,7 +157,7 @@ void Executor::RunMoreCommands()
         if(n == activeProcesses.size())
             break;
         // TODO: take into account its relative load
-        if(c->CanRun() && c->result->spaceNeeded < memoryLeft)
+        if(c->CanRun()/* && c->result->spaceNeeded < memoryLeft*/)
         {
             memoryLeft -= c->result->spaceNeeded;
             c->state = PendingCommand::Running;
