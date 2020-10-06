@@ -34,6 +34,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/evoke/src/JsonCompileDb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FileParser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FsWatcher.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
@@ -46,24 +47,18 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/tarjan.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Utilities.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/ConsoleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/DaemonConsoleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/clang.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/gcc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/generic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/msvc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/toolsets/src/Toolset.cpp
-)
-
-if (EVOKE_BUILD_WITH_DAEMON)
-  set(SOURCES ${SOURCES} 
-    ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FsWatcher.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/DaemonConsoleReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/network/src/Finder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/network/src/Retriever.cpp
   )
-endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
@@ -82,9 +77,6 @@ target_include_directories(${PROJECT_NAME}
                            PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE Threads::Threads ${Boost_LIBRARIES})
-if (EVOKE_BUILD_WITH_DAEMON)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC DAEMON_SUPPORT)
-endif()
 
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
