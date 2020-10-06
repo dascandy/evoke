@@ -88,7 +88,6 @@ void Project::Reload()
     }
     PropagateExternalIncludes();
     ExtractPublicDependencies();
-    ExtractIncludePaths();
 
     for(auto it = components.begin(); it != components.end();)
     {
@@ -98,6 +97,7 @@ void Project::Reload()
         }
         else
         {
+            it->second.pubIncl.insert("include");
             ++it;
         }
     }
@@ -512,21 +512,3 @@ void Project::ExtractPublicDependencies()
     }
 }
 
-void Project::ExtractIncludePaths()
-{
-    for(auto &c : components)
-    {
-        Component &comp = c.second;
-        for(auto &fp : comp.files)
-        {
-            if(fp->hasInclude)
-            {
-                (fp->hasExternalInclude ? comp.pubIncl : comp.privIncl).insert(fp->includePaths.begin(), fp->includePaths.end());
-            }
-        }
-        for(auto &s : comp.pubIncl)
-        {
-            comp.privIncl.erase(s);
-        }
-    }
-}

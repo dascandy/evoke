@@ -75,8 +75,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
 
 //        injectOptions(os, "target_compile_options", target, privateAccess, opts.compile);
 //        injectOptions(os, "target_include_directories", target, privateAccess, opts.include);
-        dumpTargetIncludes(os, target, publicAccess, comp.second.pubIncl);
-        dumpTargetIncludes(os, target, privateAccess, comp.second.privIncl);
+        dumpTargetIncludes(os, target, publicAccess);
 //        injectOptions(os, "target_link_libraries", target, privateAccess, opts.link);
         dumpTargetLibraries(os, target, publicAccess, comp.second.pubDeps);
         dumpTargetLibraries(os, target, privateAccess, comp.second.privDeps);
@@ -187,17 +186,11 @@ std::vector<const Component *> CMakeProjectExporter::extractSystemComponents() c
     return systemComponents;
 }
 
-void CMakeProjectExporter::dumpTargetIncludes(std::ostream &os, const std::string &target, const std::string &access, const std::unordered_set<std::string> &includes)
+void CMakeProjectExporter::dumpTargetIncludes(std::ostream &os, const std::string &target, const std::string &access)
 {
-    if(!includes.empty())
-    {
-        os << "target_include_directories(" << target << " " << access << "\n";
-        for(const auto &incl : includes)
-        {
-            os << "    ${CMAKE_CURRENT_SOURCE_DIR}/" << incl << "\n";
-        }
-        os << ")\n";
-    }
+    os << "target_include_directories(" << target << " " << access << "\n";
+    os << "    ${CMAKE_CURRENT_SOURCE_DIR}/include\n";
+    os << ")\n";
 }
 
 void CMakeProjectExporter::dumpTargetLibraries(std::ostream &os, const std::string &target, const std::string &access, const std::unordered_set<Component *> components)

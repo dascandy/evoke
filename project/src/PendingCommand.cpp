@@ -153,8 +153,8 @@ void PendingCommand::SetResult(int errorcode, std::string messages, double timeT
           result->spaceNeeded *= 0.9;
           result->measurementCount--;
         }
-        result->timeEstimate = result->timeEstimate * result->measurementCount + timeTaken;
-        result->spaceNeeded = result->spaceNeeded * result->measurementCount + spaceUsed;
+        result->timeEstimate += timeTaken;
+        result->spaceNeeded += spaceUsed;
         result->measurementCount++;
     }
 

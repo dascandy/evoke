@@ -15,7 +15,7 @@ private:
     void dumpDoNotModifyWarning(std::ostream &os);
     void extractSystemComponents(const Component &comp, std::unordered_set<std::string> &visited, std::vector<const Component *> &results) const;
     std::vector<const Component *> extractSystemComponents() const;
-    void dumpTargetIncludes(std::ostream &os, const std::string &target, const std::string &access, const std::unordered_set<std::string> &includes);
+    void dumpTargetIncludes(std::ostream &os, const std::string &target, const std::string &access);
     void dumpTargetLibraries(std::ostream &os, const std::string &target, const std::string &access, const std::unordered_set<Component *> components);
     void extractHierarchicalNames();
     bool IsSystemComponent(const std::string &name) const;
