@@ -1,17 +1,20 @@
 #include <cstdint>
-#include <sys/inotify.h>
 #include <thread>
 #include "fw/filesystem.hpp"
 #include <functional>
-#include <unistd.h>
 #include <map>
 #include <atomic>
+#include <iostream>
 
 enum class Change {
   Changed,
   Created,
   Deleted
 };
+
+#ifdef __linux__
+#include <unistd.h>
+#include <sys/inotify.h>
 
 struct FsWatcher {
   struct inotify_event {
@@ -118,3 +121,10 @@ struct FsWatcher {
 void FsWatch(fs::path path, std::function<void(fs::path, Change)> onEvent) {
   static FsWatcher fsw(path, onEvent);
 }
+
+#else
+
+void FsWatch(fs::path path, std::function<void(fs::path, Change)> onEvent) {
+  std::cerr << "Fs Watching not implemented on this platform; cannot run daemon mode.\n";
+}
+#endif
