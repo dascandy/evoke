@@ -5,6 +5,7 @@
 #include <map>
 #include <atomic>
 #include <iostream>
+#include <unordered_map>
 
 enum class Change {
   Changed,

@@ -16,10 +16,14 @@ public:
     std::vector<File *> outputs;
     void Check();
     float timeToComplete() {
-        return result->timeEstimate / result->measurementCount + longestChildCommand;
+        if (result->measurementCount > 0)
+            return result->timeEstimate / result->measurementCount + longestChildCommand;
+        return result->timeEstimate + longestChildCommand;
     }
     uint64_t memoryUse() {
-        return result->spaceNeeded / result->measurementCount;
+        if (result->measurementCount > 0)
+            return result->spaceNeeded / result->measurementCount;
+        return result->spaceNeeded;
     }
     void addChildCommand(float length) {
         if (length <= longestChildCommand) 

@@ -16,8 +16,8 @@ struct CommandResultDb {
       std::string command, output;
       command.resize(r.commandSize);
       output.resize(r.outputSize);
-      in.read(command.data(), command.size());
-      in.read(output.data(), output.size());
+      in.read((char*)command.data(), command.size());
+      in.read((char*)output.data(), output.size());
       results[command] = PendingCommand::Result{output, r.errorcode, r.measurementCount, r.timeEstimate, r.spaceNeeded};
     }
   }

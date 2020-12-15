@@ -93,7 +93,8 @@ void Project::Reload()
     {
         if(it->second.files.empty())
         {
-            it = components.erase(it);
+/*            it = components.erase(it);*/
+            ++it;
         }
         else
         {
@@ -171,10 +172,12 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 
 void Project::LoadFileList()
 {
-    components.emplace(".", ".");
+    Component& rootComponent = components.emplace(std::string("."), boost::filesystem::path(".")).first->second;
     if(fs::is_directory("test"))
     {
-        components.emplace("./test", "./test").first->second.type = "unittest";
+        Component& unittest = components.emplace(std::string("./test"), boost::filesystem::path("./test")).first->second;
+        unittest.type = "unittest";
+        unittest.privDeps.insert(&rootComponent);
     }
     for(fs::recursive_directory_iterator it("."), end;
         it != end;
@@ -192,10 +195,12 @@ void Project::LoadFileList()
         {
             if(fs::is_directory(it->path() / "include") || fs::is_directory(it->path() / "src"))
             {
-                components.emplace(it->path().string(), it->path());
+                Component& component = components.emplace(it->path().string(), it->path()).first->second;
                 if(fs::is_directory(it->path() / "test"))
                 {
-                    components.emplace((it->path() / "test").string(), it->path() / "test").first->second.type = "unittest";
+                    Component& unittest = components.emplace((it->path() / "test").string(), it->path() / "test").first->second;
+                    unittest.type = "unittest";
+                    unittest.privDeps.insert(&component);
                 }
             }
         }

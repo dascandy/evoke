@@ -211,6 +211,10 @@ void GenericToolset::CreateCommandsFor(Project &project)
         auto &component = p.second;
         auto includes = getIncludePathsFor(component);
         std::vector<File *> objects;
+        if (component.type == "unittest") {
+            // Unit tests get access to includes from a component's private folder
+            includes.insert((component.root / "../src").string());
+        }
         for(auto &f : component.files)
         {
             if(!File::isTranslationUnit(f->path))
