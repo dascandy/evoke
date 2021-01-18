@@ -1,8 +1,8 @@
 # Global flow
 
-The tool starts in evoke/src/main.cpp. It reads command-line arguments and then constructs a Project object. This object's constructor collects the whole project status & information immediately. Directly after this point it runs the actions that the user instructed it to do. This part of the program may be changed; right now it offers a project dump in verbose mode, a compilation database dump and running the build itself with the built-in executor.
+The tool starts in [evoke/src/main.cpp](../evoke/src/main.cpp). It reads command-line arguments and then constructs a Project object. This object's constructor collects the whole project status & information immediately. Directly after this point it runs the actions that the user instructed it to do. This part of the program may be changed; right now it offers a project dump in verbose mode, a compilation database dump and running the build itself with the built-in executor.
 
-Directly after creating this, the main loop uses a toolchain (from `toolsets/src/Toolset.cpp`) to determine what commands need to be run and what their rebuild-if-changed dependencies are. These are then fed to the executor to run in any order it likes.
+Directly after creating this, the main loop uses a toolchain (from [toolsets/src/Toolset.cpp](../toolsets/src/Toolset.cpp)) to determine what commands need to be run and what their rebuild-if-changed dependencies are. These are then fed to the executor to run in any order it likes.
 
 # Reading the project
 
