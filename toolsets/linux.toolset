@@ -1,3 +1,4 @@
 
-template: __builtin_gcc
-compiler: g++ -fdiagnostics-color=always -O3 -std=c++17 -Wall -Wextra -Wpedantic 
+template: __builtin_clang
+compiler: clang++-10 -fdiagnostics-color=always -O3 -std=c++17 -Wall -Wextra -Wpedantic -pthread
+linker: clang++-10 -pthread
