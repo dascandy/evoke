@@ -10,14 +10,16 @@ struct CommandResultDb {
   };
   CommandResultDb() {
     std::ifstream in(".evoke.db");
-    while (in.good()) {
+    while (true) {
       result_on_disk r;
       in.read((char*)&r, sizeof(r));
+      if (!in.good()) return;
       std::string command, output;
       command.resize(r.commandSize);
       output.resize(r.outputSize);
       in.read((char*)command.data(), command.size());
       in.read((char*)output.data(), output.size());
+      if (!in.good()) return;
       results[command] = PendingCommand::Result{output, r.errorcode, r.measurementCount, r.timeEstimate, r.spaceNeeded};
     }
   }
@@ -25,7 +27,7 @@ struct CommandResultDb {
     command.result = &results[command.commandToRun];
   }
   void Save() {
-    std::ofstream out(".evoke.db");
+    std::ofstream out(".evoke.db.new");
     for (auto& [command, r] : results) {
       if (r.output.empty() && r.measurementCount == 0) continue;
       result_on_disk res{ (uint32_t)r.errorcode, (uint32_t)r.measurementCount, r.timeEstimate, r.spaceNeeded, (uint32_t)command.size(), (uint32_t)r.output.size() };
@@ -33,6 +35,7 @@ struct CommandResultDb {
       out.write(command.data(), command.size());
       out.write(r.output.data(), r.output.size());
     }
+    fs::rename(".evoke.db.new", ".evoke.db");
   }
   ~CommandResultDb() {
     Save();
