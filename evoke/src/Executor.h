@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include <future>
 #include <fw/filesystem.hpp>
 #include <memory>
@@ -29,7 +28,6 @@ private:
     std::vector<std::unique_ptr<Process>> activeProcesses;
     Reporter &reporter;
     bool daemonMode = false;
-    size_t generation = 0;
     size_t memoryLimit;
     size_t memoryFree, memoryTotal;
 };

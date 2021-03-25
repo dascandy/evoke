@@ -21,13 +21,13 @@ static std::promise<void> done;
 class Process
 {
 public:
-    Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *, double, uint64_t)> onComplete);
-
+    Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *)> onComplete);
 private:
     void run();
 public:
     std::shared_ptr<PendingCommand> pc;
-    std::function<void(Process *, double, uint64_t)> onComplete;
+    PendingCommand::FileRecord record;
+    std::function<void(Process *)> onComplete;
     std::string filename;
     boost::process::ipstream pipe_stream;
     boost::process::child child;
@@ -41,12 +41,16 @@ public:
     State state = Running;
 };
 
-Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *, double, uint64_t)> onComplete) :
-    pc(pc),
-    onComplete(onComplete),
-    filename(filename),
-    child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
+Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *)> onComplete) 
+: pc(pc)
+, record(*pc->result)
+, onComplete(onComplete)
+, filename(filename)
+, child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
 {
+    record.toolsetHash = pc->toolsetHash;
+    record.tuHash = pc->inputs[0]->hash;
+    record.output.clear();
     std::thread([this] { run(); }).detach();
 }
 
@@ -54,29 +58,28 @@ void Process::run()
 {
     std::string line;
     while(std::getline(pipe_stream, line))
-        outbuffer += line + "\n";
+        record.output += line + "\n";
 
-    double ctime = 0;
-    unsigned long vsize = 0;
     try {
 #ifdef __linux__
         struct rusage r = {};
-        [[maybe_unused]] int rv = wait4(child.id(), &errorcode, 0, &r);
+        [[maybe_unused]] int rv = wait4(child.id(), &record.errorcode, 0, &r);
         
-        ctime = (r.ru_utime.tv_sec + r.ru_stime.tv_sec) + (r.ru_utime.tv_usec + r.ru_stime.tv_usec) * 0.000001;
-        vsize = r.ru_maxrss * 1024;
+        record.timeEstimate += (r.ru_utime.tv_sec + r.ru_stime.tv_sec) + (r.ru_utime.tv_usec + r.ru_stime.tv_usec) * 0.000001;
+        record.spaceNeeded += r.ru_maxrss * 1024;
+        record.measurementCount++;
 #else
         child.wait();
-        errorcode = child.exit_code();
+        record.errorcode = child.exit_code();
 #endif
     } catch (const std::exception& e) {
-        outbuffer = e.what();
-        errorcode = -1;
+        record.output += e.what();
+        record.errorcode = -1;
     }
     state = Done;
     // The callback will cause this object to be destructed, so move out the callback before invoking it
     auto x = std::move(onComplete);
-    x(this, ctime, vsize);
+    x(this);
 }
 
 Executor::Executor(size_t jobcount, uint64_t memoryLimit, Reporter &reporter) 
@@ -134,13 +137,14 @@ std::future<void> Executor::Mode(bool isDaemon)
 }
 
 void Executor::NewGeneration() {
-    generation++;
-    commands.clear();
-    reporter.ReportCommandQueue(commands);
+//    commands.clear();
+// HOW?!
+    std::terminate();
 }
 
 void Executor::RunMoreCommands()
 {
+    // TODO: sort only once. This is stupid.
     std::sort(commands.begin(), commands.end(), [](std::shared_ptr<PendingCommand>& a, std::shared_ptr<PendingCommand>& b) {
       return a->timeToComplete() < b->timeToComplete();
     });
@@ -161,8 +165,11 @@ void Executor::RunMoreCommands()
         if(n == activeProcesses.size())
             break;
         // TODO: take into account its relative load
-        if(c->CanRun() && (c->result->spaceNeeded < memoryLeft || !somethingRunning))
+        if(c->ReadyToStart() &&  // There are no prerequisites that are obviously missing or broken, and it's not already running
+           (c->result->spaceNeeded < memoryLeft || // We have space left to run it
+            !somethingRunning)) // or there is not enough space to run it but it's the only thing to run, so we might as well try
         {
+            somethingRunning = true;
             memoryLeft -= c->result->spaceNeeded;
             c->state = PendingCommand::Running;
             for(auto &o : c->outputs)
@@ -170,16 +177,11 @@ void Executor::RunMoreCommands()
                 fs::create_directories(o->path.parent_path());
             }
             reporter.SetRunningCommand(n, c);
-            activeProcesses[n] = std::make_unique<Process>(c, c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c, generationWhenStarted = generation](Process *t, double timeTaken, uint64_t spaceUsed) {
+            activeProcesses[n] = std::make_unique<Process>(c, c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
                 auto self = std::move(activeProcesses[n]);
-                if (generation == generationWhenStarted) {   // If the generation counter changed, then all our target pointers are stale. Don't talk to our command any more.
-                  t->outbuffer.push_back(0);
-                  c->SetResult(t->errorcode, t->outbuffer.data(), timeTaken, spaceUsed);
-                  reporter.ReportCommand(n, c);
-                } else {
-                  reporter.ReportCommand(n, nullptr);
-                }
+                c->SetResult(std::move(t->record));
+                reporter.ReportCommand(n, c);
                 reporter.SetRunningCommand(n, nullptr);
                 RunMoreCommands();
             });
@@ -190,12 +192,10 @@ void Executor::RunMoreCommands()
         }
     }
 
-    for(auto &p : activeProcesses)
-        if(p)
-            return;
-
-    if (daemonMode)
-        SaveCommandResultDb();
-    else
-        done.set_value();
+    if (not somethingRunning) {
+        if (daemonMode)
+            SaveCommandResultDb();
+        else
+            done.set_value();
+    }
 }

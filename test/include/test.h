@@ -2,6 +2,7 @@
 
 #include <string>
 #include <fw/filesystem.hpp>
+#include <cstddef>
 #include <catch2/catch.hpp>
 
 struct testenvironment {

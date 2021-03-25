@@ -13,13 +13,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
 struct File
 {
 public:
-    File(const fs::path &path, Component &component) :
-        path(path),
-        component(component),
-        hasExternalInclude(false),
-        hasInclude(false)
-    {
-    }
+    File(const fs::path &path, Component &component);
     friend class Project;
     friend int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size);
     void AddImportStmt(bool withPointyBrackets, const std::string &filename)
@@ -52,17 +46,7 @@ public:
     static bool isHeader(const fs::path &);
     bool isTranslationUnit() const;
     bool isHeader() const;
-    std::time_t lastwrite()
-    {
-        if(lastwrite_ == 0)
-        {
-            fs::error_code ec;
-            lastwrite_ = fs::last_write_time(path, ec);
-        }
-        return lastwrite_;
-    }
-    // Cache for the last write time of this file.
-    std::time_t lastwrite_ = 0;
+    bool Exists() const;
     // Full path from the root of the project to this file. Always starts with "./".
     fs::path path;
     // Module name, if any.
@@ -102,6 +86,8 @@ public:
         Error,
         Done,
     } state = Source;
+    // Hash of the file
+    std::array<uint8_t, 64> hash;
     void SignalRebuild(State newState)
     {
         state = newState;

@@ -6,10 +6,22 @@
 #include <string>
 #include <vector>
 
+class Toolset;
+
 struct PendingCommand
 {
 public:
-    PendingCommand(const std::string &command);
+    struct FileRecord {
+      std::array<uint8_t, 64> toolsetHash;
+      std::array<uint8_t, 64> tuHash;
+      double timeEstimate;
+      uint64_t spaceNeeded;
+      std::string output;
+      uint32_t measurementCount;
+      int errorcode;
+    };
+
+    PendingCommand(std::array<uint8_t, 64> toolsetHash, const std::string &command);
     void AddInput(File *input);
     void AddOutput(File *output);
     std::vector<File *> inputs;
@@ -38,16 +50,17 @@ public:
 public:
     float longestChildCommand = 0;
     std::string commandToRun;
+    std::array<uint8_t, 64> toolsetHash;
     enum State
     {
         Unknown,
         ToBeRun,
         Running,
         Done,
-        Depfail
+        Error
     } state = Unknown;
-    void SetResult(int errorcode, std::string messages, double timeTaken, uint64_t spaceUsed);
-    bool CanRun();
+    void SetResult(FileRecord newFileRecord);
+    bool ReadyToStart();
     struct Result {
         std::string output;
         uint32_t errorcode = 0;
@@ -55,7 +68,7 @@ public:
         double timeEstimate = 1; // assumption: 1 second.
         uint64_t spaceNeeded = 1 << 30; // assumption: 1 GB of memory use
     };
-    Result* result = nullptr;
+    FileRecord* result = nullptr;
 };
 
 std::ostream &operator<<(std::ostream &os, const PendingCommand &);

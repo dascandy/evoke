@@ -136,7 +136,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         }
 
         fs::path exeFile = "build/" + GetParameter("name") + "/bin/" + getExeNameFor(component);
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getUnityCommand(GetCompilerFor(".cpp"), outputFile.generic_string(), of, includes, linkDeps));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(hash, getUnityCommand(GetCompilerFor(".cpp"), outputFile.generic_string(), of, includes, linkDeps));
 
         File *executable = project.CreateFile(component, exeFile);
         pc->AddOutput(executable);
@@ -147,7 +147,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         component.commands.push_back(pc);
         if(component.type == "unittest")
         {
-            pc = std::make_shared<PendingCommand>(exeFile.string());
+            pc = std::make_shared<PendingCommand>(hash, exeFile.string());
             exeFile += ".log";
             pc->AddInput(executable);
             pc->AddOutput(project.CreateFile(component, exeFile.string()));
@@ -193,7 +193,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
     {
         auto includes = getIncludePathsFor(f->component);
         File *ofile = project.CreateFile(f->component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*f));
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getPrecompileCommand(GetCompilerFor(f->path.extension().string()), ofile->path.generic_string(), f, includes, true));
+        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(hash, getPrecompileCommand(GetCompilerFor(f->path.extension().string()), ofile->path.generic_string(), f, includes, true));
         pc->AddOutput(ofile);
         pc->AddInput(f);
         for(auto &d : GetDependencies(f, moduleMap))
@@ -221,7 +221,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 continue;
             fs::path outputFile = "build/" + GetParameter("name") + "/obj/" + getObjNameFor(*f);
             File *of = project.CreateFile(component, outputFile);
-            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(getCompileCommand(GetCompilerFor(f->path.extension().string()), outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
+            std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(hash, getCompileCommand(GetCompilerFor(f->path.extension().string()), outputFile.generic_string(), f, includes, !f->moduleName.empty() || !f->imports.empty() || !f->modImports.empty()));
             objects.push_back(of);
             pc->AddOutput(of);
             pc->AddInput(f);
@@ -244,7 +244,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
             {
                 outputFile = "build/" + GetParameter("name") + "/lib/" + getLibNameFor(component);
                 command = getArchiverCommand(GetParameter("archiver"), outputFile.generic_string(), objects);
-                pc = std::make_shared<PendingCommand>(command);
+                pc = std::make_shared<PendingCommand>(hash, command);
             }
             else
             {
@@ -271,7 +271,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                         linkDeps.push_back(std::move(in));
                 }
                 command = getLinkerCommand(GetParameter("linker"), outputFile.generic_string(), objects, linkDeps);
-                pc = std::make_shared<PendingCommand>(command);
+                pc = std::make_shared<PendingCommand>(hash, command);
                 for(auto &d : linkDeps)
                 {
                     for(auto &c : d)
@@ -294,7 +294,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
             if(component.type == "unittest" && GetParameter("cross") == "false")
             {
                 command = outputFile.string();
-                pc = std::make_shared<PendingCommand>(getUnittestCommand(command));
+                pc = std::make_shared<PendingCommand>(hash, getUnittestCommand(command));
                 outputFile += ".log";
                 pc->AddInput(libraryFile);
                 pc->AddOutput(project.CreateFile(component, outputFile.string()));
