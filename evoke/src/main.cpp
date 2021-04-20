@@ -130,14 +130,6 @@ int main(int argc, const char **argv)
     if(!op.unknownHeaders.empty())
     {
         // Report missing headers as error. Build script should handle this gracefully and reinvoke Evoke after fetching the missing headers.
-        /*
-      // TODO: allow building without package fetching somehow
-      std::string fetch = "accio fetch";
-      std::vector<std::string> hdrsToFetch(op.unknownHeaders.begin(), op.unknownHeaders.end());
-      for (auto& hdr : hdrsToFetch) fetch += " " + hdr;
-      system(fetch.c_str());
-      op.Reload();
-    */
     }
     for(auto &u : op.unknownHeaders)
     {

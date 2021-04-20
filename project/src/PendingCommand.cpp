@@ -11,10 +11,12 @@ struct FileEntry {
   uint32_t outputSize;
   uint8_t errorCode;
 };
+static const constexpr uint32_t evoke_magic = 0x45564F4B;
+static const constexpr uint32_t evoke_version = 0x00010000;
 
 struct DbHeader {
-  uint32_t magic = 0x45564F4B;
-  uint32_t version = 0x00010000;
+  uint32_t magic = evoke_magic;
+  uint32_t version = evoke_version;
   uint32_t entryCount = 0;
 };
 
@@ -24,7 +26,7 @@ struct CommandResultDb {
     std::ifstream in(".evoke.db");
     DbHeader header;
     in.read((char*)&header, sizeof(header));
-    if (!in.good() || header.magic != 0x45564F4B || header.version != 0x00010000) return;
+    if (!in.good() || header.magic != evoke_magic || header.version != evoke_version) return;
     for (size_t n = 0; n < header.entryCount; n++) {
       FileEntry fe;
       in.read((char*)&fe, sizeof(fe));

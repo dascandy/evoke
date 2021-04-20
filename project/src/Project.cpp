@@ -51,10 +51,9 @@ bool Project::FileUpdate(fs::path changedFile, Change change)
     }
 }
 
-bool reloadPredef = false;
 void Project::Reload()
 {
-    reloadPredef = true;
+    ReloadPredefComponents();
     unknownHeaders.clear();
     components.clear();
     files.clear();
@@ -89,17 +88,11 @@ void Project::Reload()
     PropagateExternalIncludes();
     ExtractPublicDependencies();
 
-    for(auto it = components.begin(); it != components.end();)
+    for(auto it = components.begin(); it != components.end(); ++it)
     {
-        if(it->second.files.empty())
-        {
-/*            it = components.erase(it);*/
-            ++it;
-        }
-        else
+        if(not it->second.files.empty())
         {
             it->second.pubIncl.insert("include");
-            ++it;
         }
     }
 }
@@ -131,7 +124,7 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 void Project::ReadCode(std::unordered_map<std::string, std::unique_ptr<File>> &files, const fs::path &path, Component &comp)
 {
     std::string gpath = path.generic_string();
-    if (gpath[0] == '.' && (gpath[1] == '/' || gpath[1] == '\\')) gpath = gpath.substr(2);
+    if (gpath[0] == '.' && gpath[1] == '/') gpath = gpath.substr(2);
     File *f = files.emplace(gpath, std::make_unique<File>(gpath, comp)).first->second.get();
     comp.files.insert(f);
 
@@ -282,15 +275,6 @@ void Project::MoveIncludeToImport()
                 ++it;
         }
     }
-}
-
-static Component *GetPredefComponent(const fs::path &path)
-{
-    static auto predefComponentList = PredefComponentList();
-    if (reloadPredef) predefComponentList = PredefComponentList();
-    if(predefComponentList.find(path.string()) != predefComponentList.end())
-        return predefComponentList.find(path.string())->second;
-    return nullptr;
 }
 
 void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,

@@ -2,7 +2,10 @@
 
 #include <map>
 #include <string>
+#include <fw/filesystem.hpp>
 
 struct Component;
 
-std::map<std::string, Component *> PredefComponentList();
+void ReloadPredefComponents();
+Component *GetPredefComponent(const fs::path &path);
+
