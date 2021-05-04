@@ -15,7 +15,7 @@ static std::map<std::string, Component *>& PredefComponentList(bool reload = fal
         ParseFile("~/.evoke/packages.conf", [&current](const std::string& tag){
             components.insert(std::make_pair(tag, Component(tag)));
             current = &components.find(tag)->second;
-        }, [&current, &list](const std::string& key, const std::string& value) {
+        }, [&current](const std::string& key, const std::string& value) {
             if (key == "files") {
                 for (auto& f : splitWithQuotes(value)) {
                     list[f] = current;
@@ -47,8 +47,7 @@ void ReloadPredefComponents()
 
 Component *GetPredefComponent(const fs::path &path)
 {
-    static auto predefComponentList = PredefComponentList();
-    if (reloadPredef) predefComponentList = PredefComponentList();
+    auto& predefComponentList = PredefComponentList();
     if(predefComponentList.find(path.string()) != predefComponentList.end())
         return predefComponentList.find(path.string())->second;
     return nullptr;
