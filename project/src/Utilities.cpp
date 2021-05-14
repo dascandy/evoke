@@ -1,10 +1,11 @@
 #include "Utilities.hpp"
+#include <algorithm>
 
 std::string GetNameFromPath(const fs::path &path, char separator)
 {
     using namespace std;
 
-    auto start = find_if_not(begin(path), end(path), [](auto &part) {
+    auto start = std::find_if_not(begin(path), end(path), [](auto &part) {
         return part.filename() == ".";
     });
 

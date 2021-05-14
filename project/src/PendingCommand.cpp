@@ -1,5 +1,6 @@
 #include "PendingCommand.h"
 #include "File.h"
+#include <fstream>
 
 struct FileEntry {
   std::array<uint8_t, 64> toolsetHash;
@@ -137,7 +138,6 @@ void PendingCommand::Check()
     // If the command has no defined output, then it has to be run every time
     if (outputs.empty()) {
         state = PendingCommand::ToBeRun;
-        return;
     } else {
     // If any output does not exist, we need to rerun this command (even if the other results are up to date)
         for(auto &out : outputs)
@@ -152,13 +152,11 @@ void PendingCommand::Check()
     if (toolsetHash != result->toolsetHash) {
         printf("Toolset hash changed\n");
         state = PendingCommand::ToBeRun;
-        return;
     }
 
     // TODO: merge all hashes
     if (result->tuHash != inputs[0]->hash) {
         state = PendingCommand::ToBeRun;
-        return;
     }
 
     if (state == PendingCommand::Done) {

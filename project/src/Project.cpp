@@ -165,10 +165,10 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 
 void Project::LoadFileList()
 {
-    Component& rootComponent = components.emplace(std::string("."), boost::filesystem::path(".")).first->second;
+    Component& rootComponent = components.emplace(std::string("."), std::filesystem::path(".")).first->second;
     if(fs::is_directory("test"))
     {
-        Component& unittest = components.emplace(std::string("./test"), boost::filesystem::path("./test")).first->second;
+        Component& unittest = components.emplace(std::string("./test"), std::filesystem::path("./test")).first->second;
         unittest.type = "unittest";
         unittest.privDeps.insert(&rootComponent);
     }

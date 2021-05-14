@@ -3,6 +3,7 @@
 #include "Utilities.hpp"
 #include <fw/filesystem.hpp>
 #include <ostream>
+#include <fstream>
 
 CMakeProjectExporter::CMakeProjectExporter(const Project &project) :
     project_{project}
@@ -21,7 +22,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
         fs::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
         fs::error_code ec;
         fs::remove(filePath, ec);
-        fs::ofstream os{filePath};
+        std::ofstream os{filePath};
 
         std::string target = comp.second.GetName();
 
@@ -87,7 +88,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
         fs::path filePath = project_.projectRoot / cmakelists_txt;
         fs::error_code ec;
         fs::remove(filePath, ec);
-        fs::ofstream os{filePath};
+        std::ofstream os{filePath};
         os << "cmake_minimum_required(VERSION 3.12)\n";
         os << "project(" << project_.projectRoot.filename().string() << ")\n\n";
 

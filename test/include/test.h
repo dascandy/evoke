@@ -9,7 +9,7 @@ struct testenvironment {
   testenvironment() 
   : current(fs::current_path())
   {
-    boost::system::error_code ec;
+    fs::error_code ec;
     fs::remove_all("test_temp", ec);
     fs::create_directory("test_temp");
     fs::current_path("test_temp");

@@ -36,6 +36,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FileParser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/FsWatcher.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/dotted.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/fw/src/sha512.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/CMakeListsTxt.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Component.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/File.cpp
@@ -76,7 +77,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE Threads::Threads ${Boost_LIBRARIES})
+                      PRIVATE Threads::Threads ${Boost_LIBRARIES} -lcrypto)
 
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 

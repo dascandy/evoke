@@ -4,17 +4,6 @@ namespace btt = boost::test_tools;
 
 #include "fw/filesystem.hpp"
 
-BOOST_AUTO_TEST_CASE(path_prefix)
-{
-    using fs::path;
-
-    path base{"./some_component/"};
-
-    BOOST_TEST(base.begin()->filename_is_dot());
-
-    BOOST_TEST(!path("some/sub/").begin()->filename_is_dot());
-}
-
 BOOST_AUTO_TEST_CASE(path_manipulate)
 {
     using fs::path;

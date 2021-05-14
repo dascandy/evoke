@@ -1,4 +1,4 @@
 
 template: __builtin_clang
-compiler: clang++-10 -fdiagnostics-color=always -O3 -std=c++17 -Wall -Wextra -Wpedantic -pthread
-linker: clang++-10 -pthread
+compiler: clang++-12 -fdiagnostics-color=always -O3 -std=c++17 -Wall -Wextra -Wpedantic -pthread
+linker: clang++-12 -pthread

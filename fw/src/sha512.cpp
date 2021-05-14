@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 std::array<uint8_t, 64> sha512(const fs::path& path) {
     int fd = open(path.c_str(), O_RDONLY);
