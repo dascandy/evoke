@@ -22,7 +22,6 @@ static std::map<std::string, Component *>& PredefComponentList(bool reload = fal
         }, [&current](const std::string& key, const std::string& value) {
             if (key == "files") {
                 for (auto& f : splitWithQuotes(value)) {
-                    printf("Predef %s : %s\n", current->root.string().c_str(), f.c_str());
                     list[f] = current;
                 }
             } else if (key == "paths") {
@@ -53,9 +52,7 @@ void ReloadPredefComponents()
 Component *GetPredefComponent(const fs::path &path)
 {
     auto& predefComponentList = PredefComponentList();
-    printf("Looking for %s\n", path.string().c_str());
     if(predefComponentList.find(path.string()) != predefComponentList.end()) {
-        printf("Found %s : %s\n", path.string().c_str(), predefComponentList.find(path.string())->second->root.string().c_str());
         return predefComponentList.find(path.string())->second;
     }
     return nullptr;

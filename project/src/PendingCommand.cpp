@@ -121,6 +121,9 @@ void PendingCommand::Check()
             for(auto &o : outputs)
             {
                 o->state = File::Error;
+                for (auto &d : o->listeners) {
+                    d->Check();
+                }
             }
             return;
         }
@@ -167,8 +170,9 @@ void PendingCommand::Check()
         // Notify any dependants that may not be checked that they should update anyway
         for(auto &o : outputs) {
             o->state = File::ToRebuild;
-            for(auto &d : o->listeners)
+            for(auto &d : o->listeners) {
                 d->Check();
+            }
         }
     }
 }
@@ -176,7 +180,17 @@ void PendingCommand::Check()
 void PendingCommand::SetResult(PendingCommand::FileRecord newResult)
 {
     *result = newResult;
-    state = PendingCommand::Unknown;
+    if (newResult.errorcode != 0) {
+        state = PendingCommand::Error;
+        for(auto &o : outputs)
+        {
+            o->state = File::Error;
+            for (auto &d : o->listeners) {
+                d->Check();
+            }
+        }
+    } else
+        state = PendingCommand::Unknown;
     Check();
 }
 

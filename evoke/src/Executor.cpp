@@ -116,6 +116,7 @@ void Executor::Run(std::shared_ptr<PendingCommand> cmd)
     if (cmd->result->spaceNeeded > memoryFree) {
         fprintf(stderr, "PROBLEM: Memory (including swap) not enough to build %s.\nRequired: %zu MB, Available: %zu MB, Total: %zu MB\n", cmd->outputs[0]->path.c_str(), cmd->result->spaceNeeded / 1000000, memoryFree / 1000000, memoryTotal / 1000000);
     }
+    commandsSorted = false;
     commands.push_back(cmd);
 }
 
@@ -144,10 +145,13 @@ void Executor::NewGeneration() {
 
 void Executor::RunMoreCommands()
 {
-    // TODO: sort only once. This is stupid.
-    std::sort(commands.begin(), commands.end(), [](std::shared_ptr<PendingCommand>& a, std::shared_ptr<PendingCommand>& b) {
-      return a->timeToComplete() < b->timeToComplete();
-    });
+    if (not commandsSorted) {
+        std::sort(commands.begin(), commands.end(), [](std::shared_ptr<PendingCommand>& a, std::shared_ptr<PendingCommand>& b) {
+          return a->timeToComplete() > b->timeToComplete();
+        });
+        commandsSorted = true;
+    }
+    SaveCommandResultDb();
     reporter.ReportCommandQueue(commands);
     size_t n = 0;
     uint64_t memoryLeft = memoryLimit;
@@ -192,10 +196,6 @@ void Executor::RunMoreCommands()
         }
     }
 
-    if (not somethingRunning) {
-        if (daemonMode)
-            SaveCommandResultDb();
-        else
-            done.set_value();
-    }
+    if (not somethingRunning and not daemonMode) 
+        done.set_value();
 }
