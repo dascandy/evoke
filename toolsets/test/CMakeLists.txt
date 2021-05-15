@@ -11,6 +11,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   )
 endif()
 
+
 set(INCLUDES
     ../../evoke/include
     ../../fw/include
@@ -29,11 +30,11 @@ set(LINKED_SOURCES
     ../../project/src/Component.cpp
     ../../project/src/tarjan.cpp
     ../../project/src/File.cpp
-    ../../fw/src/Configuration.cpp
+    ../../project/src/Utilities.cpp
+    ../../project/src/known.cpp
     ../../fw/src/dotted.cpp
     ../../fw/src/FileParser.cpp
     ../src/msvc.cpp
-    ../src/known.cpp
     ../src/Toolset.cpp
     ../src/generic.cpp
     ../src/clang.cpp
@@ -61,17 +62,9 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
-   OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0")
-   OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  find_package(Boost REQUIRED COMPONENTS filesystem system unit_test_framework)
-  target_link_libraries(${PROJECT_NAME} PRIVATE Boost::disable_autolinking)
-else()
-  find_package(Boost REQUIRED COMPONENTS system unit_test_framework)
-  target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
-endif()
+find_package(Boost REQUIRED COMPONENTS filesystem system unit_test_framework)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads ${Boost_LIBRARIES} Boost::disable_autolinking)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${PROJECT_NAME} COMMENT "Running unit tests")

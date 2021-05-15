@@ -87,7 +87,7 @@ std::string MsvcToolset::getLinkerCommand(const std::string &program, const std:
     {
         command += " " + file->path.string();
     }
-    command += " /LIBPATH:lib";
+    command += " /LIBPATH:build/" + GetParameter("name") + "/lib";
     for(auto &d : linkDeps)
         for(auto &c : d)
         {
