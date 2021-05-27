@@ -181,7 +181,8 @@ void Executor::RunMoreCommands()
                 fs::create_directories(o->path.parent_path());
             }
             reporter.SetRunningCommand(n, c);
-            activeProcesses[n] = std::make_unique<Process>(c, c->outputs[0]->path.filename().string(), c->commandToRun, [this, n, c](Process *t) {
+            std::string id = (c->outputs.empty() ? c->commandToRun : c->outputs[0]->path.filename().string());
+            activeProcesses[n] = std::make_unique<Process>(c, id, c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
                 auto self = std::move(activeProcesses[n]);
                 c->SetResult(std::move(t->record));

@@ -44,7 +44,11 @@ struct CommandResultDb {
     }
   }
   void Read(PendingCommand& command) {
-    command.result = &knownFiles[command.outputs[0]->path.string()];
+    if (command.outputs.empty()) {
+      command.result = &knownFiles[command.commandToRun + "#"];
+    } else {
+      command.result = &knownFiles[command.outputs[0]->path.string()];
+    }
   }
   void Save() {
     std::ofstream out(".evoke.db.new");
@@ -104,6 +108,9 @@ void PendingCommand::AddOutput(File *output)
 // Update the command status to either being up to date, being out of date, or being in a state where it cannot run
 void PendingCommand::Check()
 {
+    if (outputs.size() == 0) {
+        ResultDb().Read(*this);
+    }
     if (state != PendingCommand::Unknown) 
         return;
 
@@ -138,16 +145,11 @@ void PendingCommand::Check()
         }
     }
 
-    // If the command has no defined output, then it has to be run every time
-    if (outputs.empty()) {
-        state = PendingCommand::ToBeRun;
-    } else {
     // If any output does not exist, we need to rerun this command (even if the other results are up to date)
-        for(auto &out : outputs)
-        {
-            if(not out->Exists()) {
-                state = PendingCommand::ToBeRun;
-            }
+    for(auto &out : outputs)
+    {
+        if(not out->Exists()) {
+            state = PendingCommand::ToBeRun;
         }
     }
 

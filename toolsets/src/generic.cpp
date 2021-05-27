@@ -297,7 +297,6 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 pc = std::make_shared<PendingCommand>(hash, getUnittestCommand(command));
                 outputFile += ".log";
                 pc->AddInput(libraryFile);
-                pc->AddOutput(project.CreateFile(component, outputFile.string()));
                 pc->Check();
                 component.commands.push_back(pc);
             }
