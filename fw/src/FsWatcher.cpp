@@ -63,6 +63,7 @@ struct FsWatcher {
   std::map<uint32_t, fs::path> moved_from_filenames;
   void handle_raw_event(struct inotify_event* event) {
     if (event->name == std::string(".evoke.db")) return;
+    if (event->name == std::string(".evoke.db.new")) return;
 
     fs::path path = paths[event->wd];
     if (event->len) path /= event->name;
