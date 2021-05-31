@@ -28,6 +28,7 @@ public:
     std::string type;
     bool buildSuccess;
     bool isBinary;
+    bool isPredefComponent;
     std::string accumulatedErrors;
     std::string name;
 };

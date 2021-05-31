@@ -272,11 +272,12 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 }
                 command = getLinkerCommand(GetParameter("linker"), outputFile.generic_string(), objects, linkDeps);
                 pc = std::make_shared<PendingCommand>(hash, command);
+
                 for(auto &d : linkDeps)
                 {
                     for(auto &c : d)
                     {
-                        if(c != &component && !c->isHeaderOnly())
+                        if(c != &component && !c->isHeaderOnly() && !c->isPredefComponent)
                         {
                             pc->AddInput(project.CreateFile(*c, "build/" + GetParameter("name") + "/lib/" + getLibNameFor(*c)));
                         }
