@@ -155,12 +155,27 @@ void PendingCommand::Check()
 
     // If the last build output was with a different toolset or input, rebuild
     if (toolsetHash != result->toolsetHash) {
-        printf("Toolset hash changed\n");
+//        printf("Toolset hash changed %s\n", commandToRun.c_str());
         state = PendingCommand::ToBeRun;
     }
 
-    // TODO: merge all hashes
-    if (result->tuHash != inputs[0]->hash) {
+    std::array<uint8_t, 64> hash = {};
+    for (auto& i : inputs) {
+        for (size_t n = 0; n < 64; n++) 
+            hash[n] ^= i->hash[n];
+    }
+    if (result->tuHash != hash) {
+/*
+        for (size_t n = 0; n < 64; n++) {
+            printf("%02X", hash[n]);
+        }
+        printf("\n");
+        for (size_t n = 0; n < 64; n++) {
+            printf("%02X", result->tuHash[n]);
+        }
+        printf("\n");
+        printf("TU hash changed: %s\n", commandToRun.c_str());
+*/
         state = PendingCommand::ToBeRun;
     }
 

@@ -49,7 +49,12 @@ Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename
 , child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
 {
     record.toolsetHash = pc->toolsetHash;
-    record.tuHash = pc->inputs[0]->hash;
+    std::array<uint8_t, 64> hash = {};
+    for (auto& i : pc->inputs) {
+        for (size_t n = 0; n < 64; n++) 
+            hash[n] ^= i->hash[n];
+    }
+    record.tuHash = hash;
     record.output.clear();
     std::thread([this] { run(); }).detach();
 }
@@ -198,5 +203,8 @@ void Executor::RunMoreCommands()
     }
 
     if (not somethingRunning and not daemonMode) 
+    {
+        SaveCommandResultDb();
         done.set_value();
+    }
 }
