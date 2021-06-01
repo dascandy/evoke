@@ -15,6 +15,11 @@ File::File(const fs::path &path, Component &component) :
     }
 }
 
+void File::reloadHash() {
+    auto newHash = sha512(path);
+    hash = newHash;
+}
+
 bool File::isHeader(const fs::path &path)
 {
     static const std::unordered_set<std::string> exts = {".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc"};

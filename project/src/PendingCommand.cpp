@@ -124,6 +124,9 @@ void PendingCommand::Check()
     for(auto &in : inputs) {
         if ((in->state == File::Error) ||
             (not in->generator && not in->Exists())) {
+            printf("Marking cmd as error\n");
+            printf("cmd is %s\n", commandToRun.c_str());
+            printf("input failing is %s\n", in->path.c_str());
             state = PendingCommand::Error;
             for(auto &o : outputs)
             {
@@ -155,7 +158,7 @@ void PendingCommand::Check()
 
     // If the last build output was with a different toolset or input, rebuild
     if (toolsetHash != result->toolsetHash) {
-//        printf("Toolset hash changed %s\n", commandToRun.c_str());
+        printf("Toolset hash changed %s\n", commandToRun.c_str());
         state = PendingCommand::ToBeRun;
     }
 
@@ -165,7 +168,6 @@ void PendingCommand::Check()
             hash[n] ^= i->hash[n];
     }
     if (result->tuHash != hash) {
-/*
         for (size_t n = 0; n < 64; n++) {
             printf("%02X", hash[n]);
         }
@@ -175,7 +177,6 @@ void PendingCommand::Check()
         }
         printf("\n");
         printf("TU hash changed: %s\n", commandToRun.c_str());
-*/
         state = PendingCommand::ToBeRun;
     }
 

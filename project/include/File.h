@@ -42,6 +42,7 @@ public:
         }
     }
     void FileUpdated();
+    void reloadHash();
 public:
     static bool isTranslationUnit(const fs::path &);
     static bool isHeader(const fs::path &);

@@ -51,6 +51,7 @@ Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename
     record.toolsetHash = pc->toolsetHash;
     std::array<uint8_t, 64> hash = {};
     for (auto& i : pc->inputs) {
+        i->reloadHash();
         for (size_t n = 0; n < 64; n++) 
             hash[n] ^= i->hash[n];
     }

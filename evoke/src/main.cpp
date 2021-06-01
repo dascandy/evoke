@@ -152,6 +152,14 @@ int main(int argc, const char **argv)
         {
             for(auto &c : comp.second.commands)
             {
+                c->Check();
+            }
+        }
+        // TODO: filter this on actually useful commands
+        for(auto &comp : op.components)
+        {
+            for(auto &c : comp.second.commands)
+            {
                 ex.Run(c);
             }
         }

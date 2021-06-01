@@ -143,7 +143,6 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         pc->AddInput(of);
         for(auto &f : files)
             pc->AddInput(f);
-        pc->Check();
         component.commands.push_back(pc);
         if(component.type == "unittest")
         {
@@ -151,7 +150,6 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
             exeFile += ".log";
             pc->AddInput(executable);
             pc->AddOutput(project.CreateFile(component, exeFile.string()));
-            pc->Check();
             component.commands.push_back(pc);
         }
     }
@@ -203,7 +201,6 @@ void GenericToolset::CreateCommandsFor(Project &project)
             if (it != precompileds.end()) 
                 pc->AddInput(it->second);
         }
-        pc->Check();
         f->component.commands.push_back(pc);
     }
     for(auto &p : project.components)
@@ -232,7 +229,6 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 if (it != precompileds.end()) 
                     pc->AddInput(it->second);
             }
-            pc->Check();
             component.commands.push_back(pc);
         }
         if(!objects.empty())
@@ -290,7 +286,6 @@ void GenericToolset::CreateCommandsFor(Project &project)
             {
                 pc->AddInput(file);
             }
-            pc->Check();
             component.commands.push_back(pc);
             if(component.type == "unittest" && GetParameter("cross") == "false")
             {
@@ -298,7 +293,6 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 pc = std::make_shared<PendingCommand>(hash, getUnittestCommand(command));
                 outputFile += ".log";
                 pc->AddInput(libraryFile);
-                pc->Check();
                 component.commands.push_back(pc);
             }
         }
