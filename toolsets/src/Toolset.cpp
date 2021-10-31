@@ -7,6 +7,7 @@
 #include <fstream>
 #include <fw/filesystem.hpp>
 #include <string>
+#include <cstdlib>
 
 std::string Toolset::getNameFor(const Component &component)
 {
@@ -18,10 +19,15 @@ std::unique_ptr<Toolset> ParseToolset(const std::string &name);
 // TODO: actually hash the compiler executable
 std::unique_ptr<Toolset> GetToolsetByName(const std::string &name)
 {
+    static std::string homefolder = getenv("HOME");
     std::unique_ptr<Toolset> toolset;
     if(fs::is_regular_file("toolsets/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
     {
         toolset = ParseToolset("toolsets/" + name + ".toolset");
+    }
+    else if(fs::is_regular_file(homefolder + "/.evoke/" + name + ".toolset") && name.substr(0, 10) != "__builtin_")
+    {
+        toolset = ParseToolset(homefolder + "/.evoke/" + name + ".toolset");
     }
     else if(name == "windows" || name == "msvc" || name == "__builtin_msvc")
     {
