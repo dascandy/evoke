@@ -74,6 +74,12 @@ void Process::run()
         record.timeEstimate += (r.ru_utime.tv_sec + r.ru_stime.tv_sec) + (r.ru_utime.tv_usec + r.ru_stime.tv_usec) * 0.000001;
         record.spaceNeeded += r.ru_maxrss * 1024;
         record.measurementCount++;
+
+        if (record.measurementCount > 20) {
+          record.timeEstimate *= 20.0 / record.measurementCount;
+          record.spaceNeeded *= 20.0 / record.measurementCount;
+          record.measurementCount = 20;
+        }
 #else
         child.wait();
         record.errorcode = child.exit_code();
@@ -119,8 +125,8 @@ bool Executor::AllSuccess() {
 
 void Executor::Run(std::shared_ptr<PendingCommand> cmd)
 {
-    if (cmd->result->spaceNeeded > memoryFree) {
-        fprintf(stderr, "PROBLEM: Memory (including swap) not enough to build %s.\nRequired: %zu MB, Available: %zu MB, Total: %zu MB\n", cmd->outputs[0]->path.c_str(), cmd->result->spaceNeeded / 1000000, memoryFree / 1000000, memoryTotal / 1000000);
+    if (cmd->memoryUse() > memoryFree) {
+        fprintf(stderr, "PROBLEM: Memory (including swap) not enough to build %s.\nRequired: %zu MB, Available: %zu MB, Total: %zu MB\n", cmd->outputs[0]->path.c_str(), cmd->memoryUse() / 1000000, memoryFree / 1000000, memoryTotal / 1000000);
     }
     commandsSorted = false;
     commands.push_back(cmd);
@@ -159,7 +165,7 @@ void Executor::RunMoreCommands()
     for (auto& p : activeProcesses) {
         if (p) {
             somethingRunning = true;
-            memoryLeft -= p->pc->result->spaceNeeded;
+            memoryLeft -= p->pc->memoryUse();
         }
     }
     for(auto &c : commands)
@@ -170,11 +176,11 @@ void Executor::RunMoreCommands()
             break;
         // TODO: take into account its relative load
         if(c->ReadyToStart() &&  // There are no prerequisites that are obviously missing or broken, and it's not already running
-           (c->result->spaceNeeded < memoryLeft || // We have space left to run it
+           (c->memoryUse() < memoryLeft || // We have space left to run it
             !somethingRunning)) // or there is not enough space to run it but it's the only thing to run, so we might as well try
         {
             somethingRunning = true;
-            memoryLeft -= c->result->spaceNeeded;
+            memoryLeft -= c->memoryUse();
             c->state = PendingCommand::Running;
             for(auto &o : c->outputs)
             {
