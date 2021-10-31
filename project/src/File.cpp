@@ -57,6 +57,7 @@ void File::FileUpdated() {
     // - If the user modified build intermediates, they get what they deserve
     auto newHash = sha512(path);
     if (newHash != hash) {
+        hash = newHash;
         for (auto listener : listeners) {
             listener->Check();
         }
