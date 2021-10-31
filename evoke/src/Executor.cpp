@@ -143,12 +143,6 @@ std::future<void> Executor::Mode(bool isDaemon)
     return done.get_future();
 }
 
-void Executor::NewGeneration() {
-//    commands.clear();
-// HOW?!
-    std::terminate();
-}
-
 void Executor::RunMoreCommands()
 {
     if (not commandsSorted) {

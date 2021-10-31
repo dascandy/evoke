@@ -176,7 +176,6 @@ int main(int argc, const char **argv)
               reloaded = true;
           }
           if (reloaded) {
-              ex.NewGeneration();
               GenerateCommands();
           }
           if (compilation_database)

@@ -20,7 +20,6 @@ public:
     std::future<void> Mode(bool isDaemon);
 
     bool AllSuccess();
-    void NewGeneration();
     void RunMoreCommands();
     std::mutex m;
     std::vector<std::shared_ptr<PendingCommand>> commands;
