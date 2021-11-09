@@ -21,6 +21,7 @@ public:
 
     bool AllSuccess();
     void RunMoreCommands();
+    void ShowCompileInfo();
     std::mutex m;
     std::vector<std::shared_ptr<PendingCommand>> commands;
 private:

@@ -96,8 +96,9 @@ int main(int argc, const char **argv)
     bool verbose = false;
     bool unitybuild = false;
     bool daemon = false;
+    bool compile_info = false;
     std::map<std::string, std::vector<std::string>> targetsToBuild;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}, {"-m", memoryLimit}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}},
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}, {"-m", memoryLimit}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}, {"-ci", compile_info}},
         [&](std::string arg) {
         // This feels really icky, but it's the way to make this work. TODO: extract this into a class.
         static bool insideTarget = false;
@@ -197,6 +198,9 @@ int main(int argc, const char **argv)
     // If this is in daemon mode, the future returns when the user sends a SIGTERM, SIGINT or such. 
     // If not, it blocks until there are no jobs left to run.
     GenerateCommands();
+    if (compile_info) {
+        ex.ShowCompileInfo();
+    }
     std::future<void> finished;
     {
         std::lock_guard<std::mutex> l(ex.m);

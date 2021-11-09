@@ -28,10 +28,13 @@ public:
     std::vector<File *> inputs;
     std::vector<File *> outputs;
     void Check();
-    float timeToComplete() {
+    float timeForCommand() {
         if (result->measurementCount > 0)
-            return result->timeEstimate / result->measurementCount + longestChildCommand;
-        return result->timeEstimate + longestChildCommand;
+            return result->timeEstimate / result->measurementCount;
+        return result->timeEstimate;
+    }
+    float timeToComplete() {
+        return timeForCommand() + longestChildCommand;
     }
     uint64_t memoryUse() {
         if (result->measurementCount > 0)
