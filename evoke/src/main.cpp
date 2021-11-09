@@ -69,26 +69,42 @@ static std::string default_toolset() {
 #endif
 }
 
+uint64_t parseMemoryLimit(std::string str) {
+  if (str == "none") return std::numeric_limits<uint64_t>::max();
+  if (str == "available") return 0;
+  uint64_t limit = 1;
+  switch(str.back()) {
+    case 'k': case 'K': limit = 1024; break;
+    case 'm': case 'M': limit = 1024 * 1024; break;
+    case 'g': case 'G': limit = 1024 * 1024 * 1024; break;
+    case 't': case 'T': limit = 1024 * 1024 * 1024 * 1024ULL; break;
+  }
+  if (limit != 1) str.pop_back();
+  limit *= std::stoul(str);
+  return limit;
+}
+
 int main(int argc, const char **argv)
 {
     std::string toolsetname = default_toolset();
     std::string rootpath = fs::current_path().generic_string();
     std::string jobcount = std::to_string(std::max(4u, std::thread::hardware_concurrency()));
     std::string reporterName = "guess";
+    std::string memoryLimit = "available";
     bool compilation_database = false;
     bool cmakelists = false;
     bool verbose = false;
     bool unitybuild = false;
     bool daemon = false;
     std::map<std::string, std::vector<std::string>> targetsToBuild;
-    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}},
+    parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}, {"-m", memoryLimit}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}},
         [&](std::string arg) {
         // This feels really icky, but it's the way to make this work. TODO: extract this into a class.
         static bool insideTarget = false;
         if (arg.empty()) {
             std::cout << "Invalid argument: " << arg << "\n";
         } else if (insideTarget) {
-	    if (toolsetname.empty()) {
+            if (toolsetname.empty()) {
                 toolsetname = arg;
                 targetsToBuild[toolsetname];
                 insideTarget = false;
@@ -97,7 +113,7 @@ int main(int argc, const char **argv)
             }
         } else if (arg == "-t") {
             insideTarget = true;
-	    toolsetname.clear();
+            toolsetname.clear();
         } else if (arg.empty() || arg[0] == '-') {
             std::cout << "Invalid argument: " << arg << "\n";
         } else {
@@ -109,19 +125,11 @@ int main(int argc, const char **argv)
         reporterName = "daemon";
     }
     std::unique_ptr<Reporter> reporter = Reporter::Get(reporterName);
-    Executor ex(std::stoul(jobcount), *reporter);
+    Executor ex(std::stoul(jobcount), parseMemoryLimit(memoryLimit), *reporter);
     Project op(rootpath);
     if(!op.unknownHeaders.empty())
     {
         // Report missing headers as error. Build script should handle this gracefully and reinvoke Evoke after fetching the missing headers.
-        /*
-      // TODO: allow building without package fetching somehow
-      std::string fetch = "accio fetch";
-      std::vector<std::string> hdrsToFetch(op.unknownHeaders.begin(), op.unknownHeaders.end());
-      for (auto& hdr : hdrsToFetch) fetch += " " + hdr;
-      system(fetch.c_str());
-      op.Reload();
-    */
     }
     for(auto &u : op.unknownHeaders)
     {
@@ -144,6 +152,14 @@ int main(int argc, const char **argv)
         {
             for(auto &c : comp.second.commands)
             {
+                c->Check();
+            }
+        }
+        // TODO: filter this on actually useful commands
+        for(auto &comp : op.components)
+        {
+            for(auto &c : comp.second.commands)
+            {
                 ex.Run(c);
             }
         }
@@ -152,19 +168,17 @@ int main(int argc, const char **argv)
       while (1) {
         try {
           std::lock_guard<std::mutex> l(ex.m);
-          std::cout << "CHANGE: " << changedFile.string() << " change " << (int)change << "\n";
           bool reloaded = op.FileUpdate(changedFile, change);
           bool isPackageOrToolsetChange = changedFile.extension() == ".toolset" ||
                                           changedFile.filename() == "packages.conf";
-          if (reloaded || isPackageOrToolsetChange) {
-              // Need to check why this is needed. 
-              if (isPackageOrToolsetChange) {
-                  op.Reload();
-              }
-              ex.NewGeneration();
+          if (isPackageOrToolsetChange) {
+              op.Reload();
+              reloaded = true;
+          }
+          if (reloaded) {
               GenerateCommands();
           }
-          if(compilation_database)
+          if (compilation_database)
           {
               std::ofstream os("compile_commands.json");
               dumpJsonCompileDb(os, op);
@@ -177,13 +191,8 @@ int main(int argc, const char **argv)
       }
     };
     if (daemon) {
-#ifdef DAEMON_SUPPORT
         reporterName = "daemon";
         FsWatch(rootpath, UpdateAndRunJobs);
-#else
-        std::cout << "Experimental daemon support not compiled in. Please rebuild with -DEVOKE_WITH_DAEMON_SUPPORT";
-        exit(-1);
-#endif
     }
     // If this is in daemon mode, the future returns when the user sends a SIGTERM, SIGINT or such. 
     // If not, it blocks until there are no jobs left to run.
@@ -208,3 +217,5 @@ int main(int argc, const char **argv)
     printf("\n\n");
     return ex.AllSuccess() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+

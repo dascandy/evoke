@@ -137,11 +137,11 @@ void DaemonConsoleReporter::Redraw()
         if(t)
             active++;
 
-    size_t commandsFailed = 0, commandCount = 0, commandsToBeRun = 0, commandsDepfail = 0;
+    size_t commandsFailed = 0, commandCount = 0, commandsToBeRun = 0, commandsError = 0;
     if (commands) for (auto& command : *commands) {
-        if (command->errorcode) commandsFailed++;
+        if (command->result->errorcode) commandsFailed++;
         if (command->state == PendingCommand::ToBeRun) commandsToBeRun++;
-        if (command->state == PendingCommand::Depfail) commandsDepfail++;
+        if (command->state == PendingCommand::Error) commandsError++;
         commandCount++;
     }
     if (true) {
@@ -157,16 +157,16 @@ void DaemonConsoleReporter::Redraw()
             std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
         }
     }
-    std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsDepfail << " not built ][ " << commandCount << " total ]\n";
+    std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsError << " not built ][ " << commandCount << " pending ]\n";
     std::string s(screenWidth, '-');
     std::cout << blue << s << reset << std::flush;
     size_t linesLeft = screenHeight - 2;
     if (commands) {
         for (auto& command : *commands) {
-            if (command->errorcode && !command->output.empty()) printLines(screenWidth, linesLeft, command->output);
+            if (command->result->errorcode && !command->result->output.empty()) printLines(screenWidth, linesLeft, command->result->output);
         }
         for (auto& command : *commands) {
-            if (!command->errorcode && !command->output.empty()) printLines(screenWidth, linesLeft, command->output);
+            if (!command->result->errorcode && !command->result->output.empty()) printLines(screenWidth, linesLeft, command->result->output);
         }
     }
 }

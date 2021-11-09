@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <map>
 #include <memory>
 #include <set>
@@ -25,6 +24,7 @@ public:
     virtual std::string getObjNameFor(const File &file) = 0;
     virtual std::string getLibNameFor(const Component &component) = 0;
     virtual std::string getExeNameFor(const Component &component) = 0;
+    std::array<uint8_t, 64> hash;
     std::string getNameFor(const Component &component);
 };
 

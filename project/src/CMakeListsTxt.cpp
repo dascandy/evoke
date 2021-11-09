@@ -3,6 +3,7 @@
 #include "Utilities.hpp"
 #include <fw/filesystem.hpp>
 #include <ostream>
+#include <fstream>
 
 CMakeProjectExporter::CMakeProjectExporter(const Project &project) :
     project_{project}
@@ -21,7 +22,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
         fs::path filePath = project_.projectRoot / comp.second.root / cmakelists_txt;
         fs::error_code ec;
         fs::remove(filePath, ec);
-        fs::ofstream os{filePath};
+        std::ofstream os{filePath};
 
         std::string target = comp.second.GetName();
 
@@ -75,8 +76,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
 
 //        injectOptions(os, "target_compile_options", target, privateAccess, opts.compile);
 //        injectOptions(os, "target_include_directories", target, privateAccess, opts.include);
-        dumpTargetIncludes(os, target, publicAccess, comp.second.pubIncl);
-        dumpTargetIncludes(os, target, privateAccess, comp.second.privIncl);
+        dumpTargetIncludes(os, target, publicAccess);
 //        injectOptions(os, "target_link_libraries", target, privateAccess, opts.link);
         dumpTargetLibraries(os, target, publicAccess, comp.second.pubDeps);
         dumpTargetLibraries(os, target, privateAccess, comp.second.privDeps);
@@ -88,7 +88,7 @@ void CMakeProjectExporter::createCMakeListsFiles(const Toolset &)
         fs::path filePath = project_.projectRoot / cmakelists_txt;
         fs::error_code ec;
         fs::remove(filePath, ec);
-        fs::ofstream os{filePath};
+        std::ofstream os{filePath};
         os << "cmake_minimum_required(VERSION 3.12)\n";
         os << "project(" << project_.projectRoot.filename().string() << ")\n\n";
 
@@ -187,17 +187,11 @@ std::vector<const Component *> CMakeProjectExporter::extractSystemComponents() c
     return systemComponents;
 }
 
-void CMakeProjectExporter::dumpTargetIncludes(std::ostream &os, const std::string &target, const std::string &access, const std::unordered_set<std::string> &includes)
+void CMakeProjectExporter::dumpTargetIncludes(std::ostream &os, const std::string &target, const std::string &access)
 {
-    if(!includes.empty())
-    {
-        os << "target_include_directories(" << target << " " << access << "\n";
-        for(const auto &incl : includes)
-        {
-            os << "    ${CMAKE_CURRENT_SOURCE_DIR}/" << incl << "\n";
-        }
-        os << ")\n";
-    }
+    os << "target_include_directories(" << target << " " << access << "\n";
+    os << "    ${CMAKE_CURRENT_SOURCE_DIR}/include\n";
+    os << ")\n";
 }
 
 void CMakeProjectExporter::dumpTargetLibraries(std::ostream &os, const std::string &target, const std::string &access, const std::unordered_set<Component *> components)

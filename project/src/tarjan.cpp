@@ -84,6 +84,8 @@ std::set<std::string> getIncludePathsFor(Component &component)
 {
     std::vector<std::vector<Component *>> pdeps = GetTransitivePubDeps(component);
     std::set<std::string> inclpaths;
+    pdeps.push_back({&component});
+
     for(auto &v : pdeps)
     {
         for(auto &c : v)
@@ -97,14 +99,6 @@ std::set<std::string> getIncludePathsFor(Component &component)
                 }
             }
         }
-    }
-    for(auto &p : component.pubIncl)
-    {
-        inclpaths.insert((component.root / p).string());
-    }
-    for(auto &p : component.privIncl)
-    {
-        inclpaths.insert((component.root / p).string());
     }
     return inclpaths;
 }

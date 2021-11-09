@@ -15,5 +15,5 @@ void IDEReporter::SetRunningCommand(size_t channelno, std::shared_ptr<PendingCom
 
 void IDEReporter::ReportCommand(size_t , std::shared_ptr<PendingCommand> command)
 {
-    std::cout << "EVOKE COMPLETION " << command->commandToRun << " ERROR " << command->errorcode << " RESULT\n" << command->output << "\n" << std::flush;
+    std::cout << "EVOKE COMPLETION " << command->commandToRun << " ERROR " << command->result->errorcode << " RESULT\n" << command->result->output << "\n" << std::flush;
 }

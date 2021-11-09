@@ -51,10 +51,9 @@ bool Project::FileUpdate(fs::path changedFile, Change change)
     }
 }
 
-bool reloadPredef = false;
 void Project::Reload()
 {
-    reloadPredef = true;
+    ReloadPredefComponents();
     unknownHeaders.clear();
     components.clear();
     files.clear();
@@ -88,17 +87,12 @@ void Project::Reload()
     }
     PropagateExternalIncludes();
     ExtractPublicDependencies();
-    ExtractIncludePaths();
 
-    for(auto it = components.begin(); it != components.end();)
+    for(auto it = components.begin(); it != components.end(); ++it)
     {
-        if(it->second.files.empty())
+        if(not it->second.files.empty())
         {
-            it = components.erase(it);
-        }
-        else
-        {
-            ++it;
+            it->second.pubIncl.insert("include");
         }
     }
 }
@@ -129,7 +123,9 @@ std::ostream &operator<<(std::ostream &os, const Project &p)
 
 void Project::ReadCode(std::unordered_map<std::string, std::unique_ptr<File>> &files, const fs::path &path, Component &comp)
 {
-    File *f = files.emplace(path.generic_string().substr(2), std::make_unique<File>(path.generic_string().substr(2), comp)).first->second.get();
+    std::string gpath = path.generic_string();
+    if (gpath[0] == '.' && gpath[1] == '/') gpath = gpath.substr(2);
+    File *f = files.emplace(gpath, std::make_unique<File>(gpath, comp)).first->second.get();
     comp.files.insert(f);
 
     size_t fileSize = fs::file_size(path.string());
@@ -169,7 +165,13 @@ static Component *GetComponentFor(std::unordered_map<std::string, Component> &co
 
 void Project::LoadFileList()
 {
-    components.emplace(".", ".");
+    Component& rootComponent = components.emplace(std::string("."), std::filesystem::path(".")).first->second;
+    if(fs::is_directory("test"))
+    {
+        Component& unittest = components.emplace(std::string("./test"), std::filesystem::path("./test")).first->second;
+        unittest.type = "unittest";
+        unittest.privDeps.insert(&rootComponent);
+    }
     for(fs::recursive_directory_iterator it("."), end;
         it != end;
         ++it)
@@ -186,10 +188,12 @@ void Project::LoadFileList()
         {
             if(fs::is_directory(it->path() / "include") || fs::is_directory(it->path() / "src"))
             {
-                components.emplace(it->path().string(), it->path());
+                Component& component = components.emplace(it->path().string(), it->path()).first->second;
                 if(fs::is_directory(it->path() / "test"))
                 {
-                    components.emplace((it->path() / "test").string(), it->path() / "test").first->second.type = "unittest";
+                    Component& unittest = components.emplace((it->path() / "test").string(), it->path() / "test").first->second;
+                    unittest.type = "unittest";
+                    unittest.privDeps.insert(&component);
                 }
             }
         }
@@ -273,15 +277,6 @@ void Project::MoveIncludeToImport()
     }
 }
 
-static Component *GetPredefComponent(const fs::path &path)
-{
-    static auto predefComponentList = PredefComponentList();
-    if (reloadPredef) predefComponentList = PredefComponentList();
-    if(predefComponentList.find(path.string()) != predefComponentList.end())
-        return predefComponentList.find(path.string())->second;
-    return nullptr;
-}
-
 void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::string> &includeLookup,
                                         std::unordered_map<std::string, std::vector<std::string>> &ambiguous)
 {
@@ -332,7 +327,10 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                     fp.second->modImports.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
-                    if(inclpath.size() == dep->component.root.generic_string().size())
+                    if (dep->component.root.generic_string() == ".") {
+
+                    }
+                    else if(inclpath.size() == dep->component.root.generic_string().size())
                     {
                         inclpath = ".";
                     }
@@ -396,7 +394,10 @@ void Project::MapIncludesToDependencies(std::unordered_map<std::string, std::str
                     fp.second->dependencies.insert(std::make_pair(p.first, dep));
 
                     std::string inclpath = fullPath.substr(0, fullPath.size() - p.first.size() - 1);
-                    if(inclpath.size() == dep->component.root.generic_string().size())
+                    if (dep->component.root.generic_string() == ".") {
+
+                    }
+                    else if(inclpath.size() == dep->component.root.generic_string().size())
                     {
                         inclpath = ".";
                     }
@@ -504,21 +505,3 @@ void Project::ExtractPublicDependencies()
     }
 }
 
-void Project::ExtractIncludePaths()
-{
-    for(auto &c : components)
-    {
-        Component &comp = c.second;
-        for(auto &fp : comp.files)
-        {
-            if(fp->hasInclude)
-            {
-                (fp->hasExternalInclude ? comp.pubIncl : comp.privIncl).insert(fp->includePaths.begin(), fp->includePaths.end());
-            }
-        }
-        for(auto &s : comp.pubIncl)
-        {
-            comp.privIncl.erase(s);
-        }
-    }
-}

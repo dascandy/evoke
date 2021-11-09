@@ -104,14 +104,6 @@ std::ostream &operator<<(std::ostream &os, const Component &component)
             os << "    " << d << "\n";
         }
     }
-    if(!component.privIncl.empty())
-    {
-        os << "\n  privincl:\n";
-        for(auto &d : component.privIncl)
-        {
-            os << "    " << d << "\n";
-        }
-    }
     os << "\n  Commands to run:";
     for(auto &command : component.commands)
     {

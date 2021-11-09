@@ -1,4 +1,4 @@
 
 template: __builtin_clang
-compiler: clang++ -fdiagnostics-color=always -Og -g2 -std=c++17 -Wall -Wextra -Wpedantic -DDAEMON_SUPPORT -fsanitize=address,undefined -pthread
-linker: clang++ -Og -g2 -std=c++17 -fsanitize=address,undefined
+compiler: clang++-10 -fdiagnostics-color=always -Og -g2 -std=c++17 -Wall -Wextra -Wpedantic -fsanitize=address,undefined -pthread
+linker: clang++-10 -Og -g2 -std=c++17 -fsanitize=address,undefined

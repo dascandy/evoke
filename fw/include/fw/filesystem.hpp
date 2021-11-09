@@ -1,10 +1,10 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace fs
 {
-using namespace boost::filesystem;
-using boost::system::error_code;
+using namespace std::filesystem;
+using std::error_code;
 }
 

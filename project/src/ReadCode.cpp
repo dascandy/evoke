@@ -32,6 +32,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 state = AfterHash;
                 break;
             case '/': // Check for and skip comment blocks
+                if (offset + 1 == buffersize) 
+                    break;
                 if(buffer[offset + 1] == '/')
                 {
                     offset = static_cast<const char *>(memchr(buffer + offset, '\n', buffersize - offset)) - buffer;
@@ -40,7 +42,7 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 {
                     do
                     {
-                        const char *endSlash = static_cast<const char *>(memchr(buffer + offset + 1, '/', buffersize - offset));
+                        const char *endSlash = static_cast<const char *>(memchr(buffer + offset + 1, '/', buffersize - offset - 1));
                         if(!endSlash)
                             return;
                         offset = endSlash - buffer;
@@ -54,6 +56,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
             case '\f':
                 break;
             case 'e':
+                if (offset + 6 >= buffersize)
+                    break;
                 if(buffer[offset + 1] == 'x' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't' && isspace(buffer[offset+6]))
                 {
                     exported = true;
@@ -65,6 +69,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 }
                 break;
             case 'i':
+                if (offset + 6 >= buffersize)
+                    break;
                 if(buffer[offset + 1] == 'm' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't' && (isspace(buffer[offset+6]) || buffer[offset+6] == '<' || buffer[offset+6] == '"'))
                 {
                     state = AfterImport;
@@ -76,6 +82,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 }
                 break;
             case 'm':
+                if (offset + 6 >= buffersize)
+                    break;
                 if(buffer[offset + 1] == 'o' && buffer[offset + 2] == 'd' && buffer[offset + 3] == 'u' && buffer[offset + 4] == 'l' && buffer[offset + 5] == 'e' && isspace(buffer[offset+6]))
                 {
                     state = AfterModule;
@@ -102,6 +110,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 state = None;
                 break;
             case '/': // Check for and skip comment blocks
+                if (offset + 1 >= buffersize)
+                    break;
                 if(buffer[offset + 1] == '/')
                 {
                     offset = static_cast<const char *>(memchr(buffer + offset, '\n', buffersize - offset)) - buffer;
@@ -110,7 +120,7 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 {
                     do
                     {
-                        const char *endSlash = static_cast<const char *>(memchr(buffer + offset + 1, '/', buffersize - offset));
+                        const char *endSlash = static_cast<const char *>(memchr(buffer + offset + 1, '/', buffersize - offset - 1));
                         if(!endSlash)
                             return;
                         offset = endSlash - buffer;
@@ -126,6 +136,8 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
             case '\t':
                 break;
             case 'i':
+                if (offset + 7 >= buffersize)
+                    break;
                 if(buffer[offset + 1] == 'm' && buffer[offset + 2] == 'p' && buffer[offset + 3] == 'o' && buffer[offset + 4] == 'r' && buffer[offset + 5] == 't' && (isspace(buffer[offset+6]) || buffer[offset+6] == '<' || buffer[offset+6] == '"'))
                 {
                     state = AfterImport;
@@ -185,13 +197,13 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                 if(isalnum(buffer[offset]) || buffer[offset] == '_' || buffer[offset] == ':')
                 {
                     std::string modulename;
-                    while(buffer[offset] != ';' && buffer[offset] != '[' && buffer[offset] != '\n')
+                    while(offset < buffersize && buffer[offset] != ';' && buffer[offset] != '[' && buffer[offset] != '\n')
                     {
                         if(!isspace(buffer[offset]))
                             modulename += buffer[offset];
                         offset++;
                     }
-                    if(buffer[offset] != '\n')
+                    if(offset < buffersize && buffer[offset] != '\n')
                     {
                         if(state == AfterModule)
                         {
@@ -204,7 +216,7 @@ void Project::ReadCodeFrom(File &f, const char *buffer, size_t buffersize)
                         exported = false;
                     }
                 }
-                if (buffer[offset] == ';')
+                if (offset < buffersize && buffer[offset] == ';')
                     state = None;
                 else
                     state = Dirty;

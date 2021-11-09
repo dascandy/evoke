@@ -2,13 +2,14 @@
 
 #include <string>
 #include <fw/filesystem.hpp>
-#include <catch.hpp>
+#include <cstddef>
+#include <catch2/catch.hpp>
 
 struct testenvironment {
   testenvironment() 
   : current(fs::current_path())
   {
-    boost::system::error_code ec;
+    fs::error_code ec;
     fs::remove_all("test_temp", ec);
     fs::create_directory("test_temp");
     fs::current_path("test_temp");

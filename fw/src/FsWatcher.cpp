@@ -1,17 +1,21 @@
 #include <cstdint>
-#include <sys/inotify.h>
 #include <thread>
 #include "fw/filesystem.hpp"
 #include <functional>
-#include <unistd.h>
 #include <map>
 #include <atomic>
+#include <iostream>
+#include <unordered_map>
 
 enum class Change {
   Changed,
   Created,
   Deleted
 };
+
+#ifdef __linux__
+#include <unistd.h>
+#include <sys/inotify.h>
 
 struct FsWatcher {
   struct inotify_event {
@@ -58,6 +62,9 @@ struct FsWatcher {
 
   std::map<uint32_t, fs::path> moved_from_filenames;
   void handle_raw_event(struct inotify_event* event) {
+    if (event->name == std::string(".evoke.db")) return;
+    if (event->name == std::string(".evoke.db.new")) return;
+
     fs::path path = paths[event->wd];
     if (event->len) path /= event->name;
     fprintf(stderr, "Got event %08X %d   %s\n", event->mask, event->wd, path.c_str());
@@ -116,3 +123,10 @@ struct FsWatcher {
 void FsWatch(fs::path path, std::function<void(fs::path, Change)> onEvent) {
   static FsWatcher fsw(path, onEvent);
 }
+
+#else
+
+void FsWatch(fs::path path, std::function<void(fs::path, Change)> onEvent) {
+  std::cerr << "Fs Watching not implemented on this platform; cannot run daemon mode.\n";
+}
+#endif

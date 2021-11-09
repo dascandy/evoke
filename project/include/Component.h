@@ -24,10 +24,11 @@ public:
     std::unordered_set<File *> files;
     std::vector<std::shared_ptr<PendingCommand>> commands;
     std::unordered_set<Component *> pubDeps, privDeps;
-    std::unordered_set<std::string> pubIncl, privIncl;
+    std::unordered_set<std::string> pubIncl;
     std::string type;
     bool buildSuccess;
     bool isBinary;
+    bool isPredefComponent;
     std::string accumulatedErrors;
     std::string name;
 };
