@@ -133,7 +133,7 @@ int main(int argc, const char **argv)
     }
     for(auto &u : op.unknownHeaders)
     {
-        std::cerr << "Unknown header: " << u << "\n";
+        std::cerr << "Unknown header: " << u << "\e[K\n";
     }
     auto GenerateCommands = [&]() {
         for (auto& p : targetsToBuild) {
