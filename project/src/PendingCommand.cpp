@@ -1,6 +1,7 @@
 #include "PendingCommand.h"
 #include "File.h"
 #include <fstream>
+#include <map>
 
 struct FileEntry {
   std::array<uint8_t, 64> toolsetHash;

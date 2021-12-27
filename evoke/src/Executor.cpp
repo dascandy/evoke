@@ -3,11 +3,10 @@
 #include "PendingCommand.h"
 #include "Reporter.h"
 
-#include <boost/process.hpp>
-#include <cstring>
+#include <string>
 #include <functional>
 #include <thread>
-
+#include <boost/process.hpp>
 #ifdef __linux__
 #include <unistd.h>
 #include <sys/time.h>
@@ -116,7 +115,8 @@ Executor::~Executor()
 {
 }
 
-bool Executor::AllSuccess() {
+bool Executor::AllSuccess() 
+{
     for (auto& command : commands) {
         if (command->result->errorcode) return false;
     }
