@@ -2,3 +2,4 @@ boost-filesystem
 boost-system
 boost-process
 boost-interprocess
+openssl
