@@ -54,7 +54,7 @@ struct CommandResultDb {
   void Save() {
     std::ofstream out(".evoke.db.new");
     DbHeader header;
-    header.entryCount = knownFiles.size();
+    header.entryCount = static_cast<std::uint32_t>(knownFiles.size());
     out.write((const char*)&header, sizeof(header));
     for (auto& [name, record] : knownFiles) {
       FileEntry fe{record.toolsetHash, record.tuHash, record.timeEstimate, record.spaceNeeded, record.measurementCount, static_cast<uint32_t>(name.size()), static_cast<uint32_t>(record.output.size()), (uint8_t)record.errorcode};

@@ -134,7 +134,12 @@ int main(int argc, const char **argv)
     }
     for(auto &u : op.unknownHeaders)
     {
-        std::cerr << "Unknown header: " << u << "\e[K\n";
+        std::cerr << "Unknown header: " << u 
+#if defined(_MSC_VER)
+                  << "\n";
+#else
+                  << "\e[K\n";
+#endif
     }
     auto GenerateCommands = [&]() {
         for (auto& p : targetsToBuild) {

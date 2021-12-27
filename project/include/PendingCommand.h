@@ -28,12 +28,12 @@ public:
     std::vector<File *> inputs;
     std::vector<File *> outputs;
     void Check();
-    float timeForCommand() {
+    double timeForCommand() {
         if (result->measurementCount > 0)
             return result->timeEstimate / result->measurementCount;
         return result->timeEstimate;
     }
-    float timeToComplete() {
+    double timeToComplete() {
         return timeForCommand() + longestChildCommand;
     }
     uint64_t memoryUse() {
@@ -41,7 +41,7 @@ public:
             return result->spaceNeeded / result->measurementCount;
         return result->spaceNeeded;
     }
-    void addChildCommand(float length) {
+    void addChildCommand(double length) {
         if (length <= longestChildCommand) 
           return;
 
@@ -52,7 +52,7 @@ public:
         }
     }
 public:
-    float longestChildCommand = 0;
+    double longestChildCommand = 0.;
     std::string commandToRun;
     std::array<uint8_t, 64> toolsetHash;
     enum State
@@ -69,7 +69,7 @@ public:
         std::string output;
         uint32_t errorcode = 0;
         uint32_t measurementCount = 0;
-        double timeEstimate = 1; // assumption: 1 second.
+        double timeEstimate = 1.; // assumption: 1 second.
         uint64_t spaceNeeded = 1 << 30; // assumption: 1 GB of memory use
     };
     FileRecord* result = nullptr;
