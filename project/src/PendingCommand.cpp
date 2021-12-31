@@ -62,6 +62,7 @@ struct CommandResultDb {
       out.write(name.data(), name.size());
       out.write(record.output.data(), record.output.size());
     }
+    out.close();
     fs::rename(".evoke.db.new", ".evoke.db");
   }
   ~CommandResultDb() {
