@@ -3,6 +3,7 @@
 #include <iostream>
 #include <functional>
 #include <string>
+#include <vector>
 
 std::vector<std::string> splitWithQuotes(const std::string &str)
 {
