@@ -2,6 +2,7 @@
 #include <fw/filesystem.hpp>
 #include <iostream>
 #include <functional>
+#include <string>
 
 std::vector<std::string> splitWithQuotes(const std::string &str)
 {

@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <array>
 
 struct File;
 struct Component;

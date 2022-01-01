@@ -3,11 +3,10 @@
 #include "PendingCommand.h"
 #include "Reporter.h"
 
-#include <boost/process.hpp>
-#include <cstring>
+#include <string>
 #include <functional>
 #include <thread>
-
+#include <boost/process.hpp>
 #ifdef __linux__
 #include <unistd.h>
 #include <sys/time.h>
@@ -116,7 +115,8 @@ Executor::~Executor()
 {
 }
 
-bool Executor::AllSuccess() {
+bool Executor::AllSuccess() 
+{
     for (auto& command : commands) {
         if (command->result->errorcode) return false;
     }
@@ -224,25 +224,26 @@ void Executor::ShowCompileInfo()
     size_t commandsAboveMemPerThreadFree = 0;
     for (auto& c : commands) {
         totalTime += c->timeForCommand();
-        if (c->memoryUse() > maxMem) maxMem = c->memoryUse();
+        if (c->memoryUse() > maxMem) maxMem = static_cast<double>(c->memoryUse());
         if (c->memoryUse() > memoryFree) commandsAboveMemFree++;
         if (c->memoryUse() > memoryFree / std::thread::hardware_concurrency()) commandsAboveMemFree++;
     }
     fprintf(stderr, "This computer has %d cores/threads and %zu MB free of %zu MB total\n", std::thread::hardware_concurrency(), memoryFree / 1000000, memoryTotal / 1000000);
-    float longestPath = commands.front()->timeToComplete(), maxWidth = totalTime / std::thread::hardware_concurrency();
-    fprintf(stderr, "Fastest possible build on this machine is %.2f seconds (dominated by %s)\n", std::max(longestPath, maxWidth), longestPath > maxWidth ? "slow dependent path" : "parallellism");
+    double longestPath = commands.front()->timeToComplete(); 
+    double maxWidth = totalTime / std::thread::hardware_concurrency();
+    fprintf(stderr, "Fastest possible build on this machine is %.2f seconds (dominated by %s)\n", std::max(longestPath, maxWidth), longestPath > maxWidth ? "slow dependent path" : "parallelism");
     /*
     fprintf(stderr, "Shortest possible build time (longest dependent path) is %.2f seconds\n", commands.front()->timeToComplete());
     fprintf(stderr, "Fastest possible build time (if 100%% parallel on this machine) is %.2f seconds\n", totalTime / std::thread::hardware_concurrency());
     */
 
-    fprintf(stderr, "For max parallellism %.0f MB is recommended\n", maxMem * std::thread::hardware_concurrency() / 1000000);
+    fprintf(stderr, "For max parallelism %.0f MB is recommended\n", maxMem * std::thread::hardware_concurrency() / 1000000);
     fprintf(stderr, "Minimum memory for a successful build is %.0f MB\n", maxMem / 1000000);
     if (commandsAboveMemFree) {
         fprintf(stderr, "Found %zu commands that take more memory than is free. This will break your build.\n", commandsAboveMemFree);
     }
     if (commandsAboveMemPerThreadFree) {
-        fprintf(stderr, "Found %zu commands that use so much memory they will reduce build parallellism.\n", commandsAboveMemPerThreadFree);
+        fprintf(stderr, "Found %zu commands that use so much memory they will reduce build parallelism.\n", commandsAboveMemPerThreadFree);
     }
 }
 

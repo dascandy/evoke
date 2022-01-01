@@ -34,6 +34,7 @@ set(LINKED_SOURCES
     ../../project/src/known.cpp
     ../../fw/src/dotted.cpp
     ../../fw/src/FileParser.cpp
+    ../../fw/src/sha512.cpp
     ../src/msvc.cpp
     ../src/Toolset.cpp
     ../src/generic.cpp
@@ -54,6 +55,11 @@ endif(MSVC)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${LINKED_SOURCES})
 
+if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -D_WIN32_WINNT=0x0601 -D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 if (MINGW)
   set(Boost_ARCHITECTURE -x64)
   target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
@@ -62,9 +68,11 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system unit_test_framework)
+find_package(Boost REQUIRED COMPONENTS system unit_test_framework)
+
+find_package(OpenSSL REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads ${Boost_LIBRARIES} Boost::disable_autolinking)
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads ${Boost_LIBRARIES} Boost::disable_autolinking OpenSSL::SSL OpenSSL::Crypto)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${PROJECT_NAME} COMMENT "Running unit tests")
