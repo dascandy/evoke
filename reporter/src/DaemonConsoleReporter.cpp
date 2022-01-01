@@ -20,12 +20,7 @@ std::vector<std::shared_ptr<PendingCommand>> *commands = nullptr;
 DaemonConsoleReporter* reporter = nullptr;
 static void fetchDisplaySize()
 {
-#    ifdef TIOCGSIZE
-    struct ttysize ts;
-    ioctl(STDIN_FILENO, TIOCGSIZE, &ts);
-    screenHeight = ts.ts_rows;
-    screenWidth = ts.ts_cols;
-#    elif defined(TIOCGWINSZ)
+#    ifdef TIOCGWINSZ
     struct winsize ts;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &ts);
     screenHeight = ts.ws_row;
@@ -35,7 +30,7 @@ static void fetchDisplaySize()
         screenHeight = 3;
     if(screenWidth <= 0)
         screenWidth = 10;
-#    endif /* TIOCGSIZE */
+#    endif /* TIOCGWINSZ */
 }
 
 DaemonConsoleReporter::DaemonConsoleReporter()
