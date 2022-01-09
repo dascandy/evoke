@@ -16,10 +16,13 @@ BOOST_AUTO_TEST_CASE(msvc_compile)
     const std::set<std::string> includes{"hello\\include"};
     MsvcToolset msvc;
     auto cmd = msvc.getCompileCommand("cl.exe", "obj/hello/src/gretting.cpp.obj", input, includes, false);
-    BOOST_TEST(cmd == "cl.exe /c /EHsc /Foobj/hello/src/gretting.cpp.obj hello/src/gretting.cpp /Ihello\\include");
+    BOOST_TEST(cmd == "cl.exe /nologo /c /EHsc /Foobj/hello/src/gretting.cpp.obj hello/src/gretting.cpp /Ihello\\include");
 
     cmd = msvc.getCompileCommand("cl.exe", "obj/hello/src/gretting.cpp.obj", input, {}, false);
-    BOOST_TEST(cmd == "cl.exe /c /EHsc /Foobj/hello/src/gretting.cpp.obj hello/src/gretting.cpp");
+    BOOST_TEST(cmd == "cl.exe /nologo /c /EHsc /Foobj/hello/src/gretting.cpp.obj hello/src/gretting.cpp");
+
+    cmd = msvc.getCompileCommand("cl.exe", "obj/hello/src/gretting.cpp.obj", input, {}, true);
+    BOOST_TEST(cmd == "cl.exe /nologo /c /EHsc /experimental:module /std:c++20 /MD /permissive- /Foobj/hello/src/gretting.cpp.obj hello/src/gretting.cpp");
 }
 BOOST_AUTO_TEST_CASE(msvc_archive)
 {
