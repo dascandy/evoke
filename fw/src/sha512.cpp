@@ -1,33 +1,16 @@
 #include "fw/sha512.h"
 #include "openssl/sha.h"
-#if __linux__
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#else
+#include <boost/interprocess/file_mapping.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 #include <filesystem>
-#include <fstream>
-#endif
 
 std::array<uint8_t, 64> sha512(const fs::path& path) 
 {
     std::array<uint8_t, 64> hash;
-#if __linux__
-    int fd = open(path.c_str(), O_RDONLY);
-    size_t filesize = fs::file_size(path);
-    void* target = mmap(nullptr, filesize, PROT_READ, MAP_SHARED, fd, 0);
-    close(fd);
-    SHA512((const unsigned char*)target, filesize, hash.data());
-    munmap(target, filesize);
-#else
-    std::ifstream inFile(path);
-    auto filesize = fs::file_size(path);
-    auto target = std::make_unique<std::uint8_t[]>(filesize);
-    inFile.read(reinterpret_cast<char*>(target.get()), filesize);
-    SHA512(target.get(), filesize, hash.data());
-#endif
+    using namespace boost::interprocess;
+    file_mapping file(path.string().c_str(), read_only);
+    mapped_region region(file, read_only);
+    SHA512(static_cast<unsigned char *>(region.get_address()), region.get_size(), hash.data());
     return hash;
 }
 
