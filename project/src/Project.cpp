@@ -247,7 +247,7 @@ void Project::MapImportsToModules(std::unordered_map<std::string, File *> &modul
             }
             else
             {
-                std::cerr << "Could not find module " << import.first.c_str() << " imported by " << f.second->path.c_str() << '\n';
+                std::cerr << "Could not find module " << import.first << " imported by " << f.second->path << '\n';
             }
         }
     }
