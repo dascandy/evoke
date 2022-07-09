@@ -22,13 +22,13 @@ void File::reloadHash() {
 
 bool File::isHeader(const fs::path &path)
 {
-    static const std::unordered_set<std::string> exts = {".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc"};
+    static const std::unordered_set<std::string> exts = {".h", ".H", ".hpp", ".hh", ".tcc", ".ipp", ".inc", ".ixx"};
     return exts.find(path.extension().generic_string()) != exts.end();
 }
 
 bool File::isTranslationUnit(const fs::path &path)
 {
-    static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm", ".s", ".S"};
+    static const std::unordered_set<std::string> exts = {".c", ".C", ".cc", ".cpp", ".cppm", ".m", ".mm", ".s", ".S", ".ixx"};
     return exts.find(path.extension().generic_string()) != exts.end();
 }
 

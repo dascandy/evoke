@@ -8,10 +8,6 @@
 #include <algorithm>
 #include <stack>
 
-//https://blogs.msdn.microsoft.com/vcblog/2015/12/03/c-modules-in-vs-2015-update-1/
-// Enable modules support for MSVC
-//"/experimental:module /module:stdIfcDir \"$(VC_IFCPath)\" /module:search obj/modules/"
-
 MsvcToolset::MsvcToolset()
 {
     SetParameter("name", "msvc");
@@ -43,7 +39,7 @@ std::string MsvcToolset::getExeNameFor(const Component &component)
 
 std::string MsvcToolset::getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps)
 {
-    std::string command = program + " /c /EHsc /Fo" + outputFile + " " + inputFile->path.generic_string();
+    std::string command = program + " /nologo /c /EHsc /Fo" + outputFile + " " + inputFile->path.generic_string();
     for(auto &i : includes)
         command += " /I" + i;
     for(auto &d : linkDeps)
@@ -56,7 +52,12 @@ std::string MsvcToolset::getUnityCommand(const std::string &program, const std::
 
 std::string MsvcToolset::getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
 {
-    std::string command = program + " /c /EHsc /Fo" + outputFile + " " + inputFile->path.generic_string();
+    std::string command = program + " /nologo /c /EHsc";
+    if(hasModules)
+    {
+        command += " /experimental:module /std:c++20 /MD /permissive-";
+    }
+    command += " /Fo" + outputFile + " " + inputFile->path.generic_string();
     for(auto &i : includes)
         command += " /I" + i;
     return command;
@@ -64,7 +65,12 @@ std::string MsvcToolset::getPrecompileCommand(const std::string &program, const 
 
 std::string MsvcToolset::getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
 {
-    std::string command = program + " /c /EHsc /Fo" + outputFile + " " + inputFile->path.generic_string();
+    std::string command = program + " /nologo /c /EHsc";
+    if(hasModules)
+    {
+        command += " /experimental:module /std:c++20 /MD /permissive-";
+    }
+    command += " /Fo" + outputFile + " " + inputFile->path.generic_string();
     for(auto &i : includes)
         command += " /I" + i;
     return command;
