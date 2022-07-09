@@ -2,7 +2,7 @@
 
 [![Build Status](https://dev.azure.com/dascandy/Evoke/_apis/build/status/dascandy.evoke?branchName=master)](https://dev.azure.com/dascandy/Evoke/_build/latest?definitionId=1&branchName=master)
 
-Evoke is the simple solution to the complicated problem of build software for C++ and related languages.
+Evoke is the simple solution to the complicated problem of building software for C++ and related languages.
 
 ## Table of Contents  <!-- omit in toc -->
 
@@ -17,12 +17,18 @@ Evoke is the simple solution to the complicated problem of build software for C+
 
 Right now it is not available as a package for common operating systems yet. To install it, you will need to compile it from source.
 
-It requires Boost 1.64 or higher; it uses boost.process (and boost.filesystem for MSVC). To compile, download the full source tree and type `make` in the place you downloaded it to. Then, run `bin/evoke_make` to build evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
+It requires Boost 1.64 or higher; it uses boost.process and boost.interprocess. To compile, download the full source tree and type `make` in the place you downloaded it to. Then, run `bin/evoke_make` to build evoke using itself. When this succeeds, you will have a `bin/evoke` that does the same thing, but is built with Evoke. Copy this to `~/bin/evoke` for a user-local installation or to `/usr/local/bin/evoke` for a system-wide installation.
 
 ```console
 mkdir build && cd build  # create build directory
 cmake ..  # generate build system
 cmake --build .  # build evoke
+```
+
+Or, building with Evoke (if you somehow have it already),
+
+```console
+evoke
 ```
 
 ## Usage
@@ -37,18 +43,10 @@ Everybody is free to help with Evoke development. The simpler things that need t
 
 ### Short Term Goals
 
-v0.2: Builds on Windows, MacOS and Linux.
-
-v0.3: Toolsets fully separate, chainable and overrideable. Android is still a weird one out; need to make up my mind on how it should work. Package import config also fully separate. Modules support on Clang.
-
-v0.3.1: Easy imports exist for VS Code and CLion. Need to find a mac to try XCode, and need to find a Windows to try MSVC. Should be very doable. Code is in a way better state now. Android is removed for now; making an APK is a packaging task, not a building task.
-
 Next few milestones (in any order):
 - Have easy imports for evoke-built projects in XCode, MSVC, VS Code and CLion.
 - Get to 30% test coverage. Not to aim for a number, but to have at least some target.
 - Full integration with at least one package manager - export of needed file list, and import of package inputs. 
-
-- 
 
 v1.0 will be hit when:
 
@@ -69,3 +67,4 @@ Formatting of all source files is done using ClangFormat. Rules for it are speci
 ## License
 
 Evoke is partially derived from https://github.com/tomtom-international/cpp-dependencies (Apache2 licensed) and partially from https://github.com/dascandy/bob (my copyright, also Apache2 unless I'm mistaking). Because of that it is also Apache2 licensed. If this does not work for you for some reason, reach out and I'll see what we can do/change.
+
