@@ -46,10 +46,6 @@ static const char red[] = "\033[1;31m";
 static const char green[] = "\033[1;32m";
 static const char yellow[] = "\033[1;33m";
 static const char blue[] = "\033[1;34m";
-static const char purple[] = "\033[1;35m";
-static const char cyan[] = "\033[1;36m";
-static const char white[] = "\033[1;37m";
-static const char grey[] = "\033[0;37m";
 static const char topleft[] = "\033[1;1H";
 static const char clearscreen[] = "\033[2J";
 static const char reset[] = "\033[m";
@@ -188,6 +184,11 @@ void DaemonConsoleReporter::ReportCommandQueue(std::vector<std::shared_ptr<Pendi
 {
     commands = &allCommands;
     Redraw();
+}
+
+void DaemonConsoleReporter::ReportUnknownHeaders(const std::unordered_set<std::string>& )
+{
+    // No real way to display this in an interactive daemon...
 }
 
 

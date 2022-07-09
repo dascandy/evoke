@@ -5,7 +5,7 @@ std::string GetNameFromPath(const fs::path &path, char separator)
 {
     using namespace std;
 
-    auto start = std::find_if_not(begin(path), end(path), [](auto &part) {
+    auto start = std::find_if_not(begin(path), end(path), [](const auto &part) {
         return part.filename() == ".";
     });
 

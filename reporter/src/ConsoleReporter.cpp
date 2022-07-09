@@ -39,6 +39,14 @@ ConsoleReporter::ConsoleReporter()
 #endif
 }
 
+void ConsoleReporter::ReportUnknownHeaders(const std::unordered_set<std::string>& headers) 
+{
+    for(auto &u : headers)
+    {
+        std::cerr << "Unknown header: " << u << "\n";
+    }
+}
+
 void ConsoleReporter::Redraw()
 {
     size_t w = screenWidth / activeProcesses.size();

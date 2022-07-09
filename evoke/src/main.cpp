@@ -132,14 +132,8 @@ int main(int argc, const char **argv)
     {
         // Report missing headers as error. Build script should handle this gracefully and reinvoke Evoke after fetching the missing headers.
     }
-    for(auto &u : op.unknownHeaders)
-    {
-        std::cerr << "Unknown header: " << u 
-#if defined(_MSC_VER)
-                  << "\n";
-#else
-                  << "\e[K\n";
-#endif
+    if (not op.unknownHeaders.empty()) {
+        reporter->ReportUnknownHeaders(op.unknownHeaders);
     }
     auto GenerateCommands = [&]() {
         for (auto& p : targetsToBuild) {
