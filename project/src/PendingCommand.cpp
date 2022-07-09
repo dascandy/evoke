@@ -160,7 +160,7 @@ void PendingCommand::Check()
 
     // If the last build output was with a different toolset or input, rebuild
     if (toolsetHash != result->toolsetHash) {
-        printf("Toolset hash changed %s\n", commandToRun.c_str());
+//        printf("Toolset hash changed %s\n", commandToRun.c_str());
         state = PendingCommand::ToBeRun;
     }
 
@@ -170,6 +170,7 @@ void PendingCommand::Check()
             hash[n] ^= i->hash[n];
     }
     if (result->tuHash != hash) {
+/*
         for (size_t n = 0; n < 64; n++) {
             printf("%02X", hash[n]);
         }
@@ -177,8 +178,8 @@ void PendingCommand::Check()
         for (size_t n = 0; n < 64; n++) {
             printf("%02X", result->tuHash[n]);
         }
-        printf("\n");
-        printf("TU hash changed: %s\n", commandToRun.c_str());
+        printf("\n");*/
+//        printf("TU hash changed: %s\n", commandToRun.c_str());
         state = PendingCommand::ToBeRun;
     }
 

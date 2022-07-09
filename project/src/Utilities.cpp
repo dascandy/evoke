@@ -18,7 +18,7 @@ std::string GetNameFromPath(const fs::path &path, char separator)
 
     while(++start != end(path))
     {
-        if(start->filename() != ".")
+        if(not start->filename().empty() && start->filename() != ".")
         {
             out.append(1, separator).append(start->string());
         }

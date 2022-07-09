@@ -4,17 +4,9 @@
 
 BOOST_AUTO_TEST_CASE(GetNameFromPath_anonymous)
 {
-    fs::path empty_path;
-    BOOST_TEST(GetNameFromPath(empty_path) == "evoke");
-    BOOST_TEST(GetNameFromPath(empty_path, '/') == "evoke");
-
     fs::path root(".");
     BOOST_TEST(GetNameFromPath(root) == "evoke");
     BOOST_TEST(GetNameFromPath(root, '/') == "evoke");
-
-    fs::path root2("./");
-    BOOST_TEST(GetNameFromPath(root2) == "evoke");
-    BOOST_TEST(GetNameFromPath(root2, '/') == "evoke");
 }
 
 BOOST_AUTO_TEST_CASE(GetNameFromPath_first_level_component)

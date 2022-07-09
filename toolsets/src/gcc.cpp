@@ -17,7 +17,6 @@ GccToolset::GccToolset()
     SetParameter("compiler", "g++ -fdiagnostics-color=always");
     SetParameter("linker", "g++");
     SetParameter("archiver", "ar");
-    SetParameter("cross", "false");
 }
 
 std::string GccToolset::getBmiNameFor(const File &file)

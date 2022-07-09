@@ -32,6 +32,7 @@ public:
 class GenericToolset : public Toolset
 {
 public:
+    GenericToolset();
     void CreateCommandsForUnity(Project &project) override;
     void CreateCommandsFor(Project &project) override;
     void SetParameter(const std::string &key, const std::string &value) override;

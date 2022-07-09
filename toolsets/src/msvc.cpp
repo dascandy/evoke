@@ -14,7 +14,6 @@ MsvcToolset::MsvcToolset()
     SetParameter("compiler", "cl.exe");
     SetParameter("linker", "link.exe");
     SetParameter("archiver", "lib.exe");
-    SetParameter("cross", "false");
 }
 
 std::string MsvcToolset::getBmiNameFor(const File &file)

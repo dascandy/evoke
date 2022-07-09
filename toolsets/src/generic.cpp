@@ -63,6 +63,13 @@ std::string GenericToolset::GetParameter(const std::string& key) {
   return baseRV;
 }
 
+GenericToolset::GenericToolset() {
+  SetParameter("build-executable", "true");
+  SetParameter("build-unittest", "true");
+  SetParameter("build-fuzzer", "false");
+  SetParameter("run-unittest", "true");
+}
+
 std::string GenericToolset::GetCompilerFor(std::string extension) {
   try {
     return GetParameter("compiler-" + extension.substr(1));
@@ -206,9 +213,12 @@ void GenericToolset::CreateCommandsFor(Project &project)
     for(auto &p : project.components)
     {
         auto &component = p.second;
+        if(component.type != "library" && GetParameter("build-" + component.type) == "false") {
+            continue;
+        }
         auto includes = getIncludePathsFor(component);
         std::vector<File *> objects;
-        if (component.type == "unittest") {
+        if (component.type == "unittest" || component.type == "fuzzer") {
             // Unit tests get access to includes from a component's private folder
             includes.insert((component.root / "../src").string());
         }
@@ -287,7 +297,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 pc->AddInput(file);
             }
             component.commands.push_back(pc);
-            if(component.type == "unittest" && GetParameter("cross") == "false")
+            if(component.type == "unittest" && GetParameter("run-unittest") == "true")
             {
                 command = outputFile.string();
                 pc = std::make_shared<PendingCommand>(hash, getUnittestCommand(command));

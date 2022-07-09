@@ -16,7 +16,6 @@ ClangToolset::ClangToolset()
     SetParameter("compiler", "clang++");
     SetParameter("linker", "clang++");
     SetParameter("archiver", "ar");
-    SetParameter("cross", "false");
 }
 
 std::string ClangToolset::getBmiNameFor(const File &file)
