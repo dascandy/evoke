@@ -29,6 +29,7 @@ jobs:
           useVcpkgToolchainFile: true
 
   - job: Windows
+    condition: false
     pool:
       vmImage: "windows-latest"
     steps:
