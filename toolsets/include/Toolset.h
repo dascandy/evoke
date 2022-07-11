@@ -17,8 +17,8 @@ public:
     virtual ~Toolset()
     {
     }
-    virtual void CreateCommandsFor(Project &project) = 0;
-    virtual void CreateCommandsForUnity(Project &project) = 0;
+    virtual void CreateCommandsFor(Project &project, const std::vector<std::string>& targets) = 0;
+    virtual void CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets) = 0;
     virtual void SetParameter(const std::string &key, const std::string &value) = 0;
     virtual std::string GetParameter(const std::string& key) = 0;
     virtual std::string getBmiNameFor(const File &file) = 0;
@@ -33,8 +33,8 @@ class GenericToolset : public Toolset
 {
 public:
     GenericToolset();
-    void CreateCommandsForUnity(Project &project) override;
-    void CreateCommandsFor(Project &project) override;
+    void CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets) override;
+    void CreateCommandsFor(Project &project, const std::vector<std::string>& targets) override;
     void SetParameter(const std::string &key, const std::string &value) override;
     std::string GetParameter(const std::string& key) override;
 protected:

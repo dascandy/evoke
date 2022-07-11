@@ -71,15 +71,17 @@ GenericToolset::GenericToolset() {
 }
 
 std::string GenericToolset::GetCompilerFor(std::string extension) {
-  try {
+  auto it = parameters.find("compiler-" + extension.substr(1));
+  if (it != parameters.end()) {
     return GetParameter("compiler-" + extension.substr(1));
-  } catch (...) {
+  } else {
     return GetParameter("compiler");
   }
 }
 
-void GenericToolset::CreateCommandsForUnity(Project &project)
+void GenericToolset::CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets)
 {
+    (void)targets;
     for(auto &p : project.components)
     {
         auto &component = p.second;
@@ -96,6 +98,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
         File *of = project.CreateFile(component, outputFile);
         std::ofstream out(outputFile.generic_string());
         for(auto &v : allDeps)
+        {
             for(auto &c : v)
             {
                 if(c->isBinary)
@@ -118,6 +121,7 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
                     }
                 }
             }
+        }
         // TODO: missing header dependencies
 
         std::vector<std::vector<Component *>> inputLinkDeps = GetTransitiveAllDeps(component);
@@ -162,25 +166,50 @@ void GenericToolset::CreateCommandsForUnity(Project &project)
     }
 }
 
-void GenericToolset::CreateCommandsFor(Project &project)
+void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::string>& targets)
 {
     std::unordered_map<std::string, File *> moduleMap;
     std::set<File *> toPrecompile;
     std::unordered_map<File*, File*> precompileds;
-    for(auto &[name, component] : project.components)
+    std::set<Component*> componentsToCompile;
+    if (targets.empty()) {
+        for (auto& [name, component] : project.components) {
+            componentsToCompile.insert(&component);
+        }
+    } else {
+        std::vector<Component*> components;
+        for (const auto& target : targets) {
+            auto it = project.components.find(target);
+            if (it == project.components.end()) {
+                puts(("Cannot find component " + target).c_str());
+                continue;
+            }
+            components.push_back(&it->second);
+        }
+        while (not components.empty()) {
+            Component* component = components.back();
+            components.pop_back();
+            if (componentsToCompile.insert(component).second) {
+                components.insert(components.end(), component->pubDeps.begin(), component->pubDeps.end());
+                components.insert(components.end(), component->privDeps.begin(), component->privDeps.end());
+            }
+        }
+    }
+
+    for(auto &component : componentsToCompile)
     {
-        for(auto &f : component.files)
+        for(auto &f : component->files)
         {
             if(!f->moduleExported)
                 continue;
 
-            File *ofile = project.CreateFile(component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*f));
+            File *ofile = project.CreateFile(*component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*f));
             moduleMap.insert(std::make_pair(f->moduleName, ofile));
             toPrecompile.insert(f);
             precompileds.insert(std::make_pair(f, ofile));
             for(auto &import : f->modImports)
             {
-                File *ofile = project.CreateFile(component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*import.second));
+                File *ofile = project.CreateFile(*component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*import.second));
                 moduleMap.insert(std::make_pair(import.first, ofile));
                 toPrecompile.insert(f);
             }
@@ -210,9 +239,9 @@ void GenericToolset::CreateCommandsFor(Project &project)
         }
         f->component.commands.push_back(pc);
     }
-    for(auto &p : project.components)
+    for(auto &p : componentsToCompile)
     {
-        auto &component = p.second;
+        auto &component = *p;
         if(component.type != "library" && GetParameter("build-" + component.type) == "false") {
             continue;
         }
