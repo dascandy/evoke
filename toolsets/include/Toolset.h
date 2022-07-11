@@ -18,7 +18,6 @@ public:
     {
     }
     virtual void CreateCommandsFor(Project &project, const std::vector<std::string>& targets) = 0;
-    virtual void CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets) = 0;
     virtual void SetParameter(const std::string &key, const std::string &value) = 0;
     virtual std::string GetParameter(const std::string& key) = 0;
     virtual std::string getBmiNameFor(const File &file) = 0;
@@ -33,13 +32,11 @@ class GenericToolset : public Toolset
 {
 public:
     GenericToolset();
-    void CreateCommandsForUnity(Project &project, const std::vector<std::string>& targets) override;
     void CreateCommandsFor(Project &project, const std::vector<std::string>& targets) override;
     void SetParameter(const std::string &key, const std::string &value) override;
     std::string GetParameter(const std::string& key) override;
 protected:
     std::string GetCompilerFor(std::string extension);
-    virtual std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) = 0;
     virtual std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool usesModules) = 0;
     virtual std::string getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool usesModules) = 0;
     virtual std::string getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs) = 0;
@@ -52,7 +49,6 @@ class ClangToolset : public GenericToolset
 {
 public:
     ClangToolset();
-    std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs) override;
@@ -68,7 +64,6 @@ class GccToolset : public GenericToolset
 {
 public:
     GccToolset();
-    std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs) override;
@@ -84,7 +79,6 @@ class MsvcToolset : public GenericToolset
 {
 public:
     MsvcToolset();
-    std::string getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps) override;
     std::string getCompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules) override;
     std::string getArchiverCommand(const std::string &program, const std::string &outputFile, const std::vector<File *> inputs) override;

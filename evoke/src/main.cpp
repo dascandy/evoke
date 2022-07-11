@@ -94,12 +94,11 @@ int main(int argc, const char **argv)
     bool compilation_database = false;
     bool cmakelists = false;
     bool verbose = false;
-    bool unitybuild = false;
     bool daemon = false;
     bool compile_info = false;
     std::map<std::string, std::vector<std::string>> targetsToBuild;
     try {
-        parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}, {"-m", memoryLimit}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-u", unitybuild}, {"-d", daemon}, {"-ci", compile_info}},
+        parseArgs(std::vector<std::string>(argv + 1, argv + argc), {{"--root", rootpath}, {"-j", jobcount}, {"-r", reporterName}, {"-m", memoryLimit}}, {{"-cp", compilation_database}, {"-v", verbose}, {"-cm", cmakelists}, {"-d", daemon}, {"-ci", compile_info}},
             [&](std::string arg) {
             // This feels really icky, but it's the way to make this work. TODO: extract this into a class.
             static bool insideTarget = false;
@@ -139,14 +138,7 @@ int main(int argc, const char **argv)
         auto GenerateCommands = [&]() {
             for (auto& [toolsetname, targets] : targetsToBuild) {
                 std::unique_ptr<Toolset> toolset = GetToolsetByName(toolsetname);
-                if(unitybuild)
-                {
-                    toolset->CreateCommandsForUnity(op, targets);
-                }
-                else
-                {
-                    toolset->CreateCommandsFor(op, targets);
-                }
+                toolset->CreateCommandsFor(op, targets);
             }
             for(auto &comp : op.components)
             {

@@ -43,30 +43,6 @@ std::string GccToolset::getExeNameFor(const Component &component)
 #endif
 }
 
-std::string GccToolset::getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps)
-{
-    std::string command = program + " -c -o " + outputFile + " " + inputFile->path.generic_string();
-    for(auto &i : includes)
-        command += " -I" + i;
-    for(auto d : linkDeps)
-    {
-        if(d.size() == 1)
-        {
-            command += " -l" + d.front()->root.string();
-        }
-        else
-        {
-            command += " -Wl,--start-group";
-            for(auto &c : d)
-            {
-                command += " -l" + getNameFor(*c);
-            }
-            command += " -Wl,--end-group";
-        }
-    }
-    return command;
-}
-
 std::string GccToolset::getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
 {
     std::string command = program + " -fmodules-ts -c -o " + outputFile + " " + inputFile->path.generic_string();

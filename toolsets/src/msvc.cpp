@@ -36,19 +36,6 @@ std::string MsvcToolset::getExeNameFor(const Component &component)
     return getNameFor(component) + ".exe";
 }
 
-std::string MsvcToolset::getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps)
-{
-    std::string command = program + " /nologo /c /EHsc /Fo" + outputFile + " " + inputFile->path.generic_string();
-    for(auto &i : includes)
-        command += " /I" + i;
-    for(auto &d : linkDeps)
-        for(auto &c : d)
-        {
-            command += " -l" + c->GetName();
-        }
-    return command;
-}
-
 std::string MsvcToolset::getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
 {
     std::string command = program + " /nologo /c /EHsc";
