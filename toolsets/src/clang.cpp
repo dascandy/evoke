@@ -16,7 +16,6 @@ ClangToolset::ClangToolset()
     SetParameter("compiler", "clang++");
     SetParameter("linker", "clang++");
     SetParameter("archiver", "ar");
-    SetParameter("cross", "false");
 }
 
 std::string ClangToolset::getBmiNameFor(const File &file)
@@ -38,21 +37,6 @@ std::string ClangToolset::getLibNameFor(const Component &component)
 std::string ClangToolset::getExeNameFor(const Component &component)
 {
     return getNameFor(component);
-}
-
-std::string ClangToolset::getUnityCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, std::vector<std::vector<Component *>> linkDeps)
-{
-    std::string command = program + " -c -o " + outputFile + " " + inputFile->path.generic_string();
-    for(auto &i : includes)
-        command += " -I" + i;
-    for(auto d : linkDeps)
-    {
-        for(auto &c : d)
-        {
-            command += " -l" + c->GetName();
-        }
-    }
-    return command;
 }
 
 std::string ClangToolset::getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)

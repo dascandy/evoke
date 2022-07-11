@@ -8,6 +8,11 @@
 std::string home() {
   return getenv("HOME");
 }
+std::string lowercase(const std::string& str) {
+  std::string rv;
+  std::transform(str.begin(), str.end(), std::back_inserter(rv), ::tolower);
+  return rv;
+}
 
 static std::map<std::string, Component *>& PredefComponentList(bool reload = false)
 {
@@ -23,7 +28,7 @@ static std::map<std::string, Component *>& PredefComponentList(bool reload = fal
         }, [&current](const std::string& key, const std::string& value) {
             if (key == "files") {
                 for (auto& f : splitWithQuotes(value)) {
-                    list[f] = current;
+                    list[lowercase(f)] = current;
                 }
             } else if (key == "paths") {
                 for (auto& path : splitWithQuotes(value)) {

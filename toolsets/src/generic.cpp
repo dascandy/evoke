@@ -63,117 +63,66 @@ std::string GenericToolset::GetParameter(const std::string& key) {
   return baseRV;
 }
 
+GenericToolset::GenericToolset() {
+  SetParameter("build-executable", "true");
+  SetParameter("build-unittest", "true");
+  SetParameter("build-fuzzer", "false");
+  SetParameter("run-unittest", "true");
+}
+
 std::string GenericToolset::GetCompilerFor(std::string extension) {
-  try {
+  auto it = parameters.find("compiler-" + extension.substr(1));
+  if (it != parameters.end()) {
     return GetParameter("compiler-" + extension.substr(1));
-  } catch (...) {
+  } else {
     return GetParameter("compiler");
   }
 }
 
-void GenericToolset::CreateCommandsForUnity(Project &project)
-{
-    for(auto &p : project.components)
-    {
-        auto &component = p.second;
-        if(component.type == "library")
-            continue;
-
-        std::vector<std::vector<Component *>> allDeps = GetTransitiveAllDeps(component);
-        std::vector<Component *> deps;
-        std::vector<File *> files;
-        std::string linkline;
-        std::set<std::string> includes;
-        fs::create_directories("unity");
-        fs::path outputFile = std::string("unity") + "/" + getExeNameFor(component) + ".cpp";
-        File *of = project.CreateFile(component, outputFile);
-        std::ofstream out(outputFile.generic_string());
-        for(auto &v : allDeps)
-            for(auto &c : v)
-            {
-                if(c->isBinary)
-                {
-                    linkline += " -l" + getNameFor(*c);
-                }
-                else
-                {
-                    for(auto &d : getIncludePathsFor(component))
-                    {
-                        includes.insert(d);
-                    }
-                    for(auto &f : c->files)
-                    {
-                        files.push_back(f);
-                        if(File::isTranslationUnit(f->path))
-                        {
-                            out << "#include \"../" + f->path.generic_string() << "\"\n";
-                        }
-                    }
-                }
-            }
-        // TODO: missing header dependencies
-
-        std::vector<std::vector<Component *>> inputLinkDeps = GetTransitiveAllDeps(component);
-        std::reverse(inputLinkDeps.begin(), inputLinkDeps.end());
-        std::vector<std::vector<Component *>> linkDeps;
-        for(auto &in : inputLinkDeps)
-        {
-            size_t offs = 0;
-            while(offs < in.size())
-            {
-                if(in[offs] == &component || in[offs]->isHeaderOnly())
-                {
-                    in[offs] = in.back();
-                    in.pop_back();
-                }
-                else
-                {
-                    ++offs;
-                }
-            }
-            if(!in.empty())
-                linkDeps.push_back(std::move(in));
-        }
-
-        fs::path exeFile = "build/" + GetParameter("name") + "/bin/" + getExeNameFor(component);
-        std::shared_ptr<PendingCommand> pc = std::make_shared<PendingCommand>(hash, getUnityCommand(GetCompilerFor(".cpp"), outputFile.generic_string(), of, includes, linkDeps));
-
-        File *executable = project.CreateFile(component, exeFile);
-        pc->AddOutput(executable);
-        pc->AddInput(of);
-        for(auto &f : files)
-            pc->AddInput(f);
-        component.commands.push_back(pc);
-        if(component.type == "unittest")
-        {
-            pc = std::make_shared<PendingCommand>(hash, exeFile.string());
-            exeFile += ".log";
-            pc->AddInput(executable);
-            pc->AddOutput(project.CreateFile(component, exeFile.string()));
-            component.commands.push_back(pc);
-        }
-    }
-}
-
-void GenericToolset::CreateCommandsFor(Project &project)
+void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::string>& targets)
 {
     std::unordered_map<std::string, File *> moduleMap;
     std::set<File *> toPrecompile;
     std::unordered_map<File*, File*> precompileds;
-    for(auto &[name, component] : project.components)
+    std::set<Component*> componentsToCompile;
+    if (targets.empty()) {
+        for (auto& [name, component] : project.components) {
+            componentsToCompile.insert(&component);
+        }
+    } else {
+        std::vector<Component*> components;
+        for (const auto& target : targets) {
+            auto it = project.components.find(target);
+            if (it == project.components.end()) {
+                puts(("Cannot find component " + target).c_str());
+                continue;
+            }
+            components.push_back(&it->second);
+        }
+        while (not components.empty()) {
+            Component* component = components.back();
+            components.pop_back();
+            if (componentsToCompile.insert(component).second) {
+                components.insert(components.end(), component->pubDeps.begin(), component->pubDeps.end());
+                components.insert(components.end(), component->privDeps.begin(), component->privDeps.end());
+            }
+        }
+    }
+
+    for(auto &component : componentsToCompile)
     {
-        for(auto &f : component.files)
+        for(auto &f : component->files)
         {
             if(!f->moduleExported)
                 continue;
 
-            File *ofile = project.CreateFile(component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*f));
+            File *ofile = project.CreateFile(*component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*f));
             moduleMap.insert(std::make_pair(f->moduleName, ofile));
             toPrecompile.insert(f);
             precompileds.insert(std::make_pair(f, ofile));
             for(auto &import : f->modImports)
             {
-                File *ofile = project.CreateFile(component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*import.second));
+                File *ofile = project.CreateFile(*component, "build/" + GetParameter("name") + "/modules/" + getBmiNameFor(*import.second));
                 moduleMap.insert(std::make_pair(import.first, ofile));
                 toPrecompile.insert(f);
             }
@@ -203,12 +152,15 @@ void GenericToolset::CreateCommandsFor(Project &project)
         }
         f->component.commands.push_back(pc);
     }
-    for(auto &p : project.components)
+    for(auto &p : componentsToCompile)
     {
-        auto &component = p.second;
+        auto &component = *p;
+        if(component.type != "library" && GetParameter("build-" + component.type) == "false") {
+            continue;
+        }
         auto includes = getIncludePathsFor(component);
         std::vector<File *> objects;
-        if (component.type == "unittest") {
+        if (component.type == "unittest" || component.type == "fuzzer") {
             // Unit tests get access to includes from a component's private folder
             includes.insert((component.root / "../src").string());
         }
@@ -287,7 +239,7 @@ void GenericToolset::CreateCommandsFor(Project &project)
                 pc->AddInput(file);
             }
             component.commands.push_back(pc);
-            if(component.type == "unittest" && GetParameter("cross") == "false")
+            if(component.type == "unittest" && GetParameter("run-unittest") == "true")
             {
                 command = outputFile.string();
                 pc = std::make_shared<PendingCommand>(hash, getUnittestCommand(command));

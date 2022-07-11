@@ -39,6 +39,14 @@ ConsoleReporter::ConsoleReporter()
 #endif
 }
 
+void ConsoleReporter::ReportUnknownHeaders(const std::unordered_set<std::string>& headers) 
+{
+    for(auto &u : headers)
+    {
+        std::cerr << "Unknown header: " << u << "\033[0K\n";
+    }
+}
+
 void ConsoleReporter::Redraw()
 {
     size_t w = screenWidth / activeProcesses.size();
@@ -47,7 +55,7 @@ void ConsoleReporter::Redraw()
         if(t)
             active++;
 
-    std::cout << activeProcesses.size() << " concurrent tasks, " << active << " active\n";
+    std::cout << activeProcesses.size() << " concurrent tasks, " << active << " active\033[0K\n";
     if(w == 0)
     {
         // If you have more cores than horizontal characters, we can't display one task per character. Instead make the horizontal line a "usage" bar representing proportional task use.
@@ -86,7 +94,7 @@ void ConsoleReporter::Redraw()
             }
         }
     }
-    std::cout << "\r\033[1A" << std::flush;
+    std::cout << "\033[0K\r\033[1A" << std::flush;
 }
 
 void ConsoleReporter::SetConcurrencyCount(size_t count)

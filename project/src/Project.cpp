@@ -172,6 +172,12 @@ void Project::LoadFileList()
         unittest.type = "unittest";
         unittest.privDeps.insert(&rootComponent);
     }
+    if(fs::is_directory("fuzz"))
+    {
+        Component& fuzzer = components.emplace(std::string("./fuzz"), std::filesystem::path("./fuzz")).first->second;
+        fuzzer.type = "fuzzer";
+        fuzzer.privDeps.insert(&rootComponent);
+    }
     for(fs::recursive_directory_iterator it("."), end;
         it != end;
         ++it)

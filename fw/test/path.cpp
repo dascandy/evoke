@@ -24,19 +24,6 @@ BOOST_AUTO_TEST_CASE(path_base)
 {
     using fs::path;
     {
-        path base{"."};
-        path file{"./file"};
-
-        BOOST_TEST(file.lexically_relative(base).string() == "file");
-        BOOST_TEST(relative(file).string() == "file");
-
-        path fileRelated{"file"};
-        BOOST_TEST(fileRelated.lexically_relative(base).string() == "");
-
-        BOOST_TEST(relative(fileRelated).string() == "");
-    }
-
-    {
         path base{"./component"};
         path file{"./component/src/folder/file"};
 
