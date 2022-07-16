@@ -115,10 +115,9 @@ void ConsoleReporter::ReportCommand(size_t , std::shared_ptr<PendingCommand> cmd
         // Display error
         if(cmd->result->errorcode)
         {
-            std::cout << "\n\n"
-                      << "Error while running: " << cmd->commandToRun;
-            std::cout << "\n\n"
-                      << cmd->result->output << "\n\n";
+            std::cerr << "Error while running: " << cmd->commandToRun
+                      << "\033[0K\n\033[0K"
+                      << cmd->result->output << "\033[0K\n\033[0K";
         }
     }
 }

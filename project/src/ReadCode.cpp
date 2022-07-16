@@ -4,6 +4,7 @@
 #include "known.h"
 
 #include <algorithm>
+#include <cstring>
 #include <fcntl.h>
 #include <fw/filesystem.hpp>
 
