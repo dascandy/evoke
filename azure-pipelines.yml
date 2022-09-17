@@ -29,7 +29,6 @@ jobs:
           useVcpkgToolchainFile: true
 
   - job: Windows
-    condition: false
     pool:
       vmImage: "windows-latest"
     steps:
@@ -42,7 +41,8 @@ jobs:
           path: "$(Build.SourcesDirectory)/vcpkg"
       - task: lucappa.cmake-ninja-vcpkg-tasks.d855c326-b1c0-4d6f-b1c7-440ade6835fb.run-vcpkg@0
         inputs:
-          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt --triplet x64-windows"
+          vcpkgTriplet: 'x64-windows'
+          vcpkgArguments: "@$(Build.SourcesDirectory)/vcpkg-ports.txt"
           vcpkgDirectory: "$(Build.SourcesDirectory)/vcpkg"
       - task: lucappa.cmake-ninja-vcpkg-tasks.f2b1ec7d-bc54-4cc8-b9ed-1bc7f37c9dc6.run-cmake@0
         inputs:
