@@ -15,6 +15,7 @@ endif()
 
 if(EVOKE_BUILD_WITH_UNITTEST)
     add_subdirectory("toolsets/test")
+    add_subdirectory(fw/test)
 endif()
 
 
