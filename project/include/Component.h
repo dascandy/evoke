@@ -26,9 +26,9 @@ public:
     std::unordered_set<Component *> pubDeps, privDeps;
     std::unordered_set<std::string> pubIncl;
     std::string type;
-    bool buildSuccess;
-    bool isBinary;
-    bool isPredefComponent;
+    bool buildSuccess{false};
+    bool isBinary{false};
+    bool isPredefComponent{false};
     std::string accumulatedErrors;
     std::string name;
 };
