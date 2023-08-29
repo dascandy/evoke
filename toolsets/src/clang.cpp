@@ -41,9 +41,9 @@ std::string ClangToolset::getExeNameFor(const Component &component)
 
 std::string ClangToolset::getPrecompileCommand(const std::string &program, const std::string &outputFile, const File *inputFile, const std::set<std::string> &includes, bool hasModules)
 {
-    std::string command = program + " -fmodules-ts --precompile -x c++-module -o " + outputFile + " " + inputFile->path.generic_string();
+    std::string command = program + " -fmodules --precompile -x c++-module -o " + outputFile + " " + inputFile->path.generic_string();
     if(hasModules)
-        command += " -fprebuilt-module-path=modules";
+        command += " -fprebuilt-module-path=build/" + GetParameter("name") + "/modules";
     for(auto &i : includes)
         command += " -I" + i;
     return command;
@@ -53,7 +53,7 @@ std::string ClangToolset::getCompileCommand(const std::string &program, const st
 {
     std::string command = program + " -c -o " + outputFile + " " + inputFile->path.generic_string();
     if(hasModules)
-        command += " -fmodules-ts -fprebuilt-module-path=modules";
+        command += " -fmodules -fprebuilt-module-path=build/" + GetParameter("name") + "/modules";
     for(auto &i : includes)
         command += " -I" + i;
     return command;
