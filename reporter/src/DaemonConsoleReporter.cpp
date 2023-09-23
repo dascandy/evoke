@@ -128,12 +128,11 @@ void DaemonConsoleReporter::Redraw()
         if(t)
             active++;
 
-    size_t commandsFailed = 0, commandCount = 0, commandsToBeRun = 0, commandsError = 0;
+    size_t commandsFailed = 0, commandsToBeRun = 0, commandsError = 0;
     if (commands) for (auto& command : *commands) {
         if (command->result->errorcode) commandsFailed++;
         if (command->state == PendingCommand::ToBeRun) commandsToBeRun++;
         if (command->state == PendingCommand::Error) commandsError++;
-        commandCount++;
     }
     if (true) {
         if (active) {
@@ -148,7 +147,7 @@ void DaemonConsoleReporter::Redraw()
             std::cout << (commandsFailed ? red : blue) << "X" << (active ? yellow : commandsFailed ? red : green) << "X";
         }
     }
-    std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsError << " not built ][ " << commandCount << " pending ]\n";
+    std::cout << "  [ " << active << "/" << activeProcesses.size() << " active ][ " << commandsFailed << " failed ][ " << commandsError << " not built ][ " << commandsToBeRun << " pending ]\n";
     std::string s(screenWidth, '-');
     std::cout << blue << s << reset << std::flush;
     size_t linesLeft = screenHeight - 2;

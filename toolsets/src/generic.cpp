@@ -17,7 +17,6 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
     std::unordered_set<File *> d;
     std::stack<File *> deps;
     deps.push(file);
-    size_t index = 0;
     while(!deps.empty())
     {
         File *dep = deps.top();
@@ -41,7 +40,6 @@ static std::unordered_set<File *> GetDependencies(File *file, std::unordered_map
                     deps.push(it->second);
             }
         }
-        index++;
     }
     return d;
 }

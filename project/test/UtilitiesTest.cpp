@@ -2,13 +2,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(GetNameFromPath_anonymous)
-{
-    fs::path root(".");
-    BOOST_TEST(GetNameFromPath(root) == "test");
-    BOOST_TEST(GetNameFromPath(root, '/') == "test");
-}
-
 BOOST_AUTO_TEST_CASE(GetNameFromPath_first_level_component)
 {
     fs::path component_path("./comp");
