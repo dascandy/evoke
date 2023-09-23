@@ -18,6 +18,10 @@ std::unique_ptr<Reporter> Reporter::Get(const std::string &name)
     {
         return std::make_unique<ConsoleReporter>();
     }
+    else if(name == "gittery")
+    {
+      return std::make_unique<GitteryReporter>();
+    }
     else if(name == "daemon")
     {
         if(isatty(0) && isatty(1))

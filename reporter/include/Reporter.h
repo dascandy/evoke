@@ -36,6 +36,14 @@ private:
     std::vector<std::shared_ptr<PendingCommand>> activeProcesses;
 };
 
+class GitteryReporter : public Reporter
+{
+public:
+    void SetConcurrencyCount(size_t ) override {}
+    void SetRunningCommand(size_t , std::shared_ptr<PendingCommand> ) override {}
+    void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
+};
+
 class SimpleReporter : public Reporter
 {
 public:
