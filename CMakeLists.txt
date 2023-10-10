@@ -77,14 +77,14 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system)
+find_package(Boost REQUIRED)
 
 find_package(OpenSSL REQUIRED)
 
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${INCLUDES} ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}
-                      PRIVATE Threads::Threads ${Boost_LIBRARIES} Boost::disable_autolinking OpenSSL::SSL OpenSSL::Crypto)
+                      PRIVATE Threads::Threads OpenSSL::Crypto)
 
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
