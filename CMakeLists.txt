@@ -51,6 +51,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/project/src/Utilities.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/ConsoleReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/DaemonConsoleReporter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/GitteryReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/IDEReporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/Reporter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reporter/src/SimpleReporter.cpp
