@@ -21,6 +21,7 @@ class Process
 {
 public:
     Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *)> onComplete);
+    void Cancel();
 private:
     void run();
 public:
@@ -35,6 +36,7 @@ public:
     enum State
     {
         Running,
+        Cancelled,
         Done
     };
     State state = Running;
@@ -57,6 +59,13 @@ Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename
     record.tuHash = hash;
     record.output.clear();
     std::thread([this] { run(); }).detach();
+}
+
+void Process::Cancel() {
+    if (state == Running) {
+        state = Cancelled;
+        child.terminate();
+    }
 }
 
 void Process::run()
@@ -87,7 +96,9 @@ void Process::run()
         record.output += e.what();
         record.errorcode = -1;
     }
-    state = Done;
+    if (state != Cancelled) {
+        state = Done;
+    }
     // The callback will cause this object to be destructed, so move out the callback before invoking it
     auto x = std::move(onComplete);
     x(this);
@@ -149,6 +160,15 @@ std::future<void> Executor::Mode(bool isDaemon)
     return done.get_future();
 }
 
+void Executor::Reset() {
+    commands.clear();
+    for (auto& ap : activeProcesses) {
+        if (ap) {
+            ap->Cancel();
+        }
+    }
+}
+
 void Executor::RunMoreCommands()
 {
     if (not commandsSorted) {
@@ -191,8 +211,10 @@ void Executor::RunMoreCommands()
             activeProcesses[n] = std::make_unique<Process>(c, id, c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
                 auto self = std::move(activeProcesses[n]);
-                c->SetResult(std::move(t->record));
-                reporter.ReportCommand(n, c);
+                if (c->state == PendingCommand::Done) {
+                  c->SetResult(std::move(t->record));
+                  reporter.ReportCommand(n, c);
+                }
                 reporter.SetRunningCommand(n, nullptr);
                 RunMoreCommands();
             });

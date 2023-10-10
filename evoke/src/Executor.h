@@ -19,6 +19,7 @@ public:
     void Run(std::shared_ptr<PendingCommand> cmd);
     std::future<void> Mode(bool isDaemon);
 
+    void Reset();
     bool AllSuccess();
     void RunMoreCommands();
     void ShowCompileInfo();
