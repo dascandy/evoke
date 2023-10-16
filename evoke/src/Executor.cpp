@@ -211,7 +211,7 @@ void Executor::RunMoreCommands()
             activeProcesses[n] = std::make_unique<Process>(c, id, c->commandToRun, [this, n, c](Process *t) {
                 std::lock_guard<std::mutex> l(m);
                 auto self = std::move(activeProcesses[n]);
-                if (c->state == PendingCommand::Done) {
+                if (t->state == Process::Done) {
                   c->SetResult(std::move(t->record));
                   reporter.ReportCommand(n, c);
                 }
