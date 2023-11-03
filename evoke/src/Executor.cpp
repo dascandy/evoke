@@ -42,12 +42,20 @@ public:
     State state = Running;
 };
 
+boost::process::environment env(std::shared_ptr<PendingCommand>& pc) {
+  boost::process::environment rv = boost::this_process::environment();
+  for (auto& [k, v] : pc->env) {
+    rv[k] = v;
+  }
+  return rv;
+}
+
 Process::Process(std::shared_ptr<PendingCommand> pc, const std::string &filename, const std::string &cmd, std::function<void(Process *)> onComplete) 
 : pc(pc)
 , record(*pc->result)
 , onComplete(onComplete)
 , filename(filename)
-, child(cmd, (boost::process::std_out & boost::process::std_err) > pipe_stream)
+, child(cmd, env(pc), (boost::process::std_out & boost::process::std_err) > pipe_stream)
 {
     record.toolsetHash = pc->toolsetHash;
     std::array<uint8_t, 64> hash = {};

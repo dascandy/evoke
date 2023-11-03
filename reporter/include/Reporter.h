@@ -39,6 +39,8 @@ private:
 class GitteryReporter : public Reporter
 {
 public:
+    GitteryReporter();
+    ~GitteryReporter();
     void SetConcurrencyCount(size_t ) override {}
     void SetRunningCommand(size_t , std::shared_ptr<PendingCommand> ) override {}
     void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
