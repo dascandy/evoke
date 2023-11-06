@@ -26,6 +26,7 @@ class ConsoleReporter : public Reporter
 {
 public:
     ConsoleReporter();
+    ~ConsoleReporter();
     void SetConcurrencyCount(size_t count) override;
     void SetRunningCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;
     void ReportCommand(size_t channel, std::shared_ptr<PendingCommand> command) override;

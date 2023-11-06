@@ -209,7 +209,6 @@ int main(int argc, const char **argv)
         {
             std::cout << op;
         }
-        printf("\n\n");
         return ex.AllSuccess() ? EXIT_SUCCESS : EXIT_FAILURE;
     } catch (const std::exception& e) {
         printf("Received exception: %s\n", e.what());
