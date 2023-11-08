@@ -113,7 +113,7 @@ std::string ConvertCatch(std::string s) {
   return errors.dump();
 }
 
-std::string ConvertGcc(std::string s) {
+std::string ConvertGcc(std::string ) {
   throw std::runtime_error("Not implemented");
 }
 
