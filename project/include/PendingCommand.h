@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <map>
 
 class Toolset;
 
@@ -55,6 +56,7 @@ public:
     double longestChildCommand = 0.;
     std::string commandToRun;
     std::array<uint8_t, 64> toolsetHash;
+    std::map<std::string, std::string> env;
     enum State
     {
         Unknown,

@@ -39,6 +39,11 @@ ConsoleReporter::ConsoleReporter()
 #endif
 }
 
+ConsoleReporter::~ConsoleReporter() 
+{
+  printf("\n\n");
+}
+
 void ConsoleReporter::ReportUnknownHeaders(const std::unordered_set<std::string>& headers) 
 {
     for(auto &u : headers)

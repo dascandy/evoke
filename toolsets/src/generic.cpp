@@ -241,7 +241,7 @@ void GenericToolset::CreateCommandsFor(Project &project, const std::vector<std::
             {
                 command = outputFile.string();
                 pc = std::make_shared<PendingCommand>(hash, getUnittestCommand(command));
-                outputFile += ".log";
+                pc->env["LLVM_PROFILE_FILE"] = outputFile.string() + ".profraw";
                 pc->AddInput(libraryFile);
                 component.commands.push_back(pc);
             }
